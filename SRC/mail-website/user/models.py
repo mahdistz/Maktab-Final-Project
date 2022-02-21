@@ -63,7 +63,7 @@ class Users(AbstractUser):
     email = models.EmailField(_('email address'), unique=True)
 
     birth_date = models.DateField(null=True, blank=True)
-    nationality = models.TextField(null=True, blank=True)
+    nationality = models.CharField(max_length=100, null=True, blank=True)
     gender_choices = [
         ('F', 'Female'),
         ('M', 'Male'),

@@ -2,7 +2,6 @@ from django.contrib import messages
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.sites.shortcuts import get_current_site
 from django.views import View
-
 from .forms import UserRegisterForm
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import get_template
