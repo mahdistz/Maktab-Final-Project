@@ -128,8 +128,14 @@ AUTH_USER_MODEL = 'user.Users'
 # Email
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_USE_TLS = True
-EMAIL_USE_SSL = False
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_HOST_USER = 'mahdis.taghizadeh1376@gmail.com'
 EMAIL_HOST_PASSWORD = 'ychbvkunvjeqoldv'
 EMAIL_PORT = 587
+
+# SMS
+KAVENEGAR_APIKEY = '537436632F69455067616771704939662B6F4A4D4A5753784A655775682B3249474646455571346C584A343D'
+
+# Media files
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_URL = '/media/'

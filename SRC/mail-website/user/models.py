@@ -1,10 +1,12 @@
 from django.conf import settings
+from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.utils.translation import ugettext_lazy as _
-# from .managers import CustomUserManager
-from django.core.validators import RegexValidator
+from django.core.validators import RegexValidator, ValidationError
 from django.utils.deconstruct import deconstructible
+from .managers import UserManager
+import re
 
 
 @deconstructible
@@ -22,27 +24,20 @@ class MobileNumberValidator(RegexValidator):
 mobile_number_validation = MobileNumberValidator()
 
 
-@deconstructible
-class UsernameValidator(RegexValidator):
-    regex = r'^[\w.+-]+\Z'
-    message = _(
-        'Enter a valid username. This value may contain only letters, '
-        'numbers, and ./+/-/_ characters.'
-    )
-    flags = 0
-
-
-# create an instance from the class
-username_validation = UsernameValidator()
+def username_validation(username_str):
+    result = re.search('@mail.com$', username_str)
+    if result:
+        raise ValidationError('username should be without domain')
 
 
 class Users(AbstractUser):
+    username_validator_django = UnicodeUsernameValidator()
     username = models.CharField(
         _('username'),
         max_length=150,
         unique=True,
-        help_text=_('Required. 150 characters or fewer. Letters, digits and ./+/-/_ only.'),
-        validators=[username_validation],
+        help_text=_('Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.'),
+        validators=[username_validator_django, username_validation],
         error_messages={
             'unique': _("A user with that username already exists."),
         },
@@ -51,11 +46,10 @@ class Users(AbstractUser):
         ('Phone', 'Phone Number'),
         ('Email', 'Email')
     ]
-    verification = models.CharField(
-        max_length=100,
-        choices=verification_choice
-    )
-
+    verification = models.CharField(default='',
+                                    max_length=100,
+                                    choices=verification_choice
+                                    )
     phone_number = models.CharField(
         max_length=50,
         unique=True,
@@ -76,21 +70,16 @@ class Users(AbstractUser):
         ('N', 'None'),
     ]
     gender = models.CharField(max_length=10, choices=gender_choices, null=True, blank=True)
-    # is_verified = models.BooleanField(default=False)
     is_active = models.BooleanField(default=False)
 
     USERNAME_FIELD = 'username'
     REQUIRED_FIELDS = []
-
-    # objects = CustomUserManager()
-
-    def save(self, *args, **kwargs):
-        self.username += '@mail.com'
-        super().save(*args, **kwargs)
+    objects = UserManager()
 
     def __str__(self):
         return self.username
 
 
-# class Contact(AbstractUser):
-#     contact_user = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='user_contact')
+class Contact(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.DO_NOTHING, related_name='main_user')
+    contact = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='contact_user')
