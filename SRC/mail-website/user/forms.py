@@ -19,6 +19,10 @@ class UserRegisterForm(UserCreationForm):
                   'password1', 'password2', 'birth_date', 'nationality', 'gender']
 
 
+class CodePhoneForm(forms.Form):
+    code = forms.CharField(max_length=10, required=True, label='کد تایید را وارد کنید')
+
+
 UserModel = get_user_model()
 
 

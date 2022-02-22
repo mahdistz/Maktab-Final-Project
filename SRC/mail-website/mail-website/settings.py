@@ -116,8 +116,10 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.0/howto/static-files/
 
-STATIC_URL = 'static/'
-
+STATIC_URL = '/static/'
+STATICFILES_DIRS = [
+    BASE_DIR / "static",
+]
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
 
@@ -135,7 +137,7 @@ EMAIL_PORT = 587
 
 # SMS
 KAVENEGAR_APIKEY = '537436632F69455067616771704939662B6F4A4D4A5753784A655775682B3249474646455571346C584A343D'
-
+GHASEDAK_APIKEY = "97e47b97415e0406a666fdec7c377de5648f8be3673a4dc40c7ca7e6014afcdd"
 # Media files
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'

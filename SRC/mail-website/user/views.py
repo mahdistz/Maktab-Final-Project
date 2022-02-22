@@ -2,10 +2,9 @@ from django.contrib import messages
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.sites.shortcuts import get_current_site
 from django.views import View
-from .forms import UserRegisterForm
+from .forms import UserRegisterForm, CodePhoneForm
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import get_template
-from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.contrib.auth import login, authenticate, get_user_model
 from django.utils.encoding import force_bytes, force_text
@@ -22,10 +21,18 @@ from django.utils.decorators import method_decorator
 from django.utils.translation import gettext_lazy as _
 from django.urls import reverse_lazy
 from .forms import PasswordResetForm
+import ghasedak
+from random import randint
+from django.conf import settings
+import requests
 
 
 def index(request):
     return render(request, 'user/index.html', {'title': 'index'})
+
+
+def home(request):
+    return render(request, 'website-menu/index.html', {'title': 'index'})
 
 
 def register(request):
@@ -62,13 +69,52 @@ def Login(request):
             messages.success(request, f' welcome {username} !!')
             return redirect('index')
         else:
-            messages.info(request, f'account done not exit plz sign in')
+            messages.info(request, f'account done not exit please sign in')
     form = AuthenticationForm()
     return render(request, 'user/login.html', {'form': form, 'title': 'log in'})
 
 
+def register_phone(request):
+    if request.method == 'POST':
+        form = UserRegisterForm(request.POST)
+        if form.is_valid():
+            global phone, random_code
+            phone = form.cleaned_data.get('phone_number')
+            random_code = randint(1000, 9999)
+            sms = ghasedak.Ghasedak(settings.GHASEDAK_APIKEY)
+            sms.send({'message': f"سامانه\nکد ورود به سامانه : {random_code}", 'receptor': phone,
+                      'linenumber': "10008566"})
+            return redirect('verify_login_phone')
+    else:
+        form = UserRegisterForm()
+
+    context = {
+        'form': form,
+    }
+    return render(request, 'user/register.html', context)
+
+
+def verify_register_phone(request):
+    if request.method == 'POST':
+        form = CodePhoneForm(request.POST)
+        if form.is_valid():
+            if random_code == form.cleaned_data['code']:
+                user = Users.objects.get(phone_number=phone)
+                login(request, user)
+                return redirect('home')
+            else:
+                messages.error(request, 'کد وارد شده اشتباه است')
+    else:
+        form = CodePhoneForm()
+    context = {
+        'form': form,
+    }
+    return render(request, 'user/verify-login-phone.html', context)
+
+
 class SignUpView(View):
     form_class = UserRegisterForm
+    # template_name = 'register/index.html'
     template_name = 'user/register.html'
 
     def get(self, request, *args, **kwargs):
@@ -81,9 +127,8 @@ class SignUpView(View):
             user = form.save(commit=False)
             user.is_active = False  # Deactivate account till it is confirmed
             user.save()
-
             current_site = get_current_site(request)
-            subject = 'Activate Your MySite Account'
+            subject = 'Activate Your Account'
             message = render_to_string('user/acc_active_email.html', {
                 'user': user,
                 'domain': current_site.domain,
