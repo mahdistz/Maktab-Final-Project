@@ -141,3 +141,5 @@ GHASEDAK_APIKEY = "97e47b97415e0406a666fdec7c377de5648f8be3673a4dc40c7ca7e6014af
 # Media files
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
+
+LOGIN_URL = '/login/'

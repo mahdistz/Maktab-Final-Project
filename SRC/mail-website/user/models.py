@@ -43,7 +43,7 @@ class Users(AbstractUser):
         },
     )
     verification_choice = [
-        ('Phone', 'Phone Number'),
+        ('Phone', 'Phone_number'),
         ('Email', 'Email')
     ]
     verification = models.CharField(default='',
@@ -83,3 +83,12 @@ class Users(AbstractUser):
 class Contact(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.DO_NOTHING, related_name='main_user')
     contact = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='contact_user')
+
+
+class CodeRegister(models.Model):
+    code = models.IntegerField()
+    phone_number = models.CharField(max_length=11, default='')
+    create_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.code}"
