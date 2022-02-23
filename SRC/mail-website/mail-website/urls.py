@@ -24,6 +24,7 @@ from user.views import SignUpView, ActivateAccount, VerifyCodeView
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('user.urls')),
+    path('mail/', include('mail.urls')),
     path('login/', user_view.LoginView.as_view(), name='login'),
     path('logout/', auth.LogoutView.as_view(template_name='user/index.html'), name='logout'),
     path('password_reset/', auth.PasswordResetView.as_view(), name='password_reset'),

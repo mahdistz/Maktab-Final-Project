@@ -22,7 +22,7 @@ class Migration(migrations.Migration):
             },
             bases=('user.users',),
             managers=[
-                ('objects', user.managers.UserManager()),
+                ('objects', user.managers.CustomUserManager()),
             ],
         ),
         migrations.RenameField(

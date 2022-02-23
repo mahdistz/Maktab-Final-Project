@@ -5,7 +5,7 @@ from django.contrib.auth.models import AbstractUser
 from django.utils.translation import ugettext_lazy as _
 from django.core.validators import RegexValidator, ValidationError
 from django.utils.deconstruct import deconstructible
-from .managers import UserManager
+from .managers import CustomUserManager
 import re
 
 
@@ -74,7 +74,7 @@ class Users(AbstractUser):
 
     USERNAME_FIELD = 'username'
     REQUIRED_FIELDS = []
-    objects = UserManager()
+    objects = CustomUserManager()
 
     def __str__(self):
         return self.username

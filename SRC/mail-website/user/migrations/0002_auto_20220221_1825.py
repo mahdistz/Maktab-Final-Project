@@ -14,7 +14,7 @@ class Migration(migrations.Migration):
         migrations.AlterModelManagers(
             name='users',
             managers=[
-                ('objects', user.managers.UserManager()),
+                ('objects', user.managers.CustomUserManager()),
             ],
         ),
         migrations.RemoveField(

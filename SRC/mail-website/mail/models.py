@@ -26,9 +26,9 @@ class Email(models.Model):
 
     mail = models.ManyToManyField(Category, related_name='mail_category')
 
-    subject = models.CharField(max_length=255)
+    subject = models.CharField(max_length=255, null=True, blank=True)
 
-    body = models.TextField(blank=True)
+    body = models.TextField(blank=True, null=True)
 
     created_time = models.DateTimeField(auto_now_add=True)
 
@@ -61,5 +61,3 @@ class Email(models.Model):
 
     def __str__(self):
         return f"From: {self.sender}, Sub: {self.subject}"
-
-
