@@ -2,6 +2,7 @@ from django.contrib.auth.base_user import BaseUserManager
 from django.utils.translation import ugettext_lazy as _
 
 
+# manager for create user and superuser with username and password
 class CustomUserManager(BaseUserManager):
 
     def create_user(self, username, password, **extra_fields):
@@ -17,7 +18,9 @@ class CustomUserManager(BaseUserManager):
         return user
 
     def create_superuser(self, username, password, **extra_fields):
-
+        """
+        Create and save a SuperUsers with the given username and password.
+        """
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
         extra_fields.setdefault('is_active', True)
@@ -31,37 +34,38 @@ class CustomUserManager(BaseUserManager):
     def normalize_username(self, username):
         return username
 
-# ##################################################################################
-# class UserManager(BaseUserManager):
-#     use_in_migrations = True  # migration سریالایز کردن منیجر در
-#
-#     def create_user(self, mobile_number, password=None, **extra_fields):
-#         if not mobile_number:
-#             raise ValueError(_('The mobile number must be set'))
-#         mobile_number = self.normalize_mobile_number(mobile_number)
-#         user = self.model(mobile_number=mobile_number, **extra_fields)
-#         user.set_password(password)
-#         user.save(using=self._db)
-#         return user
-#
-#     def create_staff_user(self, mobile_number, password):
-#         user = self.create_user(
-#             mobile_number,
-#             password=password,
-#         )
-#         user.is_staff = True
-#         user.save(using=self._db)
-#         return user
-#
-#     def create_superuser(self, mobile_number, password):
-#         user = self.create_user(
-#             mobile_number,
-#             password=password,
-#         )
-#         user.is_staff = True
-#         user.is_superuser = True
-#         user.save(using=self._db)
-#         return user
-#
-#     def normalize_mobile_number(self, mobile_number):
-#         return mobile_number
+
+# manager for create user and superuser with phone and password
+
+class UserManager(BaseUserManager):
+
+    def create_user(self, mobile_number, password=None, **extra_fields):
+        if not mobile_number:
+            raise ValueError(_('The mobile number must be set'))
+        mobile_number = self.normalize_mobile_number(mobile_number)
+        user = self.model(mobile_number=mobile_number, **extra_fields)
+        user.set_password(password)
+        user.save()
+        return user
+
+    def create_staff_user(self, mobile_number, password):
+        user = self.create_user(
+            mobile_number,
+            password=password,
+        )
+        user.is_staff = True
+        user.save()
+        return user
+
+    def create_superuser(self, mobile_number, password):
+        user = self.create_user(
+            mobile_number,
+            password=password,
+        )
+        user.is_staff = True
+        user.is_superuser = True
+        user.save()
+        return user
+
+    def normalize_mobile_number(self, mobile_number):
+        return mobile_number
