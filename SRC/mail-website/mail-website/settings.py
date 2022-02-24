@@ -38,7 +38,11 @@ INSTALLED_APPS = [
     'user',
     'mail',
     'crispy_forms',
+    'dbbackup',
 ]
+
+DBBACKUP_STORAGE = 'django.core.files.storage.FileSystemStorage'
+DBBACKUP_STORAGE_OPTIONS = {'location': os.path.join(BASE_DIR / 'backup')}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
