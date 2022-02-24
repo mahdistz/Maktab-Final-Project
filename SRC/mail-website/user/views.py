@@ -60,8 +60,8 @@ def register(request):
 
 
 class LoginView(View):
-    # template_name = 'user/login.html'
-    template_name = 'login/index.html'
+    template_name = 'user/login.html'
+    # template_name = 'login/index.html'
 
     def post(self, request):
         username = request.POST['username']
@@ -81,9 +81,8 @@ class LoginView(View):
 
 class SignUpView(View):
     form_class = UserRegisterForm
-    template_name = 'register/index.html'
-
-    # template_name = 'user/register.html'
+    # template_name = 'register/index.html'
+    template_name = 'user/register.html'
 
     def get(self, request, *args, **kwargs):
         form = self.form_class()
@@ -96,6 +95,7 @@ class SignUpView(View):
             user.is_active = False  # Deactivate account till it is confirmed
             user.save()
             if str(form.cleaned_data['verification']) == 'Email':
+                print('hello')
                 # EMAIL
                 current_site = get_current_site(request)
                 subject = 'Activate Your Account'
@@ -109,10 +109,11 @@ class SignUpView(View):
 
                 messages.success(request, 'Please Confirm your email to complete registration.')
                 return redirect('login')
-            elif str(form.cleaned_data['verification']) == 'Phone_number':
+            elif str(form.cleaned_data['verification']) == 'Phone':
+                print('hi')
                 # SMS
                 code = random.randint(1000, 9999)
-                CodeRegister.objects.create(phone_number=form.cleaned_data['phone_number'],
+                CodeRegister.objects.create(phone_number=form.cleaned_data['phone'],
                                             code=code)
 
                 # to show on terminal and complete the request
@@ -121,10 +122,10 @@ class SignUpView(View):
                 # send_otp_code_gh(form.cleaned_data.get('phone_number'), code)
 
                 # kavenegar service --> can't send sms because 'sender' is None
-                send_otp_code(form.cleaned_data['phone_number'], code)
+                send_otp_code(form.cleaned_data['phone'], code)
                 # Sending session to other url for verifying user with sms code.
                 request.session['user_registering'] = {
-                    'phone_number': form.cleaned_data['phone_number'],
+                    'phone': form.cleaned_data['phone'],
                     'email': form.cleaned_data['email'],
                     'password1': form.cleaned_data['password1'],
                     'password2': form.cleaned_data['password2'],
@@ -147,8 +148,8 @@ class VerifyCodeView(View):
 
     def post(self, request):
         user_session = request.session['user_registering']
-        code_instance = CodeRegister.objects.get(phone_number=user_session['phone_number'])
-        user = Users.objects.get(phone_number=user_session['phone_number'])
+        code_instance = CodeRegister.objects.get(phone_number=user_session['phone'])
+        user = Users.objects.get(phone=user_session['phone'])
         form = self.form_class(request.POST)
         if form.is_valid():
             if str(form.cleaned_data['code']) == str(code_instance):

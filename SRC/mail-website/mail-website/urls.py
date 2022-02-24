@@ -20,7 +20,7 @@ from django.contrib.auth import views as auth
 from django.conf import settings
 from django.conf.urls.static import static
 from user.views import SignUpView, ActivateAccount, VerifyCodeView
-
+from mail import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('user.urls')),

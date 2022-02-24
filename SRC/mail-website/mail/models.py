@@ -47,17 +47,24 @@ class Email(models.Model):
     is_trashed = models.BooleanField(default=False)
     is_deleted = models.BooleanField(default=False)
 
-    # def serialize(self):
-    #     return {
-    #         "id": self.id,
-    #         "sender": self.sender.email,
-    #         "recipients": [user.email for user in self.recipients.all()],
-    #         "subject": self.subject,
-    #         "body": self.body,
-    #         "created_time": self.created_time.strftime("%b %d %Y, %I:%M %p"),
-    #         "is_read": self.is_read,
-    #         "is_archived": self.is_archived
-    #     }
+    def serialize(self):
+        return {
+            "id": self.id,
+            "sender": self.sender.email,
+            "recipients": [user.email for user in self.recipients.all()],
+            "subject": self.subject,
+            "body": self.body,
+            "created_time": self.created_time.strftime("%b %d %Y, %I:%M %p"),
+            "is_read": self.is_read,
+            "is_sent": self.is_sent,
+            "is_starred": self.is_starred,
+            "is_archived": self.is_archived,
+            "file": self.file,
+            "is_drafted": self.is_drafted,
+            "is_trashed": self.is_trashed,
+            "is_deleted": self.is_deleted,
+
+        }
 
     def __str__(self):
         return f"From: {self.sender}, Sub: {self.subject}"

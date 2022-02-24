@@ -43,14 +43,14 @@ class Users(AbstractUser):
         },
     )
     verification_choice = [
-        ('Phone', 'Phone_number'),
+        ('Phone', 'Phone'),
         ('Email', 'Email')
     ]
     verification = models.CharField(default='',
                                     max_length=100,
                                     choices=verification_choice
                                     )
-    phone_number = models.CharField(
+    phone = models.CharField(
         max_length=50,
         unique=True,
         verbose_name=_('Phone Number'),

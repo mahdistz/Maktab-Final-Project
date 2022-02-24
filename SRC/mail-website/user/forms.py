@@ -15,7 +15,7 @@ import kavenegar
 class UserRegisterForm(UserCreationForm):
     class Meta:
         model = Users
-        fields = ['username', 'verification', 'email', 'phone_number',
+        fields = ['username', 'verification', 'email', 'phone',
                   'password1', 'password2', 'birth_date', 'nationality', 'gender']
 
 
