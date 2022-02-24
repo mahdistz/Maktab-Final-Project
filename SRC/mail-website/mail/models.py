@@ -24,7 +24,7 @@ class Email(models.Model):
 
     recipients = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="emails_received")
 
-    mail = models.ManyToManyField(Category, related_name='mail_category')
+    category = models.ManyToManyField(Category, related_name='mail_category')
 
     subject = models.CharField(max_length=255, null=True, blank=True)
 
