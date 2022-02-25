@@ -81,7 +81,7 @@ class Users(AbstractUser):
 
 
 class Contact(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.DO_NOTHING, related_name='main_user')
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='main_user')
     contact = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='contact_user')
 
 

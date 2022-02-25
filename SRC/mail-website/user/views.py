@@ -36,27 +36,27 @@ def home(request):
     return render(request, 'website-menu/index.html')
 
 
-def register(request):
-    if request.method == 'POST':
-        form = UserRegisterForm(request.POST)
-        if form.is_valid():
-            form.save()
-            username = form.cleaned_data.get('username')
-            email = form.cleaned_data.get('email')
-            # mail
-            htmly = get_template('user/acc_active_email.html')
-            d = {'username': username}
-            subject, from_email, to = 'welcome', 'mahdis.taghizadeh1376@gmail.com', email
-            html_content = htmly.render(d)
-            msg = EmailMultiAlternatives(subject, html_content, from_email, [to])
-            msg.attach_alternative(html_content, "text/html")
-            msg.send()
-
-            messages.success(request, f'Your account has been created ! You are now able to log in')
-            return redirect('login')
-    else:
-        form = UserRegisterForm()
-    return render(request, 'user/register.html', {'form': form, 'title': 'register here'})
+# def register(request):
+#     if request.method == 'POST':
+#         form = UserRegisterForm(request.POST)
+#         if form.is_valid():
+#             form.save()
+#             username = form.cleaned_data.get('username')
+#             email = form.cleaned_data.get('email')
+#             # mail
+#             htmly = get_template('user/acc_active_email.html')
+#             d = {'username': username}
+#             subject, from_email, to = 'welcome', 'mahdis.taghizadeh1376@gmail.com', email
+#             html_content = htmly.render(d)
+#             msg = EmailMultiAlternatives(subject, html_content, from_email, [to])
+#             msg.attach_alternative(html_content, "text/html")
+#             msg.send()
+#
+#             messages.success(request, f'Your account has been created ! You are now able to log in')
+#             return redirect('login')
+#     else:
+#         form = UserRegisterForm()
+#     return render(request, 'user/register.html', {'form': form, 'title': 'register here'})
 
 
 class LoginView(View):
@@ -95,7 +95,7 @@ class SignUpView(View):
             user.is_active = False  # Deactivate account till it is confirmed
             user.save()
             if str(form.cleaned_data['verification']) == 'Email':
-                print('hello')
+
                 # EMAIL
                 current_site = get_current_site(request)
                 subject = 'Activate Your Account'
@@ -110,7 +110,7 @@ class SignUpView(View):
                 messages.success(request, 'Please Confirm your email to complete registration.')
                 return redirect('login')
             elif str(form.cleaned_data['verification']) == 'Phone':
-                print('hi')
+
                 # SMS
                 code = random.randint(1000, 9999)
                 CodeRegister.objects.create(phone_number=form.cleaned_data['phone'],
