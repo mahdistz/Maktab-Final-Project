@@ -1,100 +1,85 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-
 <head>
-  <!-- Required meta tags -->
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-
-  <!-- Bootstrap CSS -->
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
-    integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-
-  <title>Hello, world!</title>
-
-  <style>
-    nav{
-      background-color: white;
+    <title>{% block title %}{% endblock %}</title>
+    <meta charset="UTF-8">
+   {% block link %}{% endblock %}
+     <style>
+            /* The side navigation menu */
+    .sidebar {
+      margin: 0;
+      padding: 0;
+      width: 200px;
+      background-color: #f1f1f1;
+      position: fixed;
+      height: 100%;
+      overflow: auto;
     }
-    .one-edge-shadow {
-              box-shadow: 0 8px 2px -5px rgb(246, 245, 245);
+
+    /* Sidebar links */
+    .sidebar a {
+      display: block;
+      color: black;
+      padding: 16px;
+      text-decoration: none;
+    }
+
+    /* Active/current link */
+    .sidebar a.active {
+      background-color: #04AA6D;
+      color: white;
+    }
+
+    /* Links on mouse-over */
+    .sidebar a:hover:not(.active) {
+      background-color: #555;
+      color: white;
+    }
+
+    /* Page content. The value of the margin-left property should match the value of the sidebar's width property */
+    div.content {
+      margin-left: 200px;
+      padding: 1px 16px;
+      height: 1000px;
+    }
+
+    /* On screens that are less than 700px wide, make the sidebar into a topbar */
+    @media screen and (max-width: 700px) {
+      .sidebar {
+        width: 100%;
+        height: auto;
+        position: relative;
+      }
+      .sidebar a {float: left;}
+      div.content {margin-left: 0;}
+    }
+
+    /* On screens that are less than 400px, display the bar vertically, instead of horizontally */
+    @media screen and (max-width: 400px) {
+      .sidebar a {
+        text-align: center;
+        float: none;
+      }
 }
-    .display-8{
-      font-weight: 200;
-      font-size: 30px;
-    }
-  </style>
+    </style>
 </head>
-
 <body>
-
-  <!-- navbar -->
-
-  <nav class="one-edge-shadow
-  sticky-top navbar
-  navbar-expand-lg
-   navbar-light bg-white">
-    <a class="navbar-brand" href="/">E-Shop</a>
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
-      aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-
-    <div class="collapse navbar-collapse" id="navbarSupportedContent">
-      <ul class="navbar-nav mr-auto">
-        <li class="nav-item active">
-          <a class="nav-link" href="/store">Store <span class="sr-only">(current)</span></a>
-        </li>
-
-      </ul>
-
-
-      <ul class=" navbar-nav my-2 my-lg-0">
-        <li class="nav-item ">
-          <a class="nav-link" href="/cart">Cart
-            <span class="badge badge-info">{{request.session.cart.keys|length}}</span>
-            <span class="sr-only">(current)</span></a>
-        </li>
-        {% if request.session.customer %}
-
-        <li class="nav-item ">
-          <a class="nav-link" href="/orders">Orders<span class="sr-only">(current)</span></a>
-        </li>
-        <li class="nav-item ">
-          <a class="nav-link" href="/logout">Logout<span class="sr-only">(current)</span></a>
-        </li>
-        {% else %}
-
-        <li class="nav-item ">
-          <a class="nav-link" href="/signup">Signup<span class="sr-only">(current)</span></a>
-        </li>
-        <li class="nav-item ">
-          <a class="nav-link" href="/login">Login<span class="sr-only">(current)</span></a>
-        </li>
-        {% endif %}
-
-
-
-      </ul>
-
-
-    </div>
-  </nav>
-
-
-    {% block content %}{% endblock %}
-
-  <!-- Optional JavaScript -->
-  <!-- jQuery first, then Popper.js, then Bootstrap JS -->
-  <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
-    integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
-    crossorigin="anonymous"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
-    integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
-    crossorigin="anonymous"></script>
-  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
-    integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
-    crossorigin="anonymous"></script>
+{#{% if user.authenticated %}#}
+<!-- The sidebar -->
+<div class="sidebar">
+  <a class="active" href="#home">Home</a>
+  <a href="#news">News</a>
+  <a href="#contact">Contact</a>
+  <a href="#about">About</a>
+</div>
+{#{% endif %}#}
+{% block main %}{% endblock %}
+{% if messages %}
+<ul class="messages">
+    {% for message in messages %}
+    <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+    {% endfor %}
+</ul>
+{% endif %}
 </body>
-
 </html>

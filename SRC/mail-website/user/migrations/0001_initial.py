@@ -26,7 +26,7 @@ class Migration(migrations.Migration):
                 ('last_name', models.CharField(blank=True, max_length=150, verbose_name='last name')),
                 ('is_staff', models.BooleanField(default=False, help_text='Designates whether the user can log into this admin site.', verbose_name='staff status')),
                 ('date_joined', models.DateTimeField(default=django.utils.timezone.now, verbose_name='date joined')),
-                ('username', models.CharField(error_messages={'unique': 'A user with that username already exists.'}, help_text='Required. 150 characters or fewer. Letters, digits and ./+/-/_ only.', max_length=150, unique=True, validators=[user.models.UsernameValidator()], verbose_name='username')),
+                ('username', models.CharField(error_messages={'unique': 'A user with that username already exists.'}, help_text='Required. 150 characters or fewer. Letters, digits and ./+/-/_ only.', max_length=150, unique=True, validators=[user.models.UnicodeUsernameValidator()], verbose_name='username')),
                 ('verification', models.CharField(choices=[('Phone', 'Phone Number'), ('Email', 'Email')], max_length=100)),
                 ('phone_number', models.CharField(error_messages={'unique': 'A user with that Phone number already exists.'}, help_text='Example : 09125573688', max_length=50, unique=True, validators=[user.models.MobileNumberValidator()], verbose_name='Phone Number')),
                 ('email', models.EmailField(max_length=254, unique=True, verbose_name='email address')),
