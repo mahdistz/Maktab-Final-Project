@@ -17,10 +17,10 @@ class Category(models.Model):
 # Create your models here.
 class Email(models.Model):
     user = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="emails")
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="user")
 
     sender = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="emails_sent")
+        settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="sender")
 
     to = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="to")
 
@@ -47,7 +47,8 @@ class Email(models.Model):
     is_archived = models.BooleanField(default=False)
     is_sent = models.BooleanField(default=False)
     is_trashed = models.BooleanField(default=False)
-    signature = models.CharField()
+    signature = models.CharField(max_length=100, null=True, blank=True)
+    signature_image = models.ImageField(null=True, blank=True)
 
     def __str__(self):
         return f"From: {self.sender}, Sub: {self.subject}"

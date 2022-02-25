@@ -84,10 +84,10 @@ class Users(AbstractUser):
 
 class Contact(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='contacts')
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=100, default=None)
     birth_date = models.DateField(null=True, blank=True)
-    email = models.EmailField(null=False)
-    phone_number = models.CharField(validators=[mobile_number_validation], null=True, blank=True)
+    email = models.EmailField(null=False, default=None)
+    phone_number = models.CharField(max_length=11, validators=[mobile_number_validation], null=True, blank=True)
 
     class Meta:
         unique_together = [('user', 'email')]
@@ -95,7 +95,7 @@ class Contact(models.Model):
 
 class CodeRegister(models.Model):
     code = models.IntegerField()
-    phone_number = models.ForeignKey(Users.phone, on_delete=models.CASCADE, related_name='phone')
+    phone_number = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='phone_user')
     create_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
