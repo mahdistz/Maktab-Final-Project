@@ -47,12 +47,14 @@ class Users(AbstractUser):
         ('Email', 'Email')
     ]
     verification = models.CharField(default='',
-                                    max_length=100,
+                                    max_length=10,
                                     choices=verification_choice
                                     )
     phone = models.CharField(
-        max_length=50,
+        max_length=11,
         unique=True,
+        null=True,
+        blank=True,
         verbose_name=_('Phone Number'),
         validators=[mobile_number_validation],
         error_messages={
@@ -60,7 +62,7 @@ class Users(AbstractUser):
         },
         help_text=_('Example') + " : 09125573688")
 
-    email = models.EmailField(_('email address'), unique=True)
+    email = models.EmailField(_('email address'), unique=True, null=True, blank=True)
 
     birth_date = models.DateField(null=True, blank=True)
     nationality = models.CharField(max_length=100, null=True, blank=True)
@@ -81,13 +83,19 @@ class Users(AbstractUser):
 
 
 class Contact(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='main_user')
-    contact = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='contact_user')
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='contacts')
+    name = models.CharField(max_length=100)
+    birth_date = models.DateField(null=True, blank=True)
+    email = models.EmailField(null=False)
+    phone_number = models.CharField(validators=[mobile_number_validation], null=True, blank=True)
+
+    class Meta:
+        unique_together = [('user', 'email')]
 
 
 class CodeRegister(models.Model):
     code = models.IntegerField()
-    phone_number = models.CharField(max_length=11, default='')
+    phone_number = models.ForeignKey(Users.phone, on_delete=models.CASCADE, related_name='phone')
     create_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
