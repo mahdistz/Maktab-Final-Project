@@ -50,5 +50,17 @@ class Email(models.Model):
     signature = models.CharField(max_length=100, null=True, blank=True)
     signature_image = models.ImageField(null=True, blank=True)
 
+    def serialize(self):
+        return {
+            "id": self.id,
+            "sender": self.sender.email,
+            "recipients": [user.email for user in self.to.all()],
+            "subject": self.subject,
+            "body": self.body,
+            "timestamp": self.created_time.strftime("%b %d %Y, %I:%M %p"),
+            "read": self.is_read,
+            "archived": self.is_archived
+        }
+
     def __str__(self):
         return f"From: {self.sender}, Sub: {self.subject}"
