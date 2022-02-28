@@ -4,9 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="94102c5d-afd8-4331-b6d5-fcdd5a011c28" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
+    <list default="true" id="94102c5d-afd8-4331-b6d5-fcdd5a011c28" name="Changes" comment="deleted xml file">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/mail/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/mail/models.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/static/mail/inbox.js" beforeDir="false" afterPath="$PROJECT_DIR$/static/mail/inbox.js" afterDir="false" />
     </list>
@@ -69,11 +68,42 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1646065063856</updated>
-      <workItem from="1646065065602" duration="2800000" />
+      <workItem from="1646065065602" duration="3522000" />
     </task>
+    <task id="LOCAL-00001" summary="gitignore">
+      <created>1646070389213</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1646070389213</updated>
+    </task>
+    <task id="LOCAL-00002" summary="deleted xml file">
+      <created>1646070482783</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1646070482783</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="gitignore" />
+    <MESSAGE value="deleted xml file" />
+    <option name="LAST_COMMIT_MESSAGE" value="deleted xml file" />
   </component>
 </project>
