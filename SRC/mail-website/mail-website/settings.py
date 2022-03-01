@@ -39,6 +39,8 @@ INSTALLED_APPS = [
     'mail',
     'crispy_forms',
     'dbbackup',
+    'bootstrapsidebar',
+    'bootstrap_modal_forms',
 ]
 
 DBBACKUP_STORAGE = 'django.core.files.storage.FileSystemStorage'
@@ -147,3 +149,5 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
 
 LOGIN_URL = '/login/'
+SESSION_COOKIE_AGE = 60 * 60 * 24 * 30
+LOGIN_REDIRECT_URL = '/'

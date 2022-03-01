@@ -16,19 +16,16 @@ class Category(models.Model):
 
 # Create your models here.
 class Email(models.Model):
-    user = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="user")
-
     sender = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="sender")
 
-    to = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="to")
+    recipients = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="to")
 
-    cc = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="cc")
+    cc = models.ManyToManyField(settings.AUTH_USER_MODEL, blank=True, related_name="cc")
 
-    bcc = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="bcc")
+    bcc = models.ManyToManyField(settings.AUTH_USER_MODEL, blank=True, related_name="bcc")
 
-    category = models.ManyToManyField(Category, related_name='categories')
+    category = models.ManyToManyField(Category, blank=True, related_name='categories')
 
     subject = models.CharField(max_length=255, null=True, blank=True)
 
@@ -49,7 +46,6 @@ class Email(models.Model):
     is_trashed = models.BooleanField(default=False)
     signature = models.CharField(max_length=100, null=True, blank=True)
     signature_image = models.ImageField(null=True, blank=True)
-
 
     def __str__(self):
         return f"From: {self.sender}, Sub: {self.subject}"

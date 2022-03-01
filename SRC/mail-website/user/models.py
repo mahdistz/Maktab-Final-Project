@@ -53,8 +53,6 @@ class Users(AbstractUser):
     phone = models.CharField(
         max_length=11,
         unique=True,
-        null=True,
-        blank=True,
         verbose_name=_('Phone Number'),
         validators=[mobile_number_validation],
         error_messages={
@@ -62,7 +60,7 @@ class Users(AbstractUser):
         },
         help_text=_('Example') + " : 09125573688")
 
-    email = models.EmailField(_('email address'), unique=True, null=True, blank=True)
+    email = models.EmailField(_('email address'), unique=True)
 
     birth_date = models.DateField(null=True, blank=True)
     nationality = models.CharField(max_length=100, null=True, blank=True)
@@ -95,7 +93,7 @@ class Contact(models.Model):
 
 class CodeRegister(models.Model):
     code = models.IntegerField()
-    phone_number = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='phone_user')
+    phone_number = models.CharField(max_length=11, validators=[mobile_number_validation])
     create_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

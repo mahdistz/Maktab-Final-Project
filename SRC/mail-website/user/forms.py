@@ -10,6 +10,7 @@ from django.contrib.sites.shortcuts import get_current_site
 from django.urls import reverse
 from django.conf import settings
 import kavenegar
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 
 
 class UserRegisterForm(UserCreationForm):
@@ -72,3 +73,24 @@ class PasswordResetForm(forms.Form):
                                                          args=[uid, token])
         print(reset_link)
         self.send_sms(user_phone_number, reset_link)
+
+
+class LoginForm(AuthenticationForm):
+    username = forms.CharField(max_length=100,
+                               required=True,
+                               widget=forms.TextInput(attrs={'placeholder': 'Username',
+                                                             'class': 'form-control',
+                                                             }))
+    password = forms.CharField(max_length=50,
+                               required=True,
+                               widget=forms.PasswordInput(attrs={'placeholder': 'Password',
+                                                                 'class': 'form-control',
+                                                                 'data-toggle': 'password',
+                                                                 'id': 'password',
+                                                                 'name': 'password',
+                                                                 }))
+    remember_me = forms.BooleanField(required=False)
+
+    class Meta:
+        model = Users
+        fields = ['username', 'password', 'remember_me']

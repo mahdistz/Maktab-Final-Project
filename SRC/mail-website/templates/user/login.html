@@ -1,20 +1,73 @@
-{% extends "user/index.html" %}
-{% load crispy_forms_tags %}
-{% block start %}
-
- <div class="content-section col-md-8 col-md-offset-2">
-  <center>
-  <form method="POST" style="border: 1px solid black; margin: 4%; padding:10%; border-radius:1%;">
-    {% csrf_token %}
-    <fieldset class="form-group">
-      {{ form|crispy}}
-    </fieldset>
-   <center>
-    <button style="background: black; font-size: 2rem; padding:1%;" class="btn btn-outline-info" type="submit"><span class="glyphicon glyphicon-log-in"></span> &nbsp; login</button>
-  </center>
-  <br/>
-  <sub style="text-align: left;"><a href="{% url 'register' %}" style="text-decoration: none; color: blue; padding:2%; cursor:pointer; margin-right:2%;">don't have account,sign up</a></sub>
-  </form>
-</center>
- </div>
-{% endblock start %}
+{% extends "user/base.html" %}
+{% block title %} Login Page {% endblock title%}
+{% block content %}
+    <div class="form-content my-3 p-3">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-5">
+                    <div class="card shadow-lg border-0 rounded-lg mt-0 mb-3">
+                        <div class="card-header justify-content-center">
+                          <h3 class="font-weight-light my-1 text-center">Sign In</h3>
+                        </div>
+                        {% if form.errors %}
+                            <div class="alert alert-danger alert-dismissible" role="alert">
+                                <div id="form_errors">
+                                    {% for key, value in form.errors.items %}
+                                        <strong>{{ value }}</strong>
+                                    {% endfor %}
+                                </div>
+                                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                        {% endif %}
+                        <div class="card-body">
+                            <form method="POST">
+                                {% csrf_token %}
+                                <div class="form-row">
+                                    <div class="col-md-10 offset-md-1">
+                                        <div class="form-group">
+                                            <hr>
+                                            <label class="small mb-1">Username</label>
+                                            {{ form.username }}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="col-md-10 offset-md-1">
+                                        <div class="form-group">
+                                          <label class="small mb-1">Password</label>
+                                          {{ form.password }}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="col-md-10 offset-md-1">
+                                        <div class="form-group">
+                                            <!-- Add a Remember me functionality -->
+                                            {{ form.remember_me }}
+                                            <label> Remember me</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="col-md-10 offset-md-1">
+                                        <div class="form-group mt-0 mb-1">
+                                          <button name="login" class="col-md-12 btn btn-dark" id="login">Sign in</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="card-footer text-center">
+                            <div class="small">
+                                <a href="{% url 'register' %}">Don't have an account yet? Go to signup</a><br>
+                                <a href="{% url 'password_reset' %}"><i>Forgot Password?</i></a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+     </div>
+{% endblock content %}

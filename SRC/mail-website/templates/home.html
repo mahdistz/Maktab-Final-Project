@@ -1,0 +1,199 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
+    <meta http-equiv="x-ua-compatible" content="ie=edge" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="{% static 'assets/css/bootstrap.css' %}">
+    <link href="{% static 'bootstrap/sidebar-bootstrap.css' %}" rel="stylesheet">
+    <link href="{% static 'fonts.css' %}" rel="stylesheet">
+    <link href="{% static 'layout.css' %}" rel="stylesheet">
+
+
+    {% block custom-css %}
+
+    {% endblock %}
+
+    {% block head %}
+    <title>{% block title %}Home{% endblock %}</title>
+    {% endblock %}
+  </head>
+
+  <body>
+
+  <div class="page-wrapper">
+
+  {% block page-wrapper %}
+
+  {% block sidebar %}
+
+  <nav id="sidebar">
+     <div class="text-center">            
+            <div class="mb-4">
+                <img id="logo-us" class="rounded mt-4"
+                    src="{% static 'img/cc-logo.svg' %}" alt="">
+            </div>
+            <h4>welcome <br> {{user.username}}</h4>
+            <p>{{ user.last_name|default:"Last Name" }}, {{ user.first_name|default:"First name" }}
+                <br />
+            </p>
+      </div>
+
+    <hr />
+    <ul class="list-unstyled components">
+    <li class="active">
+
+        <a href="#homeSubmenu"
+            data-bs-toggle="collapse"
+            aria-expanded="false"
+            role="button"
+            class="dropdown-toggle">Home</a>
+            <ul class="collapse list-unstyled"
+                id="homeSubmenu">
+                <li>
+                    <a href="#">Home 1</a>
+                </li>
+                <li>
+                    <a href="#">Home 2</a>
+                </li>
+                <li>
+                    <a href="#">Home 3</a>
+                </li>
+            </ul>
+    </li>
+    <li>
+        <a href="{% url 'home' %}">Create New Mail</a>
+    </li>
+    <li>
+        <a href="{% url 'home' %}">Inbox</a>
+    </li>
+    <li>
+        <a href="{% url 'home' %}">Sent</a>
+    </li>
+    <li>
+        <a href="{% url 'home' %}">Draft</a>
+    </li>
+    <li>
+        <a href="{% url 'home' %}">Archive</a>
+    </li>
+    <li>
+        <a href="{% url 'home' %}">Trash</a>
+    </li>
+    </ul>
+
+    {% if user.is_authenticated %}
+      <ul class="list-unstyled " >
+        <li>
+        <a href="{% url 'logout' %}">Logout</a>
+        </li>
+      </ul>
+    {% endif %}
+  </nav>
+  {% endblock %}
+
+  <div id="content">
+    {% block navbar %}
+    <nav id="navbar-top" class="navbar navbar-expand-sm navbar-light ">
+        <div class="container-fluid">
+
+            <button type="button" id="sidebarCollapse" class="btn btn-primary">
+                <img class="mdi-svg" src="{% static 'mdi/menu.svg' %}" type="image/svg+xml" />
+            </button>
+
+            <button class="btn btn-dark d-inline-block d-sm-none ms-auto"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#navbarTop"
+                    aria-controls="navbarTop"
+                    aria-expanded="false" aria-label="Toggle navigation">
+                <img class="mdi-svg" src="{% static 'mdi/menu.svg' %}" type="image/svg+xml" />
+            </button>
+            {% block navbar-links %}
+            <div class="collapse navbar-collapse" id="navbarTop">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarAdmin" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                          Menu
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="navbarAdmin">
+                          <li><a class="dropdown-item" href="#">
+                              Item</a></li>
+                          <li><a class="dropdown-item" href="#">
+                              Item</a></li>
+                          <li><hr class="dropdown-divider"></li>
+                          <li><a class="dropdown-item" href="#">Item</a></li>
+                        </ul>
+                      </li>
+                      <li class="nav-item active">
+                        <a class="nav-link" href="#">Page</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Page</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Page</a>
+                    </li>
+                </ul>
+            </div>
+            {% endblock %}
+        </div>
+    </nav>
+    {% endblock %}
+
+    {% block messages %}
+        {% include 'snippets/show_messages.html' %}
+    {% endblock %}
+
+
+    <div id="content-wrapper">
+        {% block content %}
+
+        {% endblock %}
+    </div>
+</div>
+</div>
+  <center>
+  <div class="modal fade" tabindex="-1" role="dialog" id="modal">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content"></div>
+  </div>
+</div>
+<!-- Create book button -->
+<button id="create_email" class="btn btn-primary" type="button" name="button">Create Email</button>
+      </center>
+{% endblock %}
+
+
+<script type="text/javascript">
+
+document.addEventListener("DOMContentLoaded", function(event) {
+    document.getElementById("sidebarCollapse").onclick = function () {
+        document.getElementById("sidebar").classList.toggle("active");
+        document.getElementById("content").classList.toggle("active");
+        }
+    });
+
+</script>
+<script src="{% static 'assets/js/bootstrap.js' %}"></script>
+<script src="{% static 'assets/js/jquery.js' %}"></script>
+<script src="{% static 'js/jquery.bootstrap.modal.forms.js' %}"></script>
+<script src="{% static 'bootstrap/bootstrap.bundle.min.js' %}"></script>
+<script type="text/javascript">
+
+$(document).ready(function() {
+    $("#create_email").modalForm({
+        formURL: "{% url 'create_email' %}"
+    });
+
+});
+</script>
+
+</body>
+</html>

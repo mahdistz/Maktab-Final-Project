@@ -18,22 +18,27 @@ from django.urls import path, include
 from django.contrib.auth import views as auth
 from django.conf import settings
 from django.conf.urls.static import static
-from user.views import SignUpView, ActivateAccount, VerifyCodeView, LoginView
+from django.views.generic import TemplateView
+
+from mail.views import EmailCreateView
+from user.forms import LoginForm
+from user.views import SignUpView, ActivateAccount, VerifyCodeView, LoginView, CustomLoginView
 
 urlpatterns = [
                   path('admin/', admin.site.urls),
                   path('', include('user.urls')),
                   path('mail/', include('mail.urls')),
-                  path('login/', LoginView.as_view(), name='login'),
-                  path('logout/', auth.LogoutView.as_view(), name='logout'),
-                  path('password_reset/', auth.PasswordResetView.as_view(), name='password_reset'),
-                  path('password_reset/done/', auth.PasswordResetDoneView.as_view(), name='password_reset_done'),
-                  path('password_change/', auth.PasswordChangeView.as_view(), name='password_change'),
-                  path('password_change/done/', auth.PasswordChangeDoneView.as_view(), name='password_change_done'),
-                  path('password/reset/done/', auth.PasswordResetCompleteView.as_view(),
-                       name='password_reset_complete'),
-                  path('reset/<uid64>/<token>/', auth.PasswordResetConfirmView.as_view(),
+                  path('create/', EmailCreateView.as_view(), name='create_email'),
+                  path('password-reset-confirm/<uidb64>/<token>/',
+                       auth.PasswordResetConfirmView.as_view(template_name='password/password_reset_confirm.html'),
                        name='password_reset_confirm'),
+                  path('password-reset-complete/',
+                       auth.PasswordResetCompleteView.as_view(template_name='password/password_reset_complete.html'),
+                       name='password_reset_complete'),
+                  path('login/',
+                       CustomLoginView.as_view(redirect_authenticated_user=True, template_name='user/login.html',
+                                               authentication_form=LoginForm), name='login'),
+                  path('logout/', auth.LogoutView.as_view(template_name='user/logout.html'), name='logout'),
                   path('activate/<uidb64>/<token>/', ActivateAccount.as_view(), name='activate'),
                   path('register/', SignUpView.as_view(), name='register'),
                   path('verify/', VerifyCodeView.as_view(), name='verify'),
