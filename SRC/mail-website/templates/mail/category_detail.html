@@ -1,0 +1,8 @@
+{% extends 'home.html' %}
+{% block content %}
+<p>Name : {{ object.name }}</p>
+<p> Emails of this Label: </p>
+    {% for item in object.category_set.all %}
+        <li>{{ item }}</li>
+    {% endfor %}
+{% endblock %}

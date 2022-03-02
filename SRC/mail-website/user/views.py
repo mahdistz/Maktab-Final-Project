@@ -26,6 +26,7 @@ from django.contrib.auth.views import LoginView
 from .forms import LoginForm
 from django.contrib.auth.views import PasswordResetView
 from django.contrib.messages.views import SuccessMessageMixin
+from mail.forms import CreateMailForm
 
 
 def index(request):
@@ -34,7 +35,8 @@ def index(request):
 
 @login_required(login_url=settings.LOGIN_URL)
 def home(request):
-    return render(request, 'home.html')
+    form = CreateMailForm
+    return render(request, 'home.html', {'form': form})
 
 
 # Class based view that extends from the built-in login view to add remember me functionality
@@ -176,7 +178,7 @@ UserModel = get_user_model()
 class ResetPasswordPhoneView(PasswordContextMixin, FormView):
     form_class = PasswordResetForm
     success_url = reverse_lazy('password_reset_done')
-    template_name = 'registration/password_reset_form.html'
+    template_name = 'password/password_reset_form.html'
     token_generator = default_token_generator
     title = _('Password reset')
 

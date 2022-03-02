@@ -1,9 +1,13 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <title>{% block title %}{% endblock %}</title>
     <meta charset="UTF-8">
-   {% block link %}{% endblock %}
+   {% block link %}
+
+    <link rel="stylesheet" href="{% static 'assets/css/bootstrap.css' %}">
+   {% endblock %}
 </head>
 <body>
 {% block messages %}
@@ -15,6 +19,31 @@
 </ul>
 {% endif %}
 {% endblock %}
-{% block main %}{% endblock %}
+{% block main %}
+  <center>
+  <div class="modal fade" tabindex="-1" role="dialog" id="modal">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content"></div>
+  </div>
+</div>
+<!-- Create book button -->
+<button id="create-email" class="btn btn-primary" type="button" name="button">Create Email</button>
+      </center>
+{% endblock %}
+<script src="{% static 'assets/js/bootstrap.min.js' %}"></script>
+<script src="{% static 'assets/js/jquery-3.2.1.min.js' %}"></script>
+<script src="{% static 'js/jquery.bootstrap.modal.forms.js' %}"></script>
+<!-- You can alternatively load the minified version -->
+<script src="{% static 'js/jquery.bootstrap.modal.forms.min.js' %}"></script>
+<script type="text/javascript">
+$(document).ready(function() {
+
+    $("#create-email").modalForm({
+        formURL: "{% url 'create_email' %}"
+    });
+
+});
+</script>
+
 </body>
 </html>

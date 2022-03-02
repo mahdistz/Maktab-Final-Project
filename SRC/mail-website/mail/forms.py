@@ -1,15 +1,21 @@
 from django import forms
-from mail.models import Email
-from bootstrap_modal_forms.forms import BSModalModelForm
+from mail.models import Email, Category
+from user.models import Contact
 
 
 class CreateMailForm(forms.ModelForm):
     class Meta:
         model = Email
-        fields = ['subject', 'body', 'file']
+        fields = ['recipients', 'cc', 'bcc', 'subject', 'body', 'file']
 
 
-class EmailModelForm(BSModalModelForm):
+class CreateContactForm(forms.ModelForm):
     class Meta:
-        model = Email
-        fields = ['sender', 'recipients', 'cc', 'bcc', 'subject', 'body', 'file']
+        model = Contact
+        fields = '__all__'
+
+
+class CreateCategoryForm(forms.ModelForm):
+    class Meta:
+        model = Category
+        fields = ['name']

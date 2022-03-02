@@ -1,0 +1,10 @@
+{% extends 'home.html' %}
+{% block content %}
+    <center>
+    <a href="{% url 'create_category' %}" >Create Label</a>
+    <h3>you have {{ object_list|length }} Label{{ object_list|length|pluralize }}</h3>
+    {% for category in object_list %}
+        <li><a href="/mail/category_detail/{{ category.id }}">Label name: {{ category.name }} </a> </li>
+    {% endfor %}
+    </center>
+{% endblock %}

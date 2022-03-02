@@ -2,20 +2,20 @@
 <!doctype html>
 <html lang="en">
   <head>
-    <meta charset="UTF-8" />
     <meta name="viewport"
       content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
     <meta http-equiv="x-ua-compatible" content="ie=edge" />
-
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;700&display=swap" rel="stylesheet">
-    
-    <link rel="stylesheet" href="{% static 'assets/css/bootstrap.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/bootstrap.min.css' %}">
     <link href="{% static 'bootstrap/sidebar-bootstrap.css' %}" rel="stylesheet">
     <link href="{% static 'fonts.css' %}" rel="stylesheet">
     <link href="{% static 'layout.css' %}" rel="stylesheet">
-
+     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     {% block custom-css %}
 
@@ -48,28 +48,8 @@
 
     <hr />
     <ul class="list-unstyled components">
-    <li class="active">
-
-        <a href="#homeSubmenu"
-            data-bs-toggle="collapse"
-            aria-expanded="false"
-            role="button"
-            class="dropdown-toggle">Home</a>
-            <ul class="collapse list-unstyled"
-                id="homeSubmenu">
-                <li>
-                    <a href="#">Home 1</a>
-                </li>
-                <li>
-                    <a href="#">Home 2</a>
-                </li>
-                <li>
-                    <a href="#">Home 3</a>
-                </li>
-            </ul>
-    </li>
     <li>
-        <a href="{% url 'home' %}">Create New Mail</a>
+        <a href="" data-toggle="modal" data-target="#Modal">Create New Mail</a>
     </li>
     <li>
         <a href="{% url 'home' %}">Inbox</a>
@@ -82,6 +62,12 @@
     </li>
     <li>
         <a href="{% url 'home' %}">Archive</a>
+    </li>
+    <li>
+        <a href="{% url 'categories' %}">Label</a>
+    </li>
+    <li>
+        <a href="{% url 'contacts' %}">Contacts</a>
     </li>
     <li>
         <a href="{% url 'home' %}">Trash</a>
@@ -154,22 +140,45 @@
 
     <div id="content-wrapper">
         {% block content %}
-
+            <!-- Modal -->
+            <div class="modal fade" id="Modal" data-backdrop="static" data-keyboard="false"
+                 tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+              <div class="modal-dialog">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title" id="staticBackdropLabel">Create New Email</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                      <span aria-hidden="true">&times;</span>
+                    </button>
+                  </div>
+                  <div class="modal-body">
+                      <table>
+                          {{ form.as_table }}
+                      </table>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" >Save</button>
+                  </div>
+                </div>
+              </div>
+            </div>
         {% endblock %}
-    </div>
-</div>
-</div>
-  <center>
-  <div class="modal fade" tabindex="-1" role="dialog" id="modal">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content"></div>
-  </div>
-</div>
-<!-- Create book button -->
-<button id="create_email" class="btn btn-primary" type="button" name="button">Create Email</button>
-      </center>
-{% endblock %}
 
+</div>
+</div>
+
+{% endblock %}
+  {% block script %}
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+        integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
+        crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"
+        integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN"
+        crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.min.js"
+        integrity="sha384-w1Q4orYjBQndcko6MimVbzY0tgp4pWB4lZ7lr30WKz0vr/aWKhXdBNmNb5D92v7s"
+        crossorigin="anonymous"></script>
 
 <script type="text/javascript">
 
@@ -181,19 +190,6 @@ document.addEventListener("DOMContentLoaded", function(event) {
     });
 
 </script>
-<script src="{% static 'assets/js/bootstrap.js' %}"></script>
-<script src="{% static 'assets/js/jquery.js' %}"></script>
-<script src="{% static 'js/jquery.bootstrap.modal.forms.js' %}"></script>
-<script src="{% static 'bootstrap/bootstrap.bundle.min.js' %}"></script>
-<script type="text/javascript">
-
-$(document).ready(function() {
-    $("#create_email").modalForm({
-        formURL: "{% url 'create_email' %}"
-    });
-
-});
-</script>
-
+{% endblock %}
 </body>
 </html>
