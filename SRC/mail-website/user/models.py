@@ -90,7 +90,7 @@ class Contact(models.Model):
                               related_name='contact_email_in_website')
     name = models.CharField(max_length=100, default=None)
     birth_date1 = models.DateField(verbose_name='birth date', null=True, blank=True)
-    other_email = models.EmailField(null=True, blank=True)
+    other_email = models.CharField(max_length=500, null=True, blank=True, default='default@mail.com')
     phone_number1 = models.CharField(verbose_name='phone number', max_length=11, validators=[mobile_number_validation],
                                      null=True, blank=True)
 

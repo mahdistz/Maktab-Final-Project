@@ -12,7 +12,7 @@ class CreateMailForm(forms.ModelForm):
 class CreateContactForm(forms.ModelForm):
     class Meta:
         model = Contact
-        exclude =['user']
+        exclude = ['user']
 
 
 class CreateCategoryForm(forms.ModelForm):

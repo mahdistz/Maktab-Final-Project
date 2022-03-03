@@ -178,7 +178,7 @@ UserModel = get_user_model()
 class ResetPasswordPhoneView(PasswordContextMixin, FormView):
     form_class = PasswordResetForm
     success_url = reverse_lazy('password_reset_done')
-    template_name = 'password/password_reset_form.html'
+    template_name = 'password/password_reset.html'
     token_generator = default_token_generator
     title = _('Password reset')
 
@@ -211,4 +211,4 @@ class ResetPasswordEmailView(SuccessMessageMixin, PasswordResetView):
                       "if an account exists with the email you entered. You should receive them shortly." \
                       " If you don't receive an email, " \
                       "please make sure you've entered the address you registered with, and check your spam folder."
-    success_url = reverse_lazy('home')
+    success_url = reverse_lazy('index')
