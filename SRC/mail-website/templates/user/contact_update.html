@@ -1,0 +1,20 @@
+{% extends 'home.html' %}
+{% block title %} Update Contact {% endblock %}
+
+{% block content %}
+
+<h1> Update Contact </h1>
+<br/>
+
+<div class="form-group">
+    <form method="POST">
+        {% csrf_token %}
+        <table>
+        {{ form.as_table }}
+        <br/>
+            </table>
+        <button class="btn btn-secondary"> Update </button>
+    </form>
+</div>
+
+{% endblock %}

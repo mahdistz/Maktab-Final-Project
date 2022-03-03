@@ -1,13 +1,10 @@
 import random
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.sites.shortcuts import get_current_site
 from django.views import View
 from utils import send_otp_code, send_otp_code_gh
 from .forms import UserRegisterForm, VerifyCodeForm
-from django.core.mail import EmailMultiAlternatives
-from django.template.loader import get_template
 from django.shortcuts import render, redirect
 from django.contrib.auth import login, authenticate, get_user_model
 from django.utils.encoding import force_bytes, force_text
@@ -25,64 +22,50 @@ from django.utils.translation import gettext_lazy as _
 from django.urls import reverse_lazy
 from .forms import PasswordResetForm
 from django.conf import settings
+from django.contrib.auth.views import LoginView
+from .forms import LoginForm
+from django.contrib.auth.views import PasswordResetView
+from django.contrib.messages.views import SuccessMessageMixin
+from mail.forms import CreateMailForm
 
 
 def index(request):
     return render(request, 'user/index.html', {'title': 'index'})
 
 
-@login_required(login_url=settings.LOGIN_URL, redirect_field_name='next')
+@login_required(login_url=settings.LOGIN_URL)
 def home(request):
-    return render(request, 'website-menu/index.html')
+    form = CreateMailForm
+    return render(request, 'home.html', {'form': form})
 
 
-# def register(request):
-#     if request.method == 'POST':
-#         form = UserRegisterForm(request.POST)
-#         if form.is_valid():
-#             form.save()
-#             username = form.cleaned_data.get('username')
-#             email = form.cleaned_data.get('email')
-#             # mail
-#             htmly = get_template('user/acc_active_email.html')
-#             d = {'username': username}
-#             subject, from_email, to = 'welcome', 'mahdis.taghizadeh1376@gmail.com', email
-#             html_content = htmly.render(d)
-#             msg = EmailMultiAlternatives(subject, html_content, from_email, [to])
-#             msg.attach_alternative(html_content, "text/html")
-#             msg.send()
-#
-#             messages.success(request, f'Your account has been created ! You are now able to log in')
-#             return redirect('login')
-#     else:
-#         form = UserRegisterForm()
-#     return render(request, 'user/register.html', {'form': form, 'title': 'register here'})
+# Class based view that extends from the built-in login view to add remember me functionality
+class CustomLoginView(LoginView):
+    form_class = LoginForm
 
-
-class LoginView(View):
-    template_name = 'user/login.html'
-    # template_name = 'login/index.html'
-
-    def post(self, request):
-        username = request.POST['username']
-        password = request.POST['password']
-        user = authenticate(request, username=username, password=password)
-        if user is not None:
-            login(request, user)
-            messages.success(request, f' welcome {username}')
-            return redirect('index')
-        else:
-            messages.info(request, f'account done not exit please sign in')
-
-    def get(self, request):
-        form = AuthenticationForm()
-        return render(request, self.template_name, {'form': form, 'title': 'log in'})
+    def form_valid(self, form):
+        remember_me = form.cleaned_data.get('remember_me')
+        if not remember_me:
+            # set session expiry to 0 seconds.
+            # So it will automatically close the session after the browser is closed.
+            self.request.session.set_expiry(0)
+            # Set session as modified to force data updates/cookie to be saved.
+            self.request.session.modified = True
+        # else browser session will be as long as the session cookie time "SESSION_COOKIE_AGE" defined in settings.py
+        return super(CustomLoginView, self).form_valid(form)
 
 
 class SignUpView(View):
     form_class = UserRegisterForm
     # template_name = 'register/index.html'
     template_name = 'user/register.html'
+
+    def dispatch(self, request, *args, **kwargs):
+        # will redirect to the home page if a user tries to access the register page while logged in
+        if request.user.is_authenticated:
+            return redirect(to='/')
+        # else process dispatch as it otherwise normally would
+        return super(SignUpView, self).dispatch(request, *args, **kwargs)
 
     def get(self, request, *args, **kwargs):
         form = self.form_class()
@@ -112,14 +95,14 @@ class SignUpView(View):
             elif str(form.cleaned_data['verification']) == 'Phone':
 
                 # SMS
-                code = random.randint(1000, 9999)
+                code = random.randint(100000, 999999)
                 CodeRegister.objects.create(phone_number=form.cleaned_data['phone'],
                                             code=code)
 
                 # to show on terminal and complete the request
                 print(code)
                 # ghasedak service --> error
-                # send_otp_code_gh(form.cleaned_data.get('phone_number'), code)
+                # send_otp_code_gh(form.cleaned_data['phone'], code)
 
                 # kavenegar service --> can't send sms because 'sender' is None
                 send_otp_code(form.cleaned_data['phone'], code)
@@ -131,7 +114,7 @@ class SignUpView(View):
                     'password2': form.cleaned_data['password2'],
                     'username': form.cleaned_data['username'],
                 }
-                messages.success(request, 'we sent you a code')
+                messages.success(request, 'we sent you a code', 'success')
                 return redirect('verify')
 
         return render(request, self.template_name, {'form': form})
@@ -191,10 +174,11 @@ class ActivateAccount(View):
 UserModel = get_user_model()
 
 
-class PasswordResetView(PasswordContextMixin, FormView):
+# reset password with phone number
+class ResetPasswordPhoneView(PasswordContextMixin, FormView):
     form_class = PasswordResetForm
     success_url = reverse_lazy('password_reset_done')
-    template_name = 'registration/password_reset_form.html'
+    template_name = 'password/password_reset.html'
     token_generator = default_token_generator
     title = _('Password reset')
 
@@ -203,9 +187,9 @@ class PasswordResetView(PasswordContextMixin, FormView):
         return super().dispatch(*args, **kwargs)
 
     def form_valid(self, form):
-        phone_number = form.cleaned_data['phone_number']
+        phone_number = form.cleaned_data['phone']
         try:
-            user = UserModel.objects.get(phone_number=phone_number)
+            user = UserModel.objects.get(phone=phone_number)
             opts = {
                 'use_https': self.request.is_secure(),
                 'token_generator': self.token_generator,
@@ -216,3 +200,15 @@ class PasswordResetView(PasswordContextMixin, FormView):
             form.add_error(None, 'این شماره موبایل پیدا نشد!')
             return self.form_invalid(form)
         return super().form_valid(form)
+
+
+# reset password with sending email to user,using PasswordResetView of django and customize it.
+class ResetPasswordEmailView(SuccessMessageMixin, PasswordResetView):
+    template_name = 'password/password_reset.html'
+    email_template_name = 'password/password_reset_email.html'
+    subject_template_name = 'password/password_reset_subject'
+    success_message = "We've emailed you instructions for setting your password, " \
+                      "if an account exists with the email you entered. You should receive them shortly." \
+                      " If you don't receive an email, " \
+                      "please make sure you've entered the address you registered with, and check your spam folder."
+    success_url = reverse_lazy('index')

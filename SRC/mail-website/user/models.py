@@ -3,7 +3,7 @@ from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.utils.translation import ugettext_lazy as _
-from django.core.validators import RegexValidator, ValidationError
+from django.core.validators import RegexValidator, ValidationError, EmailValidator
 from django.utils.deconstruct import deconstructible
 from .managers import CustomUserManager
 import re
@@ -47,11 +47,12 @@ class Users(AbstractUser):
         ('Email', 'Email')
     ]
     verification = models.CharField(default='',
-                                    max_length=100,
+                                    max_length=10,
                                     choices=verification_choice
                                     )
     phone = models.CharField(
-        max_length=50,
+        default=None,
+        max_length=11,
         unique=True,
         verbose_name=_('Phone Number'),
         validators=[mobile_number_validation],
@@ -80,14 +81,26 @@ class Users(AbstractUser):
         return self.username
 
 
+validate_email = EmailValidator()
+
+
 class Contact(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='main_user')
-    contact = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='contact_user')
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='contacts')
+    email = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True,
+                              related_name='contact_email_in_website')
+    name = models.CharField(max_length=100, default=None)
+    birth_date1 = models.DateField(verbose_name='birth date', null=True, blank=True)
+    other_email = models.CharField(max_length=500, null=True, blank=True, default='default@mail.com')
+    phone_number1 = models.CharField(verbose_name='phone number', max_length=11, validators=[mobile_number_validation],
+                                     null=True, blank=True)
+
+    class Meta:
+        unique_together = [('user', 'email')]
 
 
 class CodeRegister(models.Model):
     code = models.IntegerField()
-    phone_number = models.CharField(max_length=11, default='')
+    phone_number = models.CharField(max_length=11, validators=[mobile_number_validation])
     create_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

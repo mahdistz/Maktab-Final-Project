@@ -1,0 +1,32 @@
+{% extends 'home.html' %}
+{% block content %}
+    <div style="width: 500px;height: auto" >
+    <p>Sender:{{ object.sender }}</p>
+    <p>to:{{ object.recipients.all.get }}</p>
+    <p>cc:{{ object.cc.all.get }}</p>
+    <p>subject:{{ object.subject }}</p>
+    <p>body:</p>
+    <p>{{ object.body }}</p>
+    <p>Date Time: {{ object.created_time }}</p>
+    <form action="{% url 'email_delete' email.id %}" method="post">
+        {% csrf_token %}
+        <input class="btn btn-primary" type="submit" value="Delete">
+    </form>
+    <form action="{% url 'email_delete' email.id %}" method="post">
+        {% csrf_token %}
+        <input class="btn btn-primary" type="submit" value="Archive">
+    </form>
+    <form action="{% url 'email_delete' email.id %}" method="post">
+        {% csrf_token %}
+        <input class="btn btn-primary" type="submit" value="Forward">
+    </form>
+    <form action="{% url 'email_delete' email.id %}" method="post">
+        {% csrf_token %}
+        <input class="btn btn-primary" type="submit" value="Reply">
+    </form>
+    <form action="{% url 'email_delete' email.id %}" method="post">
+        {% csrf_token %}
+        <input class="btn btn-primary" type="submit" value="Add label">
+    </form>
+    </div>
+{% endblock %}
