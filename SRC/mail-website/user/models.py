@@ -3,7 +3,7 @@ from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.utils.translation import ugettext_lazy as _
-from django.core.validators import RegexValidator, ValidationError
+from django.core.validators import RegexValidator, ValidationError, EmailValidator
 from django.utils.deconstruct import deconstructible
 from .managers import CustomUserManager
 import re
@@ -51,6 +51,7 @@ class Users(AbstractUser):
                                     choices=verification_choice
                                     )
     phone = models.CharField(
+        default=None,
         max_length=11,
         unique=True,
         verbose_name=_('Phone Number'),
@@ -80,12 +81,18 @@ class Users(AbstractUser):
         return self.username
 
 
+validate_email = EmailValidator()
+
+
 class Contact(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='contacts')
+    email = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True,
+                              related_name='contact_email_in_website')
     name = models.CharField(max_length=100, default=None)
-    birth_date = models.DateField(null=True, blank=True)
-    email = models.EmailField(null=False, default=None)
-    phone_number = models.CharField(max_length=11, validators=[mobile_number_validation], null=True, blank=True)
+    birth_date1 = models.DateField(verbose_name='birth date', null=True, blank=True)
+    other_email = models.EmailField(null=True, blank=True)
+    phone_number1 = models.CharField(verbose_name='phone number', max_length=11, validators=[mobile_number_validation],
+                                     null=True, blank=True)
 
     class Meta:
         unique_together = [('user', 'email')]

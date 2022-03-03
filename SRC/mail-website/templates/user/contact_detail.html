@@ -1,7 +1,8 @@
 {% extends 'home.html' %}
 {% block content %}
 <p>Name : {{ object.name }}</p>
-<p>Email : {{ object.user.username }}</p>
-<p>birth_date : {{ object.birth_date }}</p>
-<p>Phone Number : {{ object.phone_number }}</p>
+<p>Email : {{ object.email.username }}</p>
+<p>birth_date : {{ object.birth_date1 }}</p>
+<p>Phone Number : {{ object.phone_number1 }}</p>
+<p>Other Emails : {{ object.email.other_email }}</p>
 {% endblock %}

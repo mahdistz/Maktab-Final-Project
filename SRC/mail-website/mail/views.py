@@ -55,7 +55,8 @@ class CreateContact(View):
 
     def get(self, request):
         form = self.form_class
-        return render(request, self.template_name, {'form': form})
+        user = Users.objects.get(id=request.user.id)
+        return render(request, self.template_name, {'form': form, 'user': user})
 
     def post(self, request):
         form = self.form_class(request.POST)
