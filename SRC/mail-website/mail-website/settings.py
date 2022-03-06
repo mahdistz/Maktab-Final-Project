@@ -40,7 +40,6 @@ INSTALLED_APPS = [
     'crispy_forms',
     'dbbackup',
     'bootstrapsidebar',
-    'bootstrap_modal_forms',
 ]
 
 DBBACKUP_STORAGE = 'django.core.files.storage.FileSystemStorage'
@@ -69,6 +68,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'django.template.context_processors.media',
             ],
         },
     },
@@ -143,7 +143,7 @@ EMAIL_PORT = 587
 
 # SMS
 KAVENEGAR_APIKEY = '537436632F69455067616771704939662B6F4A4D4A5753784A655775682B3249474646455571346C584A343D'
-GHASEDAK_APIKEY = "97e47b97415e0406a666fdec7c377de5648f8be3673a4dc40c7ca7e6014afcdd"
+
 # Media files
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'

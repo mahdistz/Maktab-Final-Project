@@ -3,14 +3,14 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.sites.shortcuts import get_current_site
 from django.views import View
-from utils import send_otp_code, send_otp_code_gh
-from .forms import UserRegisterForm, VerifyCodeForm
+from utils import send_otp_code
+from .forms import UserRegisterForm, VerifyCodeForm, CreateContactForm
 from django.shortcuts import render, redirect
-from django.contrib.auth import login, authenticate, get_user_model
+from django.contrib.auth import login, authenticate
 from django.utils.encoding import force_bytes, force_text
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.template.loader import render_to_string
-from .models import Users, CodeRegister
+from .models import Users, CodeRegister, Contact
 from .tokens import account_activation_token
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.auth import get_user_model
@@ -27,6 +27,9 @@ from .forms import LoginForm
 from django.contrib.auth.views import PasswordResetView
 from django.contrib.messages.views import SuccessMessageMixin
 from mail.forms import CreateMailForm
+from django.views.generic import ListView, DetailView, DeleteView, UpdateView
+from user.models import Contact
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 
 def index(request):
@@ -98,12 +101,8 @@ class SignUpView(View):
                 code = random.randint(100000, 999999)
                 CodeRegister.objects.create(phone_number=form.cleaned_data['phone'],
                                             code=code)
-
                 # to show on terminal and complete the request
                 print(code)
-                # ghasedak service --> error
-                # send_otp_code_gh(form.cleaned_data['phone'], code)
-
                 # kavenegar service --> can't send sms because 'sender' is None
                 send_otp_code(form.cleaned_data['phone'], code)
                 # Sending session to other url for verifying user with sms code.
@@ -212,3 +211,41 @@ class ResetPasswordEmailView(SuccessMessageMixin, PasswordResetView):
                       " If you don't receive an email, " \
                       "please make sure you've entered the address you registered with, and check your spam folder."
     success_url = reverse_lazy('index')
+
+
+class ContactUpdate(LoginRequiredMixin, UpdateView):
+    model = Contact
+    template_name = 'user/contact_update.html'
+    fields = ['name', 'birth_date1', 'other_email', 'phone_number1']
+    success_url = reverse_lazy('contacts')
+
+
+class ContactDelete(LoginRequiredMixin, DeleteView):
+    model = Contact
+    success_url = reverse_lazy('contacts')
+
+
+class ContactList(LoginRequiredMixin, ListView):
+    model = Contact
+
+
+class ContactDetail(LoginRequiredMixin, DetailView):
+    model = Contact
+
+
+class CreateContact(LoginRequiredMixin, View):
+    form_class = CreateContactForm
+    template_name = 'user/create_contact.html'
+
+    def get(self, request):
+        form = self.form_class
+        return render(request, self.template_name, {'form': form})
+
+    def post(self, request):
+        form = self.form_class(request.POST)
+        if form.is_valid():
+            contact = form.save(commit=False)
+            contact.user = request.user
+            contact.save()
+            messages.success(request, 'contact created successfully', 'success')
+        return render(request, self.template_name, {'form': form})

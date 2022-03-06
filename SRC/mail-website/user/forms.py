@@ -1,5 +1,5 @@
 from django import forms
-from user.models import Users
+from user.models import Users, Contact
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import get_user_model
 from django.core.validators import RegexValidator
@@ -94,3 +94,9 @@ class LoginForm(AuthenticationForm):
     class Meta:
         model = Users
         fields = ['username', 'password', 'remember_me']
+
+
+class CreateContactForm(forms.ModelForm):
+    class Meta:
+        model = Contact
+        exclude = ['user']

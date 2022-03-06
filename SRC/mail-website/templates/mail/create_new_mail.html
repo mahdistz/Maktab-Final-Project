@@ -1,6 +1,6 @@
 {% extends 'home.html' %}
 {% block content %}
-<form method="post" action="/mail/new_mail/">
+<form method="post" action="/mail/new_mail/" enctype="multipart/form-data">
     {% csrf_token %}
     <table>
         {{ form.as_table }}

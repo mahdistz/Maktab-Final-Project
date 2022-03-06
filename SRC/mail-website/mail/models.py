@@ -1,6 +1,5 @@
 from django.conf import settings
 from django.db import models
-from user.models import Users
 from django.core.exceptions import ValidationError
 
 
@@ -8,6 +7,11 @@ def file_validator(value):
     limit = 25 * 1024 * 1024
     if value.size > limit:
         raise ValidationError('File too large. Size should not exceed 25 MiB.')
+
+
+def user_directory_path(instance, filename):
+    # file will be uploaded to MEDIA_ROOT/<sender.username>/<filename>
+    return '{0}/{1}'.format(instance.sender.username, filename)
 
 
 class Category(models.Model):
@@ -35,7 +39,7 @@ class Email(models.Model):
 
     file = models.FileField(null=True,
                             blank=True,
-                            upload_to='documents/%Y/%m/%d',
+                            upload_to=user_directory_path,
                             help_text='max 25 megabytes',
                             validators=[file_validator]
                             )
@@ -46,6 +50,10 @@ class Email(models.Model):
     is_trashed = models.BooleanField(default=False)
     signature = models.CharField(max_length=100, null=True, blank=True)
     signature_image = models.ImageField(null=True, blank=True)
+    reply_to = models.ForeignKey('self', null=True, blank=True, related_name='replies', on_delete=models.CASCADE)
+
+    class Meta:
+        ordering = ['-created_time']
 
     def __str__(self):
         return f"From: {self.sender}, Sub: {self.subject}"

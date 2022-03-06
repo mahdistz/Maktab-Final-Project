@@ -39,5 +39,7 @@ urlpatterns = [
                   path('register/', SignUpView.as_view(), name='register'),
                   path('verify/', VerifyCodeView.as_view(), name='verify'),
 
-
               ] + static(settings.STATIC_URL)
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

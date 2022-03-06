@@ -1,14 +1,15 @@
 from django.shortcuts import render, redirect, HttpResponse, HttpResponseRedirect
 from django.views import View
 from django.contrib import messages
-from .models import Users, Email, Category
-from mail.forms import CreateMailForm, CreateContactForm, CreateCategoryForm
+from .models import Email, Category
+from user.models import Users
+from mail.forms import CreateMailForm, CreateCategoryForm
 from django.urls import reverse_lazy
 from django.views.generic import ListView, DetailView, DeleteView, UpdateView
-from user.models import Contact
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 
-class CreateMail(View):
+class CreateMail(LoginRequiredMixin, View):
     form_class = CreateMailForm
     template_name = 'mail/create_new_mail.html'
 
@@ -24,61 +25,36 @@ class CreateMail(View):
                                          body=form.cleaned_data['body'],
                                          subject=form.cleaned_data['subject'],
                                          file=form.cleaned_data['file'],
+                                         signature=form.cleaned_data['signature'],
                                          )
-            recipients_list = list(form.cleaned_data['recipients'])
-            cc_list = list(form.cleaned_data['cc'])
-            bcc_list = list(form.cleaned_data['bcc'])
-            for people in recipients_list:
-                email.recipients.add(people)
-                email.save()
-            if cc_list:
-                for people in cc_list:
-                    email.cc.add(people)
-                    email.save()
-            elif bcc_list:
-                for people in bcc_list:
-                    email.bcc.add(people)
-                    email.save()
+            for people in form.cleaned_data['recipients']:
+                recipients = Users.objects.get_by_natural_key(username=people)
+                email.recipients.add(recipients)
+
+            if form.cleaned_data['cc']:
+                for people in form.cleaned_data['cc']:
+                    cc_receiver = Users.objects.get_by_natural_key(username=people)
+                    email.cc.add(cc_receiver)
+
+            elif form.cleaned_data['bcc']:
+                for people in form.cleaned_data['bcc']:
+                    bcc_receiver = Users.objects.get_by_natural_key(username=people)
+                    email.bcc.add(bcc_receiver)
+
             email.save()
         messages.success(request, 'mail sent successfully')
         return redirect('home')
 
 
-class ContactList(ListView):
-    model = Contact
-
-
-class CreateContact(View):
-    form_class = CreateContactForm
-    template_name = 'user/create_contact.html'
-
-    def get(self, request):
-        form = self.form_class
-        return render(request, self.template_name, {'form': form})
-
-    def post(self, request):
-        form = self.form_class(request.POST)
-        if form.is_valid():
-            contact = form.save(commit=False)
-            contact.user = request.user
-            contact.save()
-            messages.success(request, 'contact created successfully', 'success')
-        return render(request, self.template_name, {'form': form})
-
-
-class ContactDetail(DetailView):
-    model = Contact
-
-
-class CategoryList(ListView):
+class CategoryList(LoginRequiredMixin, ListView):
     model = Category
 
 
-class CategoryDetail(DetailView):
+class CategoryDetail(LoginRequiredMixin, DetailView):
     model = Category
 
 
-class CreateCategory(View):
+class CreateCategory(LoginRequiredMixin, View):
     form_class = CreateCategoryForm
     template_name = 'mail/create_category.html'
 
@@ -94,36 +70,19 @@ class CreateCategory(View):
         return render(request, self.template_name, {'form': form})
 
 
-class EmailList(ListView):
+class EmailList(LoginRequiredMixin, ListView):
     model = Email
 
 
-class EmailDetail(DetailView):
+class EmailDetail(LoginRequiredMixin, DetailView):
     model = Email
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['is_read'] = True
-        return context
 
-
-class EmailDelete(DeleteView):
+class EmailDelete(LoginRequiredMixin, DeleteView):
     model = Email
     success_url = reverse_lazy('emails')
 
 
-class ContactDelete(DeleteView):
-    model = Contact
-    success_url = reverse_lazy('contacts')
-
-
-class CategoryDelete(DeleteView):
+class CategoryDelete(LoginRequiredMixin, DeleteView):
     model = Category
     success_url = reverse_lazy('categories')
-
-
-class ContactUpdate(UpdateView):
-    model = Contact
-    template_name = 'user/contact_update.html'
-    fields = ['name', 'birth_date1', 'other_email', 'phone_number1']
-    success_url = reverse_lazy('contacts')
