@@ -1,6 +1,7 @@
 from django import forms
 from mail.models import Email, Category
 from django.core import validators
+from django.utils.translation import ugettext_lazy as _
 
 
 class MinLengthValidator(validators.MinLengthValidator):

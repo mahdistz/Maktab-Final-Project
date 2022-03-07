@@ -1,0 +1,9 @@
+{% extends 'home.html' %}
+{% block content %}
+    <center>
+    {% for email in emails_of_category %}
+        <li><a href="/mail/email_detail/{{ email.id }}"> {{ email.title }}-{{ email.body|truncatewords:5 }}
+         {{ email.created_time|date:"D d M Y" }}-{{ email.created_time|time:"H:i" }}</a> </li>
+    {% endfor %}
+    </center>
+{% endblock %}

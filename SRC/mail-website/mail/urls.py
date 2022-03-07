@@ -1,5 +1,5 @@
 from mail.views import CreateMail, CategoryList, CreateCategory, CategoryDetail, EmailDetail, EmailList, EmailDelete, \
-    CategoryDelete
+    CategoryDelete, InboxMail, DraftMail, AllEmailOfCategory
 from django.urls import path
 
 urlpatterns = [
@@ -11,5 +11,8 @@ urlpatterns = [
     path('email_detail/<int:pk>/', EmailDetail.as_view(), name='email_detail'),
     path('email_delete/<int:pk>/', EmailDelete.as_view(), name='email_delete'),
     path('category_delete/<int:pk>/', CategoryDelete.as_view(), name='category_delete'),
+    path('inbox/', InboxMail.as_view(), name='inbox'),
+    path('draft/', DraftMail.as_view(), name='draft'),
+    path('emails_of_category/', AllEmailOfCategory.as_view(), name='emails_of_category'),
 
 ]

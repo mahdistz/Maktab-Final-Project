@@ -14,7 +14,7 @@
     <p>subject:{{ object.subject }}</p>
     <p>body:</p>
     <p>{{ object.body }}</p>
-{#    <p>file: <a href="{{ object.file.url }}" >Download file</a></p>#}
+    <p>file: <a href="{{ object.file.url }}" >Download file</a></p>
     <p>Date Time: {{ object.created_time }}</p>
     <form action="{% url 'email_delete' email.id %}" method="post">
         {% csrf_token %}

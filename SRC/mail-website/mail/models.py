@@ -41,7 +41,7 @@ class Email(models.Model):
                             blank=True,
                             upload_to=user_directory_path,
                             help_text='max 25 megabytes',
-                            validators=[file_validator]
+                            validators=[file_validator],
                             )
 
     is_read = models.BooleanField(default=False)
@@ -49,7 +49,6 @@ class Email(models.Model):
     is_sent = models.BooleanField(default=False)
     is_trashed = models.BooleanField(default=False)
     signature = models.CharField(max_length=100, null=True, blank=True)
-    signature_image = models.ImageField(null=True, blank=True)
     reply_to = models.ForeignKey('self', null=True, blank=True, related_name='replies', on_delete=models.CASCADE)
 
     class Meta:
