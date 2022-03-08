@@ -3,11 +3,12 @@ from django.views import View
 from django.contrib import messages
 from .models import Email, Category
 from user.models import Users
-from mail.forms import CreateMailForm, CreateCategoryForm
+from mail.forms import CreateMailForm, CreateCategoryForm, AddEmailToCategoryForm
 from django.urls import reverse_lazy
 from django.views.generic import ListView, DetailView, DeleteView, UpdateView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ValidationError
+from django.db.models import Q
 
 
 class CreateMail(LoginRequiredMixin, View):
@@ -71,9 +72,10 @@ class CategoryDetail(LoginRequiredMixin, DetailView):
 class AllEmailOfCategory(LoginRequiredMixin, View):
     template_name = 'mail/all_email_of_category.html'
 
-    def get(self, request):
-        emails_of_category = Email.category.all()
-        return render(request, self.template_name, {'emails_of_category': emails_of_category})
+    def get(self, request, pk):
+        category = Category.objects.get(pk=pk)
+        emails = Email.objects.filter(category__owner=request.user, category__exact=category)
+        return render(request, self.template_name, {'emails': emails})
 
 
 class CreateCategory(LoginRequiredMixin, View):
@@ -87,8 +89,31 @@ class CreateCategory(LoginRequiredMixin, View):
     def post(self, request):
         form = self.form_class(request.POST)
         if form.is_valid():
-            form.save()
+            category = form.save(commit=False)
+            category.owner = request.user
+            category.save()
             messages.success(request, 'category created successfully', 'success')
+            return redirect('categories')
+        return render(request, self.template_name, {'form': form})
+
+
+class AddEmailToCategory(LoginRequiredMixin, View):
+    form_class = AddEmailToCategoryForm
+    template_name = 'mail/add_email_to_category.html'
+
+    def get(self, request, pk):
+        form = self.form_class
+        return render(request, self.template_name, {'form': form})
+
+    def post(self, request, pk):
+        form = self.form_class(request.POST)
+        if form.is_valid():
+            email = Email.objects.get(pk=pk)
+            category_obj = Category.objects.get(name=form.cleaned_data['name'])
+            email.category.add(category_obj)
+            email.save()
+            messages.success(request, 'email added to the label successfully', 'success')
+            return redirect('categories')
         return render(request, self.template_name, {'form': form})
 
 
@@ -101,36 +126,47 @@ class EmailDetail(LoginRequiredMixin, DetailView):
 
 
 class InboxMail(LoginRequiredMixin, View):
+    template_name = 'mail/inbox.html'
+
     def get(self, request):
         recipients = Email.objects.filter(recipients=request.user.id)
         cc = Email.objects.filter(cc=request.user.id)
         bcc = Email.objects.filter(bcc=request.user.id)
 
-        return render(request, 'mail/inbox.html',
+        return render(request, self.template_name,
                       {'recipients': recipients, 'cc': cc, 'bcc': bcc})
 
 
 class DraftMail(LoginRequiredMixin, View):
+    template_name = 'mail/draft.html'
+
     def get(self, request):
         drafts = Email.objects.filter(sender=request.user.id).filter(is_sent=False)
-        return render(request, 'mail/draft.html', {'drafts': drafts})
+        return render(request, self.template_name, {'drafts': drafts})
 
 
 class ArchiveMail(LoginRequiredMixin, View):
+    template_name = 'mail/archive.html'
+
     def get(self, request):
         archives = Email.objects.filter(is_archived=True)
-        return render(request, 'mail/archive.html', {'archives': archives})
+        return render(request, self.template_name, {'archives': archives})
 
 
 class TrashMail(LoginRequiredMixin, View):
+    template_name = 'mail/trash.html'
+
     def get(self, request):
         trashes = Email.objects.filter(is_trashed=True)
-        return render(request, 'mail/trash.html', {'trashes': trashes})
+        return render(request, self.template_name, {'trashes': trashes})
 
 
-class EmailDelete(LoginRequiredMixin, DeleteView):
-    model = Email
-    success_url = reverse_lazy('emails')
+class EmailDelete(LoginRequiredMixin, View):
+    def get(self, request, pk):
+        email_obj = Email.objects.get(pk=pk)
+        email_obj.is_trashed = True
+        email_obj.save(update_fields=['is_trashed'])
+        return render(request, 'home.html', {})
 
 
 class CategoryDelete(LoginRequiredMixin, DeleteView):

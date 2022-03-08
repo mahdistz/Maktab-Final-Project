@@ -1,8 +1,11 @@
 {% extends 'home.html' %}
 {% block content %}
 <p>Name : {{ object.name }}</p>
-<p> Emails of this Label: </p>
-    {% for item in object.category_set.all %}
-        <li>{{ item }}</li>
-    {% endfor %}
+<a href="{% url 'emails_of_category' object.pk %}"><p> Emails of this Label </p></a>
+
+ <form action="{% url 'category_delete' object.id %}" method="post">
+    {% csrf_token %}
+    <input class="btn btn-primary" type="submit" value="Delete Label">
+</form>
+
 {% endblock %}

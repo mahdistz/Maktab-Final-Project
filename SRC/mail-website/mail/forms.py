@@ -52,3 +52,7 @@ class CreateCategoryForm(forms.ModelForm):
     class Meta:
         model = Category
         fields = ['name']
+
+
+class AddEmailToCategoryForm(forms.Form):
+    name = forms.ModelChoiceField(queryset=Category.objects.all())

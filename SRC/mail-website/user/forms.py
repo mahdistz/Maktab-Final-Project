@@ -1,6 +1,5 @@
 from django import forms
 from user.models import Users, Contact
-from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import get_user_model
 from django.core.validators import RegexValidator
 from django.contrib.auth.tokens import default_token_generator
@@ -13,11 +12,18 @@ import kavenegar
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 
 
+class DateInput(forms.DateInput):
+    input_type = 'date'
+
+
 class UserRegisterForm(UserCreationForm):
     class Meta:
         model = Users
         fields = ['first_name', 'last_name', 'username', 'verification', 'email', 'phone',
                   'password1', 'password2', 'birth_date', 'nationality', 'gender']
+        widgets = {
+            'birth_date': DateInput()
+        }
 
 
 class VerifyCodeForm(forms.Form):
@@ -100,3 +106,17 @@ class CreateContactForm(forms.ModelForm):
     class Meta:
         model = Contact
         exclude = ['user']
+
+        widgets = {
+            'birth_date1': DateInput(),
+        }
+
+
+class ContactUpdateForm(forms.ModelForm):
+    class Meta:
+        model = Contact
+        exclude = ['user']
+
+        widgets = {
+            'birth_date1': DateInput(),
+        }

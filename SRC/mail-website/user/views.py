@@ -4,7 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.sites.shortcuts import get_current_site
 from django.views import View
 from utils import send_otp_code
-from .forms import UserRegisterForm, VerifyCodeForm, CreateContactForm
+from .forms import UserRegisterForm, VerifyCodeForm, CreateContactForm, ContactUpdateForm
 from django.shortcuts import render, redirect
 from django.contrib.auth import login, authenticate
 from django.utils.encoding import force_bytes, force_text
@@ -213,11 +213,31 @@ class ResetPasswordEmailView(SuccessMessageMixin, PasswordResetView):
     success_url = reverse_lazy('index')
 
 
-class ContactUpdate(LoginRequiredMixin, UpdateView):
-    model = Contact
+class ContactUpdate(LoginRequiredMixin, View):
+    form_class = ContactUpdateForm
     template_name = 'user/contact_update.html'
-    fields = ['name', 'birth_date1', 'other_email', 'phone_number1']
-    success_url = reverse_lazy('contacts')
+
+    def get(self, request, pk):
+        form = self.form_class
+        return render(request, self.template_name, {'form': form})
+
+    def post(self, request, pk):
+        form = self.form_class(request.POST)
+        if form.is_valid():
+            update_contact = form.save(commit=False)
+            contact = Contact.objects.get(pk=pk)
+            contact.user = request.user
+            contact.name = update_contact.name
+            contact.birth_date1 = update_contact.birth_date1
+            if update_contact.other_email:
+                contact.other_email = update_contact.other_email
+            contact.other_email = 'default@mail.com'
+            contact.email = update_contact.email
+            contact.phone_number1 = update_contact.phone_number1
+            contact.save(update_fields=['name', 'birth_date1', 'other_email', 'email', 'phone_number1'])
+            messages.success(request, 'contact updated successfully', 'success')
+            return redirect('contacts')
+        return render(request, self.template_name, {'form': form})
 
 
 class ContactDelete(LoginRequiredMixin, DeleteView):
@@ -248,4 +268,5 @@ class CreateContact(LoginRequiredMixin, View):
             contact.user = request.user
             contact.save()
             messages.success(request, 'contact created successfully', 'success')
+            return redirect('contacts')
         return render(request, self.template_name, {'form': form})

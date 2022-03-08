@@ -14,8 +14,13 @@
     <p>subject:{{ object.subject }}</p>
     <p>body:</p>
     <p>{{ object.body }}</p>
-    <p>file: <a href="{{ object.file.url }}" >Download file</a></p>
+    <p>{% if object.file %}
+        file: <a href="{{ object.file.url }}" >Download file</a></p>
+        {% endif %}
     <p>Date Time: {{ object.created_time }}</p>
+    <p>Label:{% for category in object.category.all %}
+            {{ category }},
+        {% endfor%}</p>
     <form action="{% url 'email_delete' email.id %}" method="post">
         {% csrf_token %}
         <input class="btn btn-primary" type="submit" value="Delete">
@@ -32,7 +37,7 @@
         {% csrf_token %}
         <input class="btn btn-primary" type="submit" value="Reply">
     </form>
-    <form action="{% url 'email_delete' email.id %}" method="post">
+    <form action="{% url 'add_email_to_category' email.id %}" method="post">
         {% csrf_token %}
         <input class="btn btn-primary" type="submit" value="Add label">
     </form>

@@ -16,6 +16,14 @@ def user_directory_path(instance, filename):
 
 class Category(models.Model):
     name = models.CharField(max_length=100)
+    owner = models.ForeignKey(
+        settings.AUTH_USER_MODEL, default='', on_delete=models.CASCADE, related_name="user_category")
+
+    class Meta:
+        unique_together = [('name', 'owner')]
+
+    def __str__(self):
+        return f"{self.name}"
 
 
 # Create your models here.
