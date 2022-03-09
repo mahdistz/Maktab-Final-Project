@@ -56,3 +56,19 @@ class CreateCategoryForm(forms.ModelForm):
 
 class AddEmailToCategoryForm(forms.Form):
     name = forms.ModelChoiceField(queryset=Category.objects.all())
+
+
+class ReplyForm(forms.ModelForm):
+    class Meta:
+        model = Email
+        fields = ['subject', 'body', 'file']
+
+
+class ForwardForm(forms.ModelForm):
+    class Meta:
+        model = Email
+        fields = ['subject', 'body', 'file']
+
+    recipients = CommaSeparatedCharField(max_length=200, required=True)
+    cc = CommaSeparatedCharField(max_length=200, required=False)
+    bcc = CommaSeparatedCharField(max_length=200, required=False)

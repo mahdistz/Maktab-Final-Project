@@ -14,6 +14,7 @@ def user_directory_path(instance, filename):
     return '{0}/{1}'.format(instance.sender.username, filename)
 
 
+# Create your models here.
 class Category(models.Model):
     name = models.CharField(max_length=100)
     owner = models.ForeignKey(
@@ -26,7 +27,6 @@ class Category(models.Model):
         return f"{self.name}"
 
 
-# Create your models here.
 class Email(models.Model):
     sender = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="sender")
@@ -64,3 +64,13 @@ class Email(models.Model):
 
     def __str__(self):
         return f"From: {self.sender}, Sub: {self.subject}"
+
+
+class UpdateEmailOfUser(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="user")
+    email = models.ForeignKey(Email, on_delete=models.PROTECT, related_name="email")
+    status_choices = [
+        ('Archive', 'Archive'),
+        ('Trash', 'Trash'),
+    ]
+    status = models.CharField(max_length=10, choices=status_choices)

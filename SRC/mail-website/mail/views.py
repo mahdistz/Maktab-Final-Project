@@ -1,9 +1,9 @@
 from django.shortcuts import render, redirect, HttpResponse, HttpResponseRedirect, Http404
 from django.views import View
 from django.contrib import messages
-from .models import Email, Category
+from .models import Email, Category, UpdateEmailOfUser
 from user.models import Users
-from mail.forms import CreateMailForm, CreateCategoryForm, AddEmailToCategoryForm
+from mail.forms import CreateMailForm, CreateCategoryForm, AddEmailToCategoryForm, ForwardForm, ReplyForm
 from django.urls import reverse_lazy
 from django.views.generic import ListView, DetailView, DeleteView, UpdateView
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -148,20 +148,28 @@ class DraftMail(LoginRequiredMixin, View):
 class ArchiveMail(LoginRequiredMixin, View):
     template_name = 'mail/archive.html'
 
-    def get(self, request):
-        archives = Email.objects.filter(is_archived=True)
+    def get(self, request, pk):
+        email_of_user = UpdateEmailOfUser.objects.get(user=request.user, email_id__in=pk)
+        email_of_user.status = 'Archive'
+        email_of_user.save()
+        archives = UpdateEmailOfUser.objects.filter(user=request.user, status='Archive')
         return render(request, self.template_name, {'archives': archives})
 
 
 class TrashMail(LoginRequiredMixin, View):
     template_name = 'mail/trash.html'
 
-    def get(self, request):
-        trashes = Email.objects.filter(is_trashed=True)
+    def get(self, request, pk):
+        email_of_user = UpdateEmailOfUser.objects.get(user=request.user, email_id__in=pk)
+        email_of_user.status = 'Trash'
+        email_of_user.save()
+        trashes = UpdateEmailOfUser.objects.filter(user=request.user, status='Trash')
         return render(request, self.template_name, {'trashes': trashes})
 
 
 class EmailDelete(LoginRequiredMixin, View):
+    template_name = 'mail/trash.html'
+
     def get(self, request, pk):
         email_obj = Email.objects.get(pk=pk)
         email_obj.is_trashed = True
@@ -172,3 +180,60 @@ class EmailDelete(LoginRequiredMixin, View):
 class CategoryDelete(LoginRequiredMixin, DeleteView):
     model = Category
     success_url = reverse_lazy('categories')
+
+
+class Reply(LoginRequiredMixin, View):
+    template_name = 'mail/reply.html'
+    form_class = ReplyForm
+
+    def get(self, request, pk):
+        form = self.form_class
+        return render(request, self.template_name, {'form': form})
+
+    def post(self, request, pk):
+        form = self.form_class(request.POST, request.FILES)
+        if form.is_valid():
+            reply_email = form.save(commit=False)
+            sender = Users.objects.get(id=request.user.id)
+            reply_email.sender = sender
+            reply_email.recipients.add(Email.objects.get(pk=pk).sender)
+            reply_email.save()
+            messages.success(request, 'mail sent successfully', 'success')
+            return redirect('home')
+        return render(request, self.template_name, {'form': form})
+
+
+class Forward(LoginRequiredMixin, View):
+    template_name = 'mail/forward.html'
+    form_class = ForwardForm
+
+    def get(self, request, pk):
+        form = self.form_class
+        return render(request, self.template_name, {'form': form})
+
+    def post(self, request, pk):
+        form = self.form_class(request.POST, request.FILES)
+        if form.is_valid():
+            forward_email = form.save(commit=False)
+            sender = Users.objects.get(id=request.user.id)
+            forward_email.sender = sender
+
+            for people in form.cleaned_data['recipients']:
+                recipients = Users.objects.get_by_natural_key(username=people)
+                forward_email.recipients.add(recipients)
+
+            if form.cleaned_data['cc']:
+                for people in form.cleaned_data['cc']:
+                    cc_receiver = Users.objects.get_by_natural_key(username=people)
+                    forward_email.cc.add(cc_receiver)
+
+            if form.cleaned_data['bcc']:
+                for people in form.cleaned_data['bcc']:
+                    bcc_receiver = Users.objects.get_by_natural_key(username=people)
+                    forward_email.bcc.add(bcc_receiver)
+
+            forward_email.save()
+            messages.success(request, 'mail sent successfully', 'success')
+            return redirect('home')
+        return render(request, self.template_name, {'form': form})
+
