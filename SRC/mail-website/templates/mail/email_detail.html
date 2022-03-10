@@ -21,25 +21,17 @@
     <p>Label:{% for category in object.category.all %}
             {{ category }},
         {% endfor%}</p>
-    <form action="{% url 'email_delete' email.id %}" method="post">
-        {% csrf_token %}
-        <input class="btn btn-primary" type="submit" value="Delete">
-    </form>
-    <form action="{% url 'email_delete' email.id %}" method="post">
-        {% csrf_token %}
-        <input class="btn btn-primary" type="submit" value="Archive">
-    </form>
-    <form action="{% url 'email_delete' email.id %}" method="post">
-        {% csrf_token %}
-        <input class="btn btn-primary" type="submit" value="Forward">
-    </form>
-    <form action="{% url 'email_delete' email.id %}" method="post">
-        {% csrf_token %}
-        <input class="btn btn-primary" type="submit" value="Reply">
-    </form>
-    <form action="{% url 'add_email_to_category' email.id %}" method="post">
-        {% csrf_token %}
-        <input class="btn btn-primary" type="submit" value="Add label">
-    </form>
+
+<a href="{% url 'forward' object.id %}"><input class="btn btn-primary" type="submit" value="Forward"></a>
+
+<a href="{% url 'reply' object.id %}"><input class="btn btn-primary" type="submit" value="Reply"></a>
+
+<a href="{% url 'add_email_to_category' object.id %}"><input class="btn btn-primary" type="submit"
+                                                             value="Add to Label"></a>
+
+<a href="{% url 'archive' object.id %}"><input class="btn btn-primary" type="submit" value="Archive"></a>
+
+<a href="{% url 'trash' object.id %}"><input class="btn btn-primary" type="submit" value="Delete"></a>
+
     </div>
 {% endblock %}

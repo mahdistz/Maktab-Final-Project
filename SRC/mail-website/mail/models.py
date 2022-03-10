@@ -52,10 +52,7 @@ class Email(models.Model):
                             validators=[file_validator],
                             )
 
-    is_read = models.BooleanField(default=False)
-    is_archived = models.BooleanField(default=False)
     is_sent = models.BooleanField(default=False)
-    is_trashed = models.BooleanField(default=False)
     signature = models.CharField(max_length=100, null=True, blank=True)
     reply_to = models.ForeignKey('self', null=True, blank=True, related_name='replies', on_delete=models.CASCADE)
 
@@ -67,10 +64,8 @@ class Email(models.Model):
 
 
 class UpdateEmailOfUser(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="user")
-    email = models.ForeignKey(Email, on_delete=models.PROTECT, related_name="email")
-    status_choices = [
-        ('Archive', 'Archive'),
-        ('Trash', 'Trash'),
-    ]
-    status = models.CharField(max_length=10, choices=status_choices)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="user")
+    email = models.ForeignKey(Email, on_delete=models.CASCADE, related_name="email")
+    is_read = models.BooleanField(default=False)
+    is_archived = models.BooleanField(default=False)
+    is_trashed = models.BooleanField(default=False)

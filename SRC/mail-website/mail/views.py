@@ -26,7 +26,6 @@ class CreateMail(LoginRequiredMixin, View):
                                          body=form.cleaned_data['body'],
                                          subject=form.cleaned_data['subject'],
                                          file=form.cleaned_data['file'],
-                                         signature=form.cleaned_data['signature'],
                                          )
             for people in form.cleaned_data['recipients']:
                 recipients = Users.objects.get_by_natural_key(username=people)
@@ -90,7 +89,7 @@ class CreateCategory(LoginRequiredMixin, View):
         form = self.form_class(request.POST)
         if form.is_valid():
             category = form.save(commit=False)
-            category.owner = request.user
+            category.owner = Users.objects.get(id=request.user.id)
             category.save()
             messages.success(request, 'category created successfully', 'success')
             return redirect('categories')
@@ -150,9 +149,9 @@ class ArchiveMail(LoginRequiredMixin, View):
 
     def get(self, request, pk):
         email_of_user = UpdateEmailOfUser.objects.get(user=request.user, email_id__in=pk)
-        email_of_user.status = 'Archive'
+        email_of_user.is_archived = True
         email_of_user.save()
-        archives = UpdateEmailOfUser.objects.filter(user=request.user, status='Archive')
+        archives = UpdateEmailOfUser.objects.filter(user=request.user, is_archived=True)
         return render(request, self.template_name, {'archives': archives})
 
 
@@ -161,20 +160,10 @@ class TrashMail(LoginRequiredMixin, View):
 
     def get(self, request, pk):
         email_of_user = UpdateEmailOfUser.objects.get(user=request.user, email_id__in=pk)
-        email_of_user.status = 'Trash'
+        email_of_user.is_trashed = True
         email_of_user.save()
-        trashes = UpdateEmailOfUser.objects.filter(user=request.user, status='Trash')
+        trashes = UpdateEmailOfUser.objects.filter(user=request.user, is_trashed=True)
         return render(request, self.template_name, {'trashes': trashes})
-
-
-class EmailDelete(LoginRequiredMixin, View):
-    template_name = 'mail/trash.html'
-
-    def get(self, request, pk):
-        email_obj = Email.objects.get(pk=pk)
-        email_obj.is_trashed = True
-        email_obj.save(update_fields=['is_trashed'])
-        return render(request, 'home.html', {})
 
 
 class CategoryDelete(LoginRequiredMixin, DeleteView):
@@ -188,7 +177,8 @@ class Reply(LoginRequiredMixin, View):
 
     def get(self, request, pk):
         form = self.form_class
-        return render(request, self.template_name, {'form': form})
+        email = Email.objects.get(pk=pk)
+        return render(request, self.template_name, {'form': form, 'email': email})
 
     def post(self, request, pk):
         form = self.form_class(request.POST, request.FILES)
@@ -196,7 +186,12 @@ class Reply(LoginRequiredMixin, View):
             reply_email = form.save(commit=False)
             sender = Users.objects.get(id=request.user.id)
             reply_email.sender = sender
-            reply_email.recipients.add(Email.objects.get(pk=pk).sender)
+            reply_email.reply_to = Email.objects.get(pk=pk)
+            receiver = Users.objects.get(id=Email.objects.get(pk=pk).sender_id)
+            recipients = Users.objects.get_by_natural_key(username=receiver)
+            reply_email.save()
+            reply_email.recipients.add(recipients)
+            reply_email.is_sent = True
             reply_email.save()
             messages.success(request, 'mail sent successfully', 'success')
             return redirect('home')
@@ -209,31 +204,53 @@ class Forward(LoginRequiredMixin, View):
 
     def get(self, request, pk):
         form = self.form_class
-        return render(request, self.template_name, {'form': form})
+        email = Email.objects.get(pk=pk)
+        return render(request, self.template_name, {'form': form, 'email': email})
 
     def post(self, request, pk):
         form = self.form_class(request.POST, request.FILES)
         if form.is_valid():
-            forward_email = form.save(commit=False)
+
+            email = Email.objects.get(pk=pk)
+            subject = form.cleaned_data['subject']
+            if subject:
+                subject += email.subject
+            else:
+                subject = email.subject
+            body = form.cleaned_data['body']
+            if body:
+                body += email.body
+            else:
+                body = email.body
+            file = form.cleaned_data['file']
+            if not file:
+                file = email.file
+            else:
+                file = form.cleaned_data['file']
+
             sender = Users.objects.get(id=request.user.id)
-            forward_email.sender = sender
+            forward = Email.objects.create(sender=sender,
+                                           subject=subject,
+                                           body=body,
+                                           file=file,
+                                           )
 
             for people in form.cleaned_data['recipients']:
                 recipients = Users.objects.get_by_natural_key(username=people)
-                forward_email.recipients.add(recipients)
+                forward.recipients.add(recipients)
 
             if form.cleaned_data['cc']:
                 for people in form.cleaned_data['cc']:
                     cc_receiver = Users.objects.get_by_natural_key(username=people)
-                    forward_email.cc.add(cc_receiver)
+                    forward.cc.add(cc_receiver)
 
             if form.cleaned_data['bcc']:
                 for people in form.cleaned_data['bcc']:
                     bcc_receiver = Users.objects.get_by_natural_key(username=people)
-                    forward_email.bcc.add(bcc_receiver)
+                    forward.bcc.add(bcc_receiver)
 
-            forward_email.save()
+            forward.is_sent = True
+            forward.save()
             messages.success(request, 'mail sent successfully', 'success')
             return redirect('home')
         return render(request, self.template_name, {'form': form})
-

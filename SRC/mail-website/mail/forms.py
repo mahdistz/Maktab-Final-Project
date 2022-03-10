@@ -41,7 +41,7 @@ class CommaSeparatedCharField(forms.Field):
 class CreateMailForm(forms.ModelForm):
     class Meta:
         model = Email
-        fields = ['subject', 'body', 'file', 'signature', 'reply_to']
+        fields = ['subject', 'body', 'file']
 
     recipients = CommaSeparatedCharField(max_length=200, required=True)
     cc = CommaSeparatedCharField(max_length=200, required=False)
