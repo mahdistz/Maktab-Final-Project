@@ -22,15 +22,19 @@ ALTER TABLE ONLY public.user_users_groups DROP CONSTRAINT user_users_groups_user
 ALTER TABLE ONLY public.user_users_groups DROP CONSTRAINT user_users_groups_group_id_5df0dc90_fk_auth_group_id;
 ALTER TABLE ONLY public.user_contact DROP CONSTRAINT user_contact_user_id_06fd0470_fk_user_users_id;
 ALTER TABLE ONLY public.user_contact DROP CONSTRAINT user_contact_email_id_d50e2efd_fk_user_users_id;
+ALTER TABLE ONLY public.mail_updateemailofuser DROP CONSTRAINT mail_updateemailofuser_user_id_d64fdc22_fk_user_users_id;
+ALTER TABLE ONLY public.mail_updateemailofuser DROP CONSTRAINT mail_updateemailofuser_email_id_5d13eec4_fk_mail_email_id;
 ALTER TABLE ONLY public.mail_email_recipients DROP CONSTRAINT mail_email_to_users_id_faf33a00_fk_user_users_id;
 ALTER TABLE ONLY public.mail_email_recipients DROP CONSTRAINT mail_email_to_email_id_5a3d6cd6_fk_mail_email_id;
 ALTER TABLE ONLY public.mail_email DROP CONSTRAINT mail_email_sender_id_102f874d_fk_user_users_id;
+ALTER TABLE ONLY public.mail_email DROP CONSTRAINT mail_email_reply_to_id_f55bc634_fk_mail_email_id;
 ALTER TABLE ONLY public.mail_email_category DROP CONSTRAINT mail_email_mail_email_id_0d02e404_fk_mail_email_id;
 ALTER TABLE ONLY public.mail_email_category DROP CONSTRAINT mail_email_mail_category_id_ccdeaea6_fk_mail_category_id;
 ALTER TABLE ONLY public.mail_email_cc DROP CONSTRAINT mail_email_cc_users_id_cc5c244a_fk_user_users_id;
 ALTER TABLE ONLY public.mail_email_cc DROP CONSTRAINT mail_email_cc_email_id_82bd2bb5_fk_mail_email_id;
 ALTER TABLE ONLY public.mail_email_bcc DROP CONSTRAINT mail_email_bcc_users_id_7f583820_fk_user_users_id;
 ALTER TABLE ONLY public.mail_email_bcc DROP CONSTRAINT mail_email_bcc_email_id_019fd01b_fk_mail_email_id;
+ALTER TABLE ONLY public.mail_category DROP CONSTRAINT mail_category_owner_id_9ce90553_fk_user_users_id;
 ALTER TABLE ONLY public.django_admin_log DROP CONSTRAINT django_admin_log_user_id_c564eba6_fk_user_users_id;
 ALTER TABLE ONLY public.django_admin_log DROP CONSTRAINT django_admin_log_content_type_id_c4bce8eb_fk_django_co;
 ALTER TABLE ONLY public.auth_permission DROP CONSTRAINT auth_permission_content_type_id_2f476e4b_fk_django_co;
@@ -45,15 +49,19 @@ DROP INDEX public.user_users_groups_group_id_5df0dc90;
 DROP INDEX public.user_users_email_3e8dac5f_like;
 DROP INDEX public.user_contact_user_id_06fd0470;
 DROP INDEX public.user_contact_email_id_d50e2efd;
+DROP INDEX public.mail_updateemailofuser_user_id_d64fdc22;
+DROP INDEX public.mail_updateemailofuser_email_id_5d13eec4;
 DROP INDEX public.mail_email_to_users_id_faf33a00;
 DROP INDEX public.mail_email_to_email_id_5a3d6cd6;
 DROP INDEX public.mail_email_sender_id_102f874d;
+DROP INDEX public.mail_email_reply_to_id_f55bc634;
 DROP INDEX public.mail_email_mail_email_id_0d02e404;
 DROP INDEX public.mail_email_mail_category_id_ccdeaea6;
 DROP INDEX public.mail_email_cc_users_id_cc5c244a;
 DROP INDEX public.mail_email_cc_email_id_82bd2bb5;
 DROP INDEX public.mail_email_bcc_users_id_7f583820;
 DROP INDEX public.mail_email_bcc_email_id_019fd01b;
+DROP INDEX public.mail_category_owner_id_9ce90553;
 DROP INDEX public.django_session_session_key_c0390e0f_like;
 DROP INDEX public.django_session_expire_date_a5c62663;
 DROP INDEX public.django_admin_log_user_id_c564eba6;
@@ -72,6 +80,7 @@ ALTER TABLE ONLY public.user_users_groups DROP CONSTRAINT user_users_groups_pkey
 ALTER TABLE ONLY public.user_users DROP CONSTRAINT user_users_email_key;
 ALTER TABLE ONLY public.user_contact DROP CONSTRAINT user_contact_user_id_email_7ec37915_uniq;
 ALTER TABLE ONLY public.user_contact DROP CONSTRAINT user_contact_pkey;
+ALTER TABLE ONLY public.mail_updateemailofuser DROP CONSTRAINT mail_updateemailofuser_pkey;
 ALTER TABLE ONLY public.mail_email_recipients DROP CONSTRAINT mail_email_to_pkey;
 ALTER TABLE ONLY public.mail_email_recipients DROP CONSTRAINT mail_email_to_email_id_users_id_b771b0bf_uniq;
 ALTER TABLE ONLY public.mail_email DROP CONSTRAINT mail_email_pkey;
@@ -82,6 +91,7 @@ ALTER TABLE ONLY public.mail_email_cc DROP CONSTRAINT mail_email_cc_email_id_use
 ALTER TABLE ONLY public.mail_email_bcc DROP CONSTRAINT mail_email_bcc_pkey;
 ALTER TABLE ONLY public.mail_email_bcc DROP CONSTRAINT mail_email_bcc_email_id_users_id_e32c3f8f_uniq;
 ALTER TABLE ONLY public.mail_category DROP CONSTRAINT mail_category_pkey;
+ALTER TABLE ONLY public.mail_category DROP CONSTRAINT mail_category_name_owner_id_1dbd5f2f_uniq;
 ALTER TABLE ONLY public.django_session DROP CONSTRAINT django_session_pkey;
 ALTER TABLE ONLY public.django_migrations DROP CONSTRAINT django_migrations_pkey;
 ALTER TABLE ONLY public.django_content_type DROP CONSTRAINT django_content_type_pkey;
@@ -97,6 +107,7 @@ ALTER TABLE public.user_users_user_permissions ALTER COLUMN id DROP DEFAULT;
 ALTER TABLE public.user_users_groups ALTER COLUMN id DROP DEFAULT;
 ALTER TABLE public.user_users ALTER COLUMN id DROP DEFAULT;
 ALTER TABLE public.user_contact ALTER COLUMN id DROP DEFAULT;
+ALTER TABLE public.mail_updateemailofuser ALTER COLUMN id DROP DEFAULT;
 ALTER TABLE public.mail_email_recipients ALTER COLUMN id DROP DEFAULT;
 ALTER TABLE public.mail_email_cc ALTER COLUMN id DROP DEFAULT;
 ALTER TABLE public.mail_email_category ALTER COLUMN id DROP DEFAULT;
@@ -117,6 +128,8 @@ DROP TABLE public.user_users_groups;
 DROP TABLE public.user_users;
 DROP SEQUENCE public.user_contact_id_seq;
 DROP TABLE public.user_contact;
+DROP SEQUENCE public.mail_updateemailofuser_id_seq;
+DROP TABLE public.mail_updateemailofuser;
 DROP SEQUENCE public.mail_email_to_id_seq;
 DROP TABLE public.mail_email_recipients;
 DROP SEQUENCE public.mail_email_mail_id_seq;
@@ -380,7 +393,8 @@ ALTER TABLE public.django_session OWNER TO postgres;
 
 CREATE TABLE public.mail_category (
     id bigint NOT NULL,
-    name character varying(100) NOT NULL
+    name character varying(100) NOT NULL,
+    owner_id bigint NOT NULL
 );
 
 
@@ -418,12 +432,9 @@ CREATE TABLE public.mail_email (
     created_time timestamp with time zone NOT NULL,
     sender_id bigint NOT NULL,
     file character varying(100),
-    is_archived boolean NOT NULL,
-    is_read boolean NOT NULL,
     is_sent boolean NOT NULL,
-    is_trashed boolean NOT NULL,
     signature character varying(100),
-    signature_image character varying(100)
+    reply_to_id bigint
 );
 
 
@@ -587,6 +598,43 @@ ALTER SEQUENCE public.mail_email_to_id_seq OWNED BY public.mail_email_recipients
 
 
 --
+-- Name: mail_updateemailofuser; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.mail_updateemailofuser (
+    id bigint NOT NULL,
+    email_id bigint NOT NULL,
+    user_id bigint NOT NULL,
+    is_archived boolean NOT NULL,
+    is_read boolean NOT NULL,
+    is_trashed boolean NOT NULL
+);
+
+
+ALTER TABLE public.mail_updateemailofuser OWNER TO postgres;
+
+--
+-- Name: mail_updateemailofuser_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.mail_updateemailofuser_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.mail_updateemailofuser_id_seq OWNER TO postgres;
+
+--
+-- Name: mail_updateemailofuser_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.mail_updateemailofuser_id_seq OWNED BY public.mail_updateemailofuser.id;
+
+
+--
 -- Name: user_contact; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -596,7 +644,7 @@ CREATE TABLE public.user_contact (
     email_id bigint,
     name character varying(100) NOT NULL,
     birth_date1 date,
-    other_email character varying(500) NOT NULL,
+    other_email character varying(254) NOT NULL,
     phone_number1 character varying(11)
 );
 
@@ -824,6 +872,13 @@ ALTER TABLE ONLY public.mail_email_recipients ALTER COLUMN id SET DEFAULT nextva
 
 
 --
+-- Name: mail_updateemailofuser id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.mail_updateemailofuser ALTER COLUMN id SET DEFAULT nextval('public.mail_updateemailofuser_id_seq'::regclass);
+
+
+--
 -- Name: user_contact id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -912,6 +967,22 @@ COPY public.auth_permission (id, name, content_type_id, codename) FROM stdin;
 38	Can change code register	10	change_coderegister
 39	Can delete code register	10	delete_coderegister
 40	Can view code register	10	view_coderegister
+41	Can add Mailbox	11	add_mailbox
+42	Can change Mailbox	11	change_mailbox
+43	Can delete Mailbox	11	delete_mailbox
+44	Can view Mailbox	11	view_mailbox
+45	Can add E-mail message	12	add_message
+46	Can change E-mail message	12	change_message
+47	Can delete E-mail message	12	delete_message
+48	Can view E-mail message	12	view_message
+49	Can add Message attachment	13	add_messageattachment
+50	Can change Message attachment	13	change_messageattachment
+51	Can delete Message attachment	13	delete_messageattachment
+52	Can view Message attachment	13	view_messageattachment
+53	Can add update email of user	14	add_updateemailofuser
+54	Can change update email of user	14	change_updateemailofuser
+55	Can delete update email of user	14	delete_updateemailofuser
+56	Can view update email of user	14	view_updateemailofuser
 \.
 
 
@@ -923,6 +994,9 @@ COPY public.django_admin_log (id, action_time, object_id, object_repr, action_fl
 1	2022-02-28 23:14:36.622675+03:30	1	Category object (1)	1	[{"added": {}}]	7	37
 2	2022-02-28 23:15:08.05415+03:30	1	From: Admin, Sub: it's good	1	[{"added": {}}]	8	37
 3	2022-03-01 14:41:59.99541+03:30	37	Admin1	2	[{"changed": {"fields": ["Email address"]}}]	6	37
+4	2022-03-07 01:42:29.775418+03:30	26	From: Admin@mail.com, Sub: hi mahdis123	1	[{"added": {}}]	8	37
+5	2022-03-07 01:44:44.713713+03:30	27	From: mahdistz1234@mail.com, Sub: None	1	[{"added": {}}]	8	37
+6	2022-03-07 19:44:47.385679+03:30	43	From: Admin@mail.com, Sub: hi test email	1	[{"added": {}}]	8	37
 \.
 
 
@@ -941,6 +1015,10 @@ COPY public.django_content_type (id, app_label, model) FROM stdin;
 8	mail	email
 9	user	contact
 10	user	coderegister
+11	django_mailbox	mailbox
+12	django_mailbox	message
+13	django_mailbox	messageattachment
+14	mail	updateemailofuser
 \.
 
 
@@ -995,6 +1073,24 @@ COPY public.django_migrations (id, app, name, applied) FROM stdin;
 44	user	0011_auto_20220303_1821	2022-03-03 18:25:55.501918+03:30
 45	user	0012_alter_contact_other_email	2022-03-03 19:37:52.261562+03:30
 46	user	0013_alter_contact_other_email	2022-03-03 22:40:15.113355+03:30
+47	django_mailbox	0001_initial	2022-03-06 22:14:15.398748+03:30
+48	django_mailbox	0002_add_eml_to_message	2022-03-06 22:14:15.409059+03:30
+49	django_mailbox	0003_auto_20150409_0316	2022-03-06 22:14:15.417032+03:30
+50	django_mailbox	0004_bytestring_to_unicode	2022-03-06 22:14:15.428338+03:30
+51	django_mailbox	0005_auto_20160523_2240	2022-03-06 22:14:15.438339+03:30
+52	django_mailbox	0006_mailbox_last_polling	2022-03-06 22:14:15.445174+03:30
+53	django_mailbox	0007_auto_20180421_0026	2022-03-06 22:14:15.460966+03:30
+54	django_mailbox	0008_auto_20190219_1553	2022-03-06 22:14:15.473189+03:30
+55	mail	0009_email_reply_to	2022-03-06 22:40:18.669342+03:30
+56	mail	0010_auto_20220307_0058	2022-03-07 00:59:09.776264+03:30
+57	mail	0011_remove_email_signature_image	2022-03-07 17:01:09.745236+03:30
+58	mail	0012_auto_20220308_1943	2022-03-08 19:46:11.777814+03:30
+59	mail	0013_alter_category_owner	2022-03-08 19:46:13.58181+03:30
+60	mail	0014_alter_category_owner	2022-03-08 19:46:13.61581+03:30
+61	user	0014_alter_contact_other_email	2022-03-08 22:47:43.181409+03:30
+62	user	0015_alter_contact_other_email	2022-03-08 22:51:01.440012+03:30
+63	mail	0015_updateemailofuser	2022-03-09 23:04:28.876873+03:30
+64	mail	0016_auto_20220310_1632	2022-03-10 16:32:35.840523+03:30
 \.
 
 
@@ -1006,7 +1102,7 @@ COPY public.django_session (session_key, session_data, expire_date) FROM stdin;
 7rad0jby2tvesmedcw373flavxmd8tc9	e30:1nMBSg:SLlvkC0A2WJYiaKVhg9znA2K54pOipy272GvNOpv9N0	2022-03-07 19:52:54.037111+03:30
 qsamwluw9uwvzkwn0ekrnhdihn4jxgjg	.eJxVjMsOgjAQRf9l1qZpQx8MS_d-QzMwo1RNaygkGOO_Kwkbtveccz8Qq9SaSo6yvtL0hk6fINIyj3GpMsXE0EET4DD2NDwkb4TvlG9FDSXPU-rVpqidVnUpLM_z7h4ORqrjv6Yg2pCzrSa0bUAThF1DxNygQ0QOJGSMQdHtwOwdOh_6q_PWeGvRw_cHLqg-qQ:1nP2q7:XaVLMKx52zDulKNg515BvQHNpN0ClhlrjgwwVTziVmQ	2022-03-31 18:16:55.125455+04:30
 7rutz64351m3pljdnghg0rdnbavshb19	.eJxVjMsOgjAQRf9l1qZpQx8MS_d-QzMwo1RNaygkGOO_Kwkbtveccz8Qq9SaSo6yvtL0hk6fINIyj3GpMsXE0EET4DD2NDwkb4TvlG9FDSXPU-rVpqidVnUpLM_z7h4ORqrjv6Yg2pCzrSa0bUAThF1DxNygQ0QOJGSMQdHtwOwdOh_6q_PWeGvRw_cHLqg-qQ:1nP7Mk:6o4dlJ1X8TPN4SJA4yHcoAGYVrtouN2jEBHRMDgDLys	2022-03-31 23:06:54.824492+04:30
-dmkf60a2ryxe0rc16qwti8yg3d01t5ya	.eJxVjDsOwjAQBe_iGlm2_F1Kes5grb0LDiBbipMq4u4QKQW0b2beJhKuS03r4DlNJM7CBHH6HTOWJ7ed0APbvcvS2zJPWe6KPOiQ1078uhzu30HFUb81BlYanY0KwcYAOjA5g0hkwAEABWTUWgOrWIi8A-dDvjlvtbcWvHh_AP6AN2w:1nPONe:Y6793ZWI9KUs6n1N-V97c88QIwmPmPIO3hIApAvJ-gE	2022-04-01 17:16:58.797181+04:30
+8j3lacxrshl2mjb1na4w7dpa2iwinmwe	.eJxVjMsOwiAQRf-FtSHlURlcuvcbyAAzUjWQlHZl_HdD0oVu7znnvkXAfSth77SGJYuLME6cfseI6Ul1kPzAem8ytbqtS5RDkQft8tYyva6H-3dQsJdRMxie0WhSLlnryJNJGmECVtqwZdCefFaTcrP3EXQGi-DOmpkcshWfLwlQN_8:1nRf1f:ShBhN7cFGSsnY1S4o0xxSsegadBbcy_CkS4MZjxUyJ4	2022-04-07 23:27:39.093735+04:30
 wzev6rzyprwlamcahe4ohate9mc840iz	.eJxVjMsOwiAQRf-FtSHMQBlw6d5vIDylaiAp7cr479qkC93ec859Mee3tbpt5MXNiZ2ZJHb6HYOPj9x2ku6-3TqPva3LHPiu8IMOfu0pPy-H-3dQ_ajfehKIRaAAAIwglcKiTIlamiSBIJpSMihtphjIoshFWxKAWtjkyShi7w_MmTaG:1nOPFj:PCzdwf15B7_H-Po4yuz48XUeT6AskZbM9ofukwdfVD4	2022-03-13 23:00:43.136089+03:30
 \.
 
@@ -1015,9 +1111,9 @@ wzev6rzyprwlamcahe4ohate9mc840iz	.eJxVjMsOwiAQRf-FtSHMQBlw6d5vIDylaiAp7cr479qkC9
 -- Data for Name: mail_category; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.mail_category (id, name) FROM stdin;
-1	maktab
-2	family
+COPY public.mail_category (id, name, owner_id) FROM stdin;
+5	uni	37
+6	other	37
 \.
 
 
@@ -1025,14 +1121,23 @@ COPY public.mail_category (id, name) FROM stdin;
 -- Data for Name: mail_email; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.mail_email (id, subject, body, created_time, sender_id, file, is_archived, is_read, is_sent, is_trashed, signature, signature_image) FROM stdin;
-2	\N		2022-03-03 00:50:58.223123+03:30	37		f	f	f	f	\N	
-3	\N		2022-03-03 00:55:47.592564+03:30	37		f	f	f	f	\N	
-5	\N		2022-03-03 00:57:08.907233+03:30	37		f	f	f	f	\N	
-7	\N		2022-03-03 01:11:33.011003+03:30	37		f	f	f	f	\N	
-9	\N		2022-03-03 01:48:48.975239+03:30	37		f	f	f	f	\N	
-11	2222222		2022-03-03 22:29:29.167445+03:30	37		f	f	f	f	\N	
-13	333		2022-03-03 22:30:24.897134+03:30	37		f	f	f	f	\N	
+COPY public.mail_email (id, subject, body, created_time, sender_id, file, is_sent, signature, reply_to_id) FROM stdin;
+50	hi tery	123	2022-03-10 21:22:44.195544+03:30	37		f	\N	45
+45	hi	سلاااام عزیزم . حالت چطوره؟	2022-03-08 19:58:40.995663+03:30	37	Admin@mail.com/photo_2022-03-05_23-43-03_muXLyIz.jpg	t	\N	\N
+46	go to heaven	hi baby\r\nhow are you?	2022-03-09 01:37:45.28085+03:30	37		t	\N	\N
+51	\N		2022-03-10 22:31:50.193846+03:30	37		f	\N	\N
+52	\N		2022-03-10 22:32:15.626251+03:30	37		f	\N	\N
+53	\N		2022-03-10 22:35:30.092471+03:30	37		f	\N	\N
+54	\N		2022-03-10 22:35:47.258997+03:30	37		f	\N	\N
+55	\N		2022-03-10 22:37:36.061917+03:30	37		f	\N	\N
+56	\N		2022-03-10 22:38:14.542013+03:30	37		f	\N	\N
+57	\N		2022-03-10 22:39:05.799735+03:30	37		f	\N	\N
+58	\N		2022-03-10 22:40:17.396555+03:30	37		f	\N	\N
+62	\N		2022-03-10 22:52:31.180633+03:30	37		f	\N	\N
+63	8909hi tery	jjjjjjj123	2022-03-10 22:56:22.80254+03:30	37		f	\N	\N
+64	8909hi tery	jjjjjjj123	2022-03-10 22:56:38.772859+03:30	37		f	\N	\N
+65	\N		2022-03-10 22:57:31.079803+03:30	37		f	\N	\N
+66	hi tery	123	2022-03-10 22:59:13.590782+03:30	37		f	\N	\N
 \.
 
 
@@ -1041,8 +1146,6 @@ COPY public.mail_email (id, subject, body, created_time, sender_id, file, is_arc
 --
 
 COPY public.mail_email_bcc (id, email_id, users_id) FROM stdin;
-2	11	34
-3	13	34
 \.
 
 
@@ -1051,6 +1154,9 @@ COPY public.mail_email_bcc (id, email_id, users_id) FROM stdin;
 --
 
 COPY public.mail_email_category (id, email_id, category_id) FROM stdin;
+5	45	5
+9	46	6
+11	50	6
 \.
 
 
@@ -1059,7 +1165,7 @@ COPY public.mail_email_category (id, email_id, category_id) FROM stdin;
 --
 
 COPY public.mail_email_cc (id, email_id, users_id) FROM stdin;
-2	3	35
+6	45	37
 \.
 
 
@@ -1068,12 +1174,26 @@ COPY public.mail_email_cc (id, email_id, users_id) FROM stdin;
 --
 
 COPY public.mail_email_recipients (id, email_id, users_id) FROM stdin;
-2	3	34
-3	5	29
-4	7	29
-5	9	34
-6	11	34
-7	13	34
+46	45	37
+47	46	36
+48	46	34
+49	50	37
+50	62	36
+51	62	34
+52	64	36
+53	64	34
+54	65	36
+55	65	34
+56	66	34
+57	66	36
+\.
+
+
+--
+-- Data for Name: mail_updateemailofuser; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.mail_updateemailofuser (id, email_id, user_id, is_archived, is_read, is_trashed) FROM stdin;
 \.
 
 
@@ -1082,8 +1202,8 @@ COPY public.mail_email_recipients (id, email_id, users_id) FROM stdin;
 --
 
 COPY public.user_contact (id, user_id, email_id, name, birth_date1, other_email, phone_number1) FROM stdin;
-14	37	35	nazi	\N	default@mail.com	\N
-12	37	34	مهدیس	\N	test2@gmail.com	09123456789
+20	37	37	me	\N	default@mail.com	\N
+19	37	29	mahdis	\N	default@mail.com	\N
 \.
 
 
@@ -1097,7 +1217,7 @@ COPY public.user_users (id, password, last_login, is_superuser, first_name, last
 27	pbkdf2_sha256$260000$9YH49dSqeVEJ21oJg668wu$SaUGYlMCvwrEddJUcOWMmAMzdS6nxpddIE787mnUhbk=	2022-02-24 19:41:00.790255+03:30	t			t	2022-02-24 01:58:12.261862+03:30	Admin			\N	\N	\N	t	
 29	pbkdf2_sha256$260000$kt2VTGadZyEdBgLBWcfsrw$vZ+dnJOIzW53cX3phC9DzsNzK4K7GyCQUz0ayUUNnpI=	2022-02-24 20:28:09.161442+03:30	f			f	2022-02-24 20:26:43.623498+03:30	mahdistz1234@mail.com	09033774653	mahdis.taghi1376@gmail.com	\N	\N	\N	t	Email
 36	pbkdf2_sha256$260000$91oIBG3wLFFh7D05DNUBT9$nnvYzVwetShXv1KsvmUogvkH3UJOrxH5Qa1lQKtW+qo=	2022-02-25 10:24:23.892791+03:30	f			f	2022-02-25 10:21:52.459483+03:30	hello123@mail.com	09392841708	test888@gmail.com	\N	\N	\N	t	Phone
-37	pbkdf2_sha256$260000$NFENSbXMOMvPLvXOuDSFGn$m+A7P1ljkaD58tcXIW6WWeommp3f0hZ+eZHN01wDlTU=	2022-03-02 16:16:58.784664+03:30	t			t	2022-02-27 22:59:34.889304+03:30	Admin@mail.com	09123456789	mahdis.taghizadeh1376@gmail.com	\N	\N	\N	t	
+37	pbkdf2_sha256$260000$Sn4VdGOaSXgnYHFRELDE6q$rBDQpSVeny8UIsNhXt/czcPEgRh4XzrNNsSrcQXgzrI=	2022-03-08 22:27:39.087888+03:30	t			t	2022-02-27 22:59:34.889304+03:30	Admin@mail.com	09123456789	mahdis.taghizadeh1376@gmail.com	\N	\N	\N	t	
 \.
 
 
@@ -1135,77 +1255,84 @@ SELECT pg_catalog.setval('public.auth_group_permissions_id_seq', 1, false);
 -- Name: auth_permission_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.auth_permission_id_seq', 40, true);
+SELECT pg_catalog.setval('public.auth_permission_id_seq', 56, true);
 
 
 --
 -- Name: django_admin_log_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.django_admin_log_id_seq', 3, true);
+SELECT pg_catalog.setval('public.django_admin_log_id_seq', 6, true);
 
 
 --
 -- Name: django_content_type_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.django_content_type_id_seq', 10, true);
+SELECT pg_catalog.setval('public.django_content_type_id_seq', 14, true);
 
 
 --
 -- Name: django_migrations_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.django_migrations_id_seq', 46, true);
+SELECT pg_catalog.setval('public.django_migrations_id_seq', 64, true);
 
 
 --
 -- Name: mail_category_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.mail_category_id_seq', 2, true);
+SELECT pg_catalog.setval('public.mail_category_id_seq', 6, true);
 
 
 --
 -- Name: mail_email_bcc_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.mail_email_bcc_id_seq', 3, true);
+SELECT pg_catalog.setval('public.mail_email_bcc_id_seq', 4, true);
 
 
 --
 -- Name: mail_email_cc_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.mail_email_cc_id_seq', 2, true);
+SELECT pg_catalog.setval('public.mail_email_cc_id_seq', 6, true);
 
 
 --
 -- Name: mail_email_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.mail_email_id_seq', 13, true);
+SELECT pg_catalog.setval('public.mail_email_id_seq', 66, true);
 
 
 --
 -- Name: mail_email_mail_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.mail_email_mail_id_seq', 1, true);
+SELECT pg_catalog.setval('public.mail_email_mail_id_seq', 11, true);
 
 
 --
 -- Name: mail_email_to_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.mail_email_to_id_seq', 7, true);
+SELECT pg_catalog.setval('public.mail_email_to_id_seq', 57, true);
+
+
+--
+-- Name: mail_updateemailofuser_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.mail_updateemailofuser_id_seq', 1, false);
 
 
 --
 -- Name: user_contact_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.user_contact_id_seq', 14, true);
+SELECT pg_catalog.setval('public.user_contact_id_seq', 20, true);
 
 
 --
@@ -1318,6 +1445,14 @@ ALTER TABLE ONLY public.django_session
 
 
 --
+-- Name: mail_category mail_category_name_owner_id_1dbd5f2f_uniq; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.mail_category
+    ADD CONSTRAINT mail_category_name_owner_id_1dbd5f2f_uniq UNIQUE (name, owner_id);
+
+
+--
 -- Name: mail_category mail_category_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1395,6 +1530,14 @@ ALTER TABLE ONLY public.mail_email_recipients
 
 ALTER TABLE ONLY public.mail_email_recipients
     ADD CONSTRAINT mail_email_to_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: mail_updateemailofuser mail_updateemailofuser_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.mail_updateemailofuser
+    ADD CONSTRAINT mail_updateemailofuser_pkey PRIMARY KEY (id);
 
 
 --
@@ -1534,6 +1677,13 @@ CREATE INDEX django_session_session_key_c0390e0f_like ON public.django_session U
 
 
 --
+-- Name: mail_category_owner_id_9ce90553; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX mail_category_owner_id_9ce90553 ON public.mail_category USING btree (owner_id);
+
+
+--
 -- Name: mail_email_bcc_email_id_019fd01b; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -1576,6 +1726,13 @@ CREATE INDEX mail_email_mail_email_id_0d02e404 ON public.mail_email_category USI
 
 
 --
+-- Name: mail_email_reply_to_id_f55bc634; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX mail_email_reply_to_id_f55bc634 ON public.mail_email USING btree (reply_to_id);
+
+
+--
 -- Name: mail_email_sender_id_102f874d; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -1594,6 +1751,20 @@ CREATE INDEX mail_email_to_email_id_5a3d6cd6 ON public.mail_email_recipients USI
 --
 
 CREATE INDEX mail_email_to_users_id_faf33a00 ON public.mail_email_recipients USING btree (users_id);
+
+
+--
+-- Name: mail_updateemailofuser_email_id_5d13eec4; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX mail_updateemailofuser_email_id_5d13eec4 ON public.mail_updateemailofuser USING btree (email_id);
+
+
+--
+-- Name: mail_updateemailofuser_user_id_d64fdc22; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX mail_updateemailofuser_user_id_d64fdc22 ON public.mail_updateemailofuser USING btree (user_id);
 
 
 --
@@ -1700,6 +1871,14 @@ ALTER TABLE ONLY public.django_admin_log
 
 
 --
+-- Name: mail_category mail_category_owner_id_9ce90553_fk_user_users_id; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.mail_category
+    ADD CONSTRAINT mail_category_owner_id_9ce90553_fk_user_users_id FOREIGN KEY (owner_id) REFERENCES public.user_users(id) DEFERRABLE INITIALLY DEFERRED;
+
+
+--
 -- Name: mail_email_bcc mail_email_bcc_email_id_019fd01b_fk_mail_email_id; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1748,6 +1927,14 @@ ALTER TABLE ONLY public.mail_email_category
 
 
 --
+-- Name: mail_email mail_email_reply_to_id_f55bc634_fk_mail_email_id; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.mail_email
+    ADD CONSTRAINT mail_email_reply_to_id_f55bc634_fk_mail_email_id FOREIGN KEY (reply_to_id) REFERENCES public.mail_email(id) DEFERRABLE INITIALLY DEFERRED;
+
+
+--
 -- Name: mail_email mail_email_sender_id_102f874d_fk_user_users_id; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1769,6 +1956,22 @@ ALTER TABLE ONLY public.mail_email_recipients
 
 ALTER TABLE ONLY public.mail_email_recipients
     ADD CONSTRAINT mail_email_to_users_id_faf33a00_fk_user_users_id FOREIGN KEY (users_id) REFERENCES public.user_users(id) DEFERRABLE INITIALLY DEFERRED;
+
+
+--
+-- Name: mail_updateemailofuser mail_updateemailofuser_email_id_5d13eec4_fk_mail_email_id; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.mail_updateemailofuser
+    ADD CONSTRAINT mail_updateemailofuser_email_id_5d13eec4_fk_mail_email_id FOREIGN KEY (email_id) REFERENCES public.mail_email(id) DEFERRABLE INITIALLY DEFERRED;
+
+
+--
+-- Name: mail_updateemailofuser mail_updateemailofuser_user_id_d64fdc22_fk_user_users_id; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.mail_updateemailofuser
+    ADD CONSTRAINT mail_updateemailofuser_user_id_d64fdc22_fk_user_users_id FOREIGN KEY (user_id) REFERENCES public.user_users(id) DEFERRABLE INITIALLY DEFERRED;
 
 
 --
