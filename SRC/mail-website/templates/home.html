@@ -1,21 +1,20 @@
 {% load static %}
+{% load crispy_forms_tags %}
 <!doctype html>
 <html lang="en">
   <head>
+    <meta charset="utf-8">
     <meta name="viewport"
       content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
     <meta http-equiv="x-ua-compatible" content="ie=edge" />
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{% static 'assets/css/bootstrap.min.css' %}">
     <link href="{% static 'bootstrap/sidebar-bootstrap.css' %}" rel="stylesheet">
     <link href="{% static 'fonts.css' %}" rel="stylesheet">
     <link href="{% static 'layout.css' %}" rel="stylesheet">
-     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
     {% block custom-css %}
 
@@ -52,13 +51,13 @@
         <a href="" data-toggle="modal" data-target="#Modal">Create New Mail</a>
     </li>
     <li>
-        <a href="{% url 'home' %}">Inbox</a>
+        <a href="{% url 'inbox' %}">Inbox</a>
     </li>
     <li>
-        <a href="{% url 'emails' %}">Sent</a>
+        <a href="{% url 'sent' %}">Sent</a>
     </li>
     <li>
-        <a href="{% url 'home' %}">Draft</a>
+        <a href="{% url 'draft' %}">Draft</a>
     </li>
     <li>
         <a href="{% url 'home' %}">Archive</a>
@@ -118,10 +117,10 @@
                         </ul>
                       </li>
                       <li class="nav-item active">
-                        <a class="nav-link" href="#">Page</a>
+                        <a class="nav-link" href="{% url 'home' %}">Home</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#">Page</a>
+                        <a class="nav-link" href="" data-toggle="modal" data-target="#Modal">New Mail</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="#">Page</a>
@@ -152,15 +151,13 @@
                     </button>
                   </div>
                   <div class="modal-body">
-                  <form action="{% url 'create_mail' %}" method="post">
+                  <form action="{% url 'create_mail' %}" method="post" enctype="multipart/form-data">
                       {% csrf_token %}
-                      <table>
-                          {{ form.as_table }}
-                      </table>
+                      {{form|crispy}}
                   </div>
                   <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                    <input type="submit" class="btn btn-primary" value="Save" >
+                    <input type="submit" class="btn btn-primary" name="cancel" value="Cancel" >
+                      <input type="submit" class="btn btn-primary" name="save" value="Save" >
                   </div>
                     </form>
                 </div>
@@ -172,6 +169,7 @@
 </div>
 
 {% endblock %}
+
   {% block script %}
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
         integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
@@ -189,6 +187,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
     document.getElementById("sidebarCollapse").onclick = function () {
         document.getElementById("sidebar").classList.toggle("active");
         document.getElementById("content").classList.toggle("active");
+        document.getElementById("Modal").classList.toggle("active");
         }
     });
 

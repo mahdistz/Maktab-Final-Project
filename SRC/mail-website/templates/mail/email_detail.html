@@ -2,31 +2,36 @@
 {% block content %}
     <div style="width: 500px;height: auto" >
     <p>Sender:{{ object.sender }}</p>
-    <p>to:{{ object.recipients.all.get }}</p>
-    <p>cc:{{ object.cc.all.get }}</p>
+    <p>to:{% for recipients in object.recipients.all %}
+            {{ recipients }},
+        {% endfor%}</p>
+    <p>cc:{% for cc in object.cc.all %}
+            {{ cc }},
+        {% endfor%}</p>
+    <p>bcc:{% for bcc in object.bcc.all %}
+            {{ bcc }},
+        {% endfor%}</p>
     <p>subject:{{ object.subject }}</p>
     <p>body:</p>
     <p>{{ object.body }}</p>
+    <p>{% if object.file %}
+        file: <a href="{{ object.file.url }}" >Download file</a></p>
+        {% endif %}
     <p>Date Time: {{ object.created_time }}</p>
-    <form action="{% url 'email_delete' email.id %}" method="post">
-        {% csrf_token %}
-        <input class="btn btn-primary" type="submit" value="Delete">
-    </form>
-    <form action="{% url 'email_delete' email.id %}" method="post">
-        {% csrf_token %}
-        <input class="btn btn-primary" type="submit" value="Archive">
-    </form>
-    <form action="{% url 'email_delete' email.id %}" method="post">
-        {% csrf_token %}
-        <input class="btn btn-primary" type="submit" value="Forward">
-    </form>
-    <form action="{% url 'email_delete' email.id %}" method="post">
-        {% csrf_token %}
-        <input class="btn btn-primary" type="submit" value="Reply">
-    </form>
-    <form action="{% url 'email_delete' email.id %}" method="post">
-        {% csrf_token %}
-        <input class="btn btn-primary" type="submit" value="Add label">
-    </form>
+    <p>Label:{% for category in object.category.all %}
+            {{ category }},
+        {% endfor%}</p>
+
+<a href="{% url 'forward' object.id %}"><input class="btn btn-primary" type="submit" value="Forward"></a>
+
+<a href="{% url 'reply' object.id %}"><input class="btn btn-primary" type="submit" value="Reply"></a>
+
+<a href="{% url 'add_email_to_category' object.id %}"><input class="btn btn-primary" type="submit"
+                                                             value="Add to Label"></a>
+
+<a href="{% url 'archive' object.id %}"><input class="btn btn-primary" type="submit" value="Archive"></a>
+
+<a href="{% url 'trash' object.id %}"><input class="btn btn-primary" type="submit" value="Delete"></a>
+
     </div>
 {% endblock %}

@@ -4,7 +4,7 @@
     <a href="{% url 'create_contact' %}" >Create Contact</a>
     <h3>you have {{ object_list|length }} contact{{ object_list|length|pluralize }}</h3>
     {% for contact in object_list %}
-        <li><a href="/mail/contact_detail/{{ contact.id }}"> name: {{ contact.name }},
+        <li><a href="/contact_detail/{{ contact.id }}"> name: {{ contact.name }},
             email : {{ contact.email.username }}</a> </li>
     {% endfor %}
     </center>
