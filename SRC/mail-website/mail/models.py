@@ -53,6 +53,10 @@ class Email(models.Model):
                             )
 
     is_sent = models.BooleanField(default=False)
+    is_read = models.BooleanField(default=False)
+    is_archived = models.BooleanField(default=False)
+    is_trashed = models.BooleanField(default=False)
+
     signature = models.CharField(max_length=100, null=True, blank=True)
     reply_to = models.ForeignKey('self', null=True, blank=True, related_name='replies', on_delete=models.CASCADE)
 
@@ -61,11 +65,3 @@ class Email(models.Model):
 
     def __str__(self):
         return f"From: {self.sender}, Sub: {self.subject}"
-
-
-class UpdateEmailOfUser(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="user")
-    email = models.ForeignKey(Email, on_delete=models.CASCADE, related_name="email")
-    is_read = models.BooleanField(default=False)
-    is_archived = models.BooleanField(default=False)
-    is_trashed = models.BooleanField(default=False)

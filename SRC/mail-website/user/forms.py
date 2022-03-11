@@ -108,7 +108,7 @@ class CreateContactForm(forms.ModelForm):
         exclude = ['user']
 
         widgets = {
-            'birth_date1': DateInput(),
+            'birth_date': DateInput(),
         }
 
 
@@ -118,5 +118,9 @@ class ContactUpdateForm(forms.ModelForm):
         exclude = ['user']
 
         widgets = {
-            'birth_date1': DateInput(),
+            'birth_date': DateInput(),
         }
+
+
+class SearchContactForm(forms.Form):
+    search = forms.CharField()

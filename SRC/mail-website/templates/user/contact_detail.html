@@ -1,17 +1,15 @@
 {% extends 'home.html' %}
 {% block content %}
+
 <p>Name : {{ object.name }}</p>
 <p>Email : {{ object.email.username }}</p>
-<p>birth_date : {{ object.birth_date1 }}</p>
-<p>Phone Number : {{ object.phone_number1 }}</p>
+<p>birth_date : {{ object.birth_date }}</p>
+<p>Phone Number : {{ object.phone_number }}</p>
 <p>Other Emails : {{ object.other_email }}</p>
-    <form action="{% url 'contact_delete' contact.id %}" method="post">
-        {% csrf_token %}
-        <input class="btn btn-primary" type="submit" value="Delete">
-    </form>
-    <form action="{% url 'contact_update' contact.id %}" method="post">
-        {% csrf_token %}
-        <input class="btn btn-primary" type="hidden" value="default@mail.com">
-        <input class="btn btn-primary" type="submit" value="Edit">
-    </form>
+
+
+<a href="{% url 'contact_delete' pk=object.id %}"><input class="btn btn-primary" type="submit" value="Delete"></a>
+
+<a href="{% url 'contact_update' pk=object.id %}"><input class="btn btn-primary" type="submit" value="Edit"></a>
+
 {% endblock %}

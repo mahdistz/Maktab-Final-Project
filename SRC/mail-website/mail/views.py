@@ -1,7 +1,8 @@
 from django.shortcuts import render, redirect, HttpResponse, HttpResponseRedirect, Http404
 from django.views import View
 from django.contrib import messages
-from .models import Email, Category, UpdateEmailOfUser
+from user.forms import SearchContactForm
+from .models import Email, Category
 from user.models import Users
 from mail.forms import CreateMailForm, CreateCategoryForm, AddEmailToCategoryForm, ForwardForm, ReplyForm
 from django.urls import reverse_lazy
@@ -68,6 +69,17 @@ class CategoryDetail(LoginRequiredMixin, DetailView):
     model = Category
 
 
+class CategoriesOfEmail(LoginRequiredMixin, View):
+    template_name = 'mail/categories.html'
+
+    def get(self, request):
+        user_id = request.user.id
+        user = Users.objects.get(id=user_id)
+        owner = Category.objects.filter(owner=user)
+        categories = owner.categories.all()
+        return render(request, self.template_name, {'categories': categories})
+
+
 class AllEmailOfCategory(LoginRequiredMixin, View):
     template_name = 'mail/all_email_of_category.html'
 
@@ -128,12 +140,9 @@ class InboxMail(LoginRequiredMixin, View):
     template_name = 'mail/inbox.html'
 
     def get(self, request):
-        recipients = Email.objects.filter(recipients=request.user.id)
-        cc = Email.objects.filter(cc=request.user.id)
-        bcc = Email.objects.filter(bcc=request.user.id)
-
-        return render(request, self.template_name,
-                      {'recipients': recipients, 'cc': cc, 'bcc': bcc})
+        emails = Email.objects.filter(Q(recipients=request.user.id) | Q(cc=request.user.id) | Q(bcc=request.user.id)).\
+            order_by('-created_time')
+        return render(request, self.template_name, {'emails': emails})
 
 
 class SentMail(LoginRequiredMixin, View):
@@ -154,26 +163,26 @@ class DraftMail(LoginRequiredMixin, View):
         return render(request, self.template_name, {'drafts': drafts})
 
 
-class ArchiveMail(LoginRequiredMixin, View):
-    template_name = 'mail/archive.html'
-
-    def get(self, request, pk):
-        email_of_user = UpdateEmailOfUser.objects.get(user=request.user, email_id__in=pk)
-        email_of_user.is_archived = True
-        email_of_user.save()
-        archives = UpdateEmailOfUser.objects.filter(user=request.user, is_archived=True)
-        return render(request, self.template_name, {'archives': archives})
-
-
-class TrashMail(LoginRequiredMixin, View):
-    template_name = 'mail/trash.html'
-
-    def get(self, request, pk):
-        email_of_user = UpdateEmailOfUser.objects.get(user=request.user, email_id__in=pk)
-        email_of_user.is_trashed = True
-        email_of_user.save()
-        trashes = UpdateEmailOfUser.objects.filter(user=request.user, is_trashed=True)
-        return render(request, self.template_name, {'trashes': trashes})
+# class ArchiveMail(LoginRequiredMixin, View):
+#     template_name = 'mail/archive.html'
+#
+#     def get(self, request, pk):
+#         email_of_user = UpdateEmailOfUser.objects.get(user=request.user, email_id__in=pk)
+#         email_of_user.is_archived = True
+#         email_of_user.save()
+#         archives = UpdateEmailOfUser.objects.filter(user=request.user, is_archived=True)
+#         return render(request, self.template_name, {'archives': archives})
+#
+#
+# class TrashMail(LoginRequiredMixin, View):
+#     template_name = 'mail/trash.html'
+#
+#     def get(self, request, pk):
+#         email_of_user = UpdateEmailOfUser.objects.get(user=request.user, email_id__in=pk)
+#         email_of_user.is_trashed = True
+#         email_of_user.save()
+#         trashes = UpdateEmailOfUser.objects.filter(user=request.user, is_trashed=True)
+#         return render(request, self.template_name, {'trashes': trashes})
 
 
 class CategoryDelete(LoginRequiredMixin, DeleteView):
@@ -213,36 +222,19 @@ class Forward(LoginRequiredMixin, View):
     form_class = ForwardForm
 
     def get(self, request, pk):
-        form = self.form_class
         email = Email.objects.get(pk=pk)
-        return render(request, self.template_name, {'form': form, 'email': email})
+        form = self.form_class(instance=email)
+        return render(request, self.template_name, {'form': form})
 
     def post(self, request, pk):
         form = self.form_class(request.POST, request.FILES)
         if form.is_valid():
 
-            email = Email.objects.get(pk=pk)
-            subject = form.cleaned_data['subject']
-            if subject:
-                subject += email.subject
-            else:
-                subject = email.subject
-            body = form.cleaned_data['body']
-            if body:
-                body += email.body
-            else:
-                body = email.body
-            file = form.cleaned_data['file']
-            if not file:
-                file = email.file
-            else:
-                file = form.cleaned_data['file']
-
             sender = Users.objects.get(id=request.user.id)
             forward = Email.objects.create(sender=sender,
-                                           subject=subject,
-                                           body=body,
-                                           file=file,
+                                           subject=form.cleaned_data['subject'],
+                                           body=form.cleaned_data['body'],
+                                           file=form.cleaned_data['file'],
                                            )
 
             for people in form.cleaned_data['recipients']:

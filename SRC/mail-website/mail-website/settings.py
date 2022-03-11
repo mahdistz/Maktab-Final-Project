@@ -82,7 +82,7 @@ WSGI_APPLICATION = 'mail-website.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'finalproject',
+        'NAME': 'finalprojectdjango',
         'USER': 'postgres',
         'PASSWORD': 'mahdis378',
         'HOST': 'localhost',

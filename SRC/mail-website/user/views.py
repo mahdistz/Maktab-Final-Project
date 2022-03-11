@@ -1,10 +1,11 @@
 import random
+import csv
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.sites.shortcuts import get_current_site
 from django.views import View
 from utils import send_otp_code
-from .forms import UserRegisterForm, VerifyCodeForm, CreateContactForm, ContactUpdateForm
+from .forms import UserRegisterForm, VerifyCodeForm, CreateContactForm, ContactUpdateForm, SearchContactForm
 from django.shortcuts import render, redirect
 from django.contrib.auth import login, authenticate
 from django.utils.encoding import force_bytes, force_text
@@ -30,6 +31,8 @@ from mail.forms import CreateMailForm
 from django.views.generic import ListView, DetailView, DeleteView, UpdateView
 from user.models import Contact
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.shortcuts import render, redirect, HttpResponse, HttpResponseRedirect, Http404
+from django.db.models import Q
 
 
 def index(request):
@@ -101,17 +104,21 @@ class SignUpView(View):
                 code = random.randint(100000, 999999)
                 CodeRegister.objects.create(phone_number=form.cleaned_data['phone'],
                                             code=code)
-                # to show on terminal and complete the request
-                print(code)
-                # kavenegar service --> can't send sms because 'sender' is None
+                # kavenegar service
                 send_otp_code(form.cleaned_data['phone'], code)
                 # Sending session to other url for verifying user with sms code.
                 request.session['user_registering'] = {
-                    'phone': form.cleaned_data['phone'],
-                    'email': form.cleaned_data['email'],
+                    'username': form.cleaned_data['username'],
                     'password1': form.cleaned_data['password1'],
                     'password2': form.cleaned_data['password2'],
-                    'username': form.cleaned_data['username'],
+                    'verification': form.cleaned_data['verification'],
+                    'phone': form.cleaned_data['phone'],
+                    'email': form.cleaned_data['email'],
+                    'first_name': form.cleaned_data['first_name'],
+                    'last_name': form.cleaned_data['last_name'],
+                    'nationality': form.cleaned_data['nationality'],
+                    'birth_date': form.cleaned_data['birth_date'].isoformat(),
+                    'gender': form.cleaned_data['gender'],
                 }
                 messages.success(request, 'we sent you a code', 'success')
                 return redirect('verify')
@@ -217,24 +224,17 @@ class ContactUpdate(LoginRequiredMixin, View):
     form_class = ContactUpdateForm
     template_name = 'user/contact_update.html'
 
-    def get(self, request, pk):
-        form = self.form_class
+    def get(self, request, pk, *args, **kwargs):
+        contact = Contact.objects.get(pk=pk)
+        form = self.form_class(instance=contact)
         return render(request, self.template_name, {'form': form})
 
     def post(self, request, pk):
         form = self.form_class(request.POST)
         if form.is_valid():
             update_contact = form.save(commit=False)
-            contact = Contact.objects.get(pk=pk)
-            contact.user = request.user
-            contact.name = update_contact.name
-            contact.birth_date1 = update_contact.birth_date1
-            if update_contact.other_email:
-                contact.other_email = update_contact.other_email
-            contact.other_email = 'default@mail.com'
-            contact.email = update_contact.email
-            contact.phone_number1 = update_contact.phone_number1
-            contact.save(update_fields=['name', 'birth_date1', 'other_email', 'email', 'phone_number1'])
+            update_contact.user = request.user
+            update_contact.save()
             messages.success(request, 'contact updated successfully', 'success')
             return redirect('contacts')
         return render(request, self.template_name, {'form': form})
@@ -251,6 +251,23 @@ class ContactList(LoginRequiredMixin, ListView):
 
 class ContactDetail(LoginRequiredMixin, DetailView):
     model = Contact
+
+
+class ContactsOfUser(LoginRequiredMixin, View):
+    template_name = 'user/contacts.html'
+
+    def get(self, request):
+        user_id = request.user.id
+        user = Users.objects.get(id=user_id)
+        contacts = user.contacts.all()
+        # search in name or email of contacts
+        form = SearchContactForm()
+        if 'search' in request.GET:
+            form = SearchContactForm(request.GET)
+            if form.is_valid():
+                cd = form.cleaned_data['search']
+                contacts = contacts.filter(name__icontains=cd)
+        return render(request, self.template_name, {'contacts': contacts, 'form': form})
 
 
 class CreateContact(LoginRequiredMixin, View):
@@ -270,3 +287,16 @@ class CreateContact(LoginRequiredMixin, View):
             messages.success(request, 'contact created successfully', 'success')
             return redirect('contacts')
         return render(request, self.template_name, {'form': form})
+
+
+def export_contact_csv(request):
+    contacts = Contact.objects.filter(user_id=request.user)
+
+    response = HttpResponse('text/csv')
+    response['Content-Disposition'] = 'attachment; filename=contacts.csv'
+    writer = csv.writer(response)
+    writer.writerow(['ID', 'Owner', 'Name', 'Email', 'Phone', 'Birthdate'])
+    rows = contacts.values_list('id', 'user', 'name', 'email', 'phone_number', 'birth_date')
+    for std in rows:
+        writer.writerow(std)
+    return response

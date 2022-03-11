@@ -1,0 +1,24 @@
+{% extends 'home.html' %}
+{% block content %}
+    <center>
+
+    <h3>You Have {{ contacts|length }} Contact{{ contacts|length|pluralize }}</h3>
+    <a href="{% url 'create_contact' %}" ><input type="submit" class="btn btn-primary" value="Create Contact"></a>
+    <a href="{% url 'export_contact_csv' %}" ><input type="submit" class="btn btn-primary" value="export contact csv"></a>
+    <br>
+    <br>
+    {# search in name of contacts #}
+    <form action="" method="get">
+        {{ form }}
+        <input type="submit" value="search">
+    </form>
+
+    <br>
+    <br>
+    {% for contact in contacts %}
+        <li><a href="/contact_detail/{{ contact.id }}"> name: {{ contact.name }},
+            email : {{ contact.email.username }}</a> </li>
+    {% endfor %}
+
+    </center>
+{% endblock %}
