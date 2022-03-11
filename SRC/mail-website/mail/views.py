@@ -136,6 +136,16 @@ class InboxMail(LoginRequiredMixin, View):
                       {'recipients': recipients, 'cc': cc, 'bcc': bcc})
 
 
+class SentMail(LoginRequiredMixin, View):
+    template_name = 'mail/sent.html'
+
+    def get(self, request):
+        sent = Email.objects.filter(sender__exact=request.user.id)
+
+        return render(request, self.template_name,
+                      {'sent': sent})
+
+
 class DraftMail(LoginRequiredMixin, View):
     template_name = 'mail/draft.html'
 

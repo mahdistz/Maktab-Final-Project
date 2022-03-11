@@ -1,5 +1,6 @@
 from mail.views import CreateMail, CategoryList, CreateCategory, CategoryDetail, EmailDetail, EmailList, \
-    CategoryDelete, InboxMail, DraftMail, AllEmailOfCategory, AddEmailToCategory, ArchiveMail, TrashMail, Forward, Reply
+    CategoryDelete, InboxMail, DraftMail, AllEmailOfCategory, AddEmailToCategory, ArchiveMail, TrashMail, Forward, \
+    Reply, SentMail
 from django.urls import path
 
 urlpatterns = [
@@ -13,7 +14,7 @@ urlpatterns = [
     path('trash/<int:pk>/', TrashMail.as_view(), name='trash'),
     path('reply/<int:pk>/', Reply.as_view(), name='reply'),
     path('forward/<int:pk>/', Forward.as_view(), name='forward'),
-    path('sent/', EmailList.as_view(), name='sent'),
+    path('sent/', SentMail.as_view(), name='sent'),
     path('email_detail/<int:pk>/', EmailDetail.as_view(), name='email_detail'),
     path('category_delete/<int:pk>/', CategoryDelete.as_view(), name='category_delete'),
     path('emails_of_category/<int:pk>/', AllEmailOfCategory.as_view(), name='emails_of_category'),
