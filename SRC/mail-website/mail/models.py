@@ -56,7 +56,12 @@ class Email(models.Model):
     is_read = models.BooleanField(default=False)
     is_archived = models.BooleanField(default=False)
     is_trashed = models.BooleanField(default=False)
-
+    status_choices = [
+        ('recipients', 'recipients'),
+        ('cc', 'cc'),
+        ('bcc', 'bcc'),
+    ]
+    status = models.CharField(max_length=10, choices=status_choices, default='')
     signature = models.CharField(max_length=100, null=True, blank=True)
     reply_to = models.ForeignKey('self', null=True, blank=True, related_name='replies', on_delete=models.CASCADE)
 

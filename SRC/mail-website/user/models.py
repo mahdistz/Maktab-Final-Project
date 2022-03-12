@@ -85,9 +85,9 @@ validate_email = EmailValidator()
 
 
 class Contact(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='contacts')
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='contacts')
     email = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True,
-                              related_name='contact_email_in_website')
+                              related_name='contact_email')
     name = models.CharField(max_length=100, default=None)
     birth_date = models.DateField(verbose_name='birth date', null=True, blank=True)
     other_email = models.EmailField(null=True, blank=True, default='')
@@ -95,7 +95,7 @@ class Contact(models.Model):
                                     null=True, blank=True)
 
     class Meta:
-        unique_together = [('user', 'email')]
+        unique_together = [('owner', 'email')]
 
 
 class CodeRegister(models.Model):

@@ -232,9 +232,14 @@ class ContactUpdate(LoginRequiredMixin, View):
     def post(self, request, pk):
         form = self.form_class(request.POST)
         if form.is_valid():
-            update_contact = form.save(commit=False)
-            update_contact.user = request.user
-            update_contact.save()
+            update_contact = form.cleaned_data
+            contact = Contact.objects.get(pk=pk)
+            contact.name = update_contact['name']
+            contact.email = update_contact['email']
+            contact.phone_number = update_contact['phone_number']
+            contact.other_email = update_contact['other_email']
+            contact.birth_date = update_contact['birth_date']
+            contact.save()
             messages.success(request, 'contact updated successfully', 'success')
             return redirect('contacts')
         return render(request, self.template_name, {'form': form})
@@ -282,21 +287,25 @@ class CreateContact(LoginRequiredMixin, View):
         form = self.form_class(request.POST)
         if form.is_valid():
             contact = form.save(commit=False)
-            contact.user = request.user
+            contact.owner = request.user
             contact.save()
             messages.success(request, 'contact created successfully', 'success')
             return redirect('contacts')
         return render(request, self.template_name, {'form': form})
 
 
-def export_contact_csv(request):
-    contacts = Contact.objects.filter(user_id=request.user)
+def export_to_csv(request):
+    model_class = Contact
 
-    response = HttpResponse('text/csv')
-    response['Content-Disposition'] = 'attachment; filename=contacts.csv'
+    meta = model_class._meta
+    field_names = [field.name for field in meta.fields]
+
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename={}.csv'.format(meta)
     writer = csv.writer(response)
-    writer.writerow(['ID', 'Owner', 'Name', 'Email', 'Phone', 'Birthdate'])
-    rows = contacts.values_list('id', 'user', 'name', 'email', 'phone_number', 'birth_date')
-    for std in rows:
-        writer.writerow(std)
+
+    writer.writerow(field_names)
+    for obj in model_class.objects.filter(owner_id=request.user):
+        row = writer.writerow([getattr(obj, field) for field in field_names])
+
     return response

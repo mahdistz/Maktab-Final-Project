@@ -105,7 +105,7 @@ class LoginForm(AuthenticationForm):
 class CreateContactForm(forms.ModelForm):
     class Meta:
         model = Contact
-        exclude = ['user']
+        exclude = ['owner']
 
         widgets = {
             'birth_date': DateInput(),
@@ -115,7 +115,7 @@ class CreateContactForm(forms.ModelForm):
 class ContactUpdateForm(forms.ModelForm):
     class Meta:
         model = Contact
-        exclude = ['user']
+        exclude = ['owner']
 
         widgets = {
             'birth_date': DateInput(),

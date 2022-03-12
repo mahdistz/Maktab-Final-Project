@@ -1,15 +1,27 @@
 from django.shortcuts import render, redirect, HttpResponse, HttpResponseRedirect, Http404
 from django.views import View
 from django.contrib import messages
-from user.forms import SearchContactForm
 from .models import Email, Category
 from user.models import Users
 from mail.forms import CreateMailForm, CreateCategoryForm, AddEmailToCategoryForm, ForwardForm, ReplyForm
 from django.urls import reverse_lazy
-from django.views.generic import ListView, DetailView, DeleteView, UpdateView
+from django.views.generic import ListView, DetailView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.core.exceptions import ValidationError
 from django.db.models import Q
+
+
+def to_cc_bcc(to, cc, bcc):
+    all_receiver = []
+
+    all_receiver.extend(to)
+
+    if cc is not None:
+        all_receiver.extend(cc)
+
+    if bcc is not None:
+        all_receiver.extend(bcc)
+
+    return all_receiver
 
 
 class CreateMail(LoginRequiredMixin, View):
@@ -22,37 +34,75 @@ class CreateMail(LoginRequiredMixin, View):
     def post(self, request):
         form = self.form_class(request.POST, request.FILES)
         if form.is_valid():
-            user = Users.objects.get(id=request.user.id)
-            email = Email.objects.create(sender=user,
-                                         body=form.cleaned_data['body'],
-                                         subject=form.cleaned_data['subject'],
-                                         file=form.cleaned_data['file'],
-                                         )
-            for people in form.cleaned_data['recipients']:
-                recipients = Users.objects.get_by_natural_key(username=people)
-                email.recipients.add(recipients)
-
-            if form.cleaned_data['cc']:
-                for people in form.cleaned_data['cc']:
-                    cc_receiver = Users.objects.get_by_natural_key(username=people)
-                    email.cc.add(cc_receiver)
-
-            if form.cleaned_data['bcc']:
-                for people in form.cleaned_data['bcc']:
-                    bcc_receiver = Users.objects.get_by_natural_key(username=people)
-                    email.bcc.add(bcc_receiver)
-
             if 'save' in request.POST:
                 # When the user presses the save button, email's field is_sent=True,
                 # then email object saved.
-                email.is_sent = True
-                email.save()
+                cd = form.cleaned_data
+                to_cc_bcc_list = to_cc_bcc(cd['recipients'], cd['cc'], cd['bcc'])
+                # Clear duplicates receiver
+                receiver_list = list(dict.fromkeys(to_cc_bcc_list))
+                sender = Users.objects.get(id=request.user.id)
+                for receiver in receiver_list:
+                    if receiver in cd['recipients']:
+                        exist_receiver = Users.objects.filter(username=receiver)
+                        if exist_receiver:
+                            cd['recipients'] = receiver
+                            email = Email.objects.create(sender=sender, subject=cd['subject'], body=cd['body'],
+                                                         file=cd['file'], is_sent=True, status='recipients')
+                            recipients = Users.objects.get_by_natural_key(username=cd['recipients'])
+                            email.recipients.add(recipients)
+                            email.save()
+
+                    elif receiver in cd['cc']:
+
+                        exist_receiver = Users.objects.filter(username=receiver)
+                        if exist_receiver:
+                            cd['cc'] = receiver
+                            email = Email.objects.create(sender=sender, subject=cd['subject'], body=cd['body'],
+                                                         file=cd['file'], is_sent=True, status='cc')
+
+                            recipients = Users.objects.get_by_natural_key(username=cd['cc'])
+                            email.recipients.add(recipients)
+                            email.save()
+
+                    elif receiver in cd['bcc']:
+
+                        exist_receiver = Users.objects.filter(username=receiver)
+                        if exist_receiver:
+                            cd['bcc'] = receiver
+                            email = Email.objects.create(sender=sender, subject=cd['subject'], body=cd['body'],
+                                                         file=cd['file'], is_sent=True, status='bcc')
+
+                            recipients = Users.objects.get_by_natural_key(username=cd['bcc'])
+                            email.recipients.add(recipients)
+                            email.save()
+
                 messages.success(request, 'mail sent successfully', 'success')
 
             if 'cancel' in request.POST:
                 # When the user presses the cancel button, email's field is_sent=False (by default),
                 # and email object saved. save with is_sent = False to show email on Draft
+                cd = form.cleaned_data
+                sender = Users.objects.get(id=request.user.id)
+                email = Email.objects.create(sender=sender, subject=cd['subject'], body=cd['body'],
+                                             file=cd['file'])
+
+                for people in cd['recipients']:
+                    recipients = Users.objects.get_by_natural_key(username=people)
+                    email.recipients.add(recipients)
+
+                if cd['cc']:
+                    for people in cd['cc']:
+                        cc_receiver = Users.objects.get_by_natural_key(username=people)
+                        email.cc.add(cc_receiver)
+
+                if cd['bcc']:
+                    for people in cd['bcc']:
+                        bcc_receiver = Users.objects.get_by_natural_key(username=people)
+                        email.bcc.add(bcc_receiver)
+
                 email.save()
+
                 messages.info(request, 'mail saved in draft', 'info')
             return render(request, 'home.html', {})
 
@@ -69,15 +119,17 @@ class CategoryDetail(LoginRequiredMixin, DetailView):
     model = Category
 
 
-class CategoriesOfEmail(LoginRequiredMixin, View):
+class Categories(LoginRequiredMixin, View):
     template_name = 'mail/categories.html'
 
     def get(self, request):
         user_id = request.user.id
         user = Users.objects.get(id=user_id)
-        owner = Category.objects.filter(owner=user)
-        categories = owner.categories.all()
-        return render(request, self.template_name, {'categories': categories})
+        print(user)
+        categories = Category.objects.filter(owner=user)
+        if categories:
+            return render(request, self.template_name, {'categories': categories})
+        return render(request, self.template_name, {})
 
 
 class AllEmailOfCategory(LoginRequiredMixin, View):
@@ -140,8 +192,10 @@ class InboxMail(LoginRequiredMixin, View):
     template_name = 'mail/inbox.html'
 
     def get(self, request):
-        emails = Email.objects.filter(Q(recipients=request.user.id) | Q(cc=request.user.id) | Q(bcc=request.user.id)).\
-            order_by('-created_time')
+        emails = Email.objects.filter(
+            Q(recipients=request.user.id, status='recipients', is_archived=False, is_trashed=False) |
+            Q(recipients=request.user.id, status='cc', is_archived=False, is_trashed=False) |
+            Q(recipients=request.user.id, status='bcc', is_archived=False, is_trashed=False)).order_by('-created_time')
         return render(request, self.template_name, {'emails': emails})
 
 
@@ -149,40 +203,67 @@ class SentMail(LoginRequiredMixin, View):
     template_name = 'mail/sent.html'
 
     def get(self, request):
-        sent = Email.objects.filter(sender__exact=request.user.id)
-
-        return render(request, self.template_name,
-                      {'sent': sent})
+        sent = Email.objects.filter(sender__exact=request.user.id, is_sent=True, is_archived=False, is_trashed=False)
+        return render(request, self.template_name, {'sent': sent})
 
 
 class DraftMail(LoginRequiredMixin, View):
     template_name = 'mail/draft.html'
 
     def get(self, request):
-        drafts = Email.objects.filter(sender=request.user.id).filter(is_sent=False)
+        drafts = Email.objects.filter(sender=request.user.id, is_sent=False, is_archived=False, is_trashed=False)
         return render(request, self.template_name, {'drafts': drafts})
 
 
-# class ArchiveMail(LoginRequiredMixin, View):
-#     template_name = 'mail/archive.html'
-#
-#     def get(self, request, pk):
-#         email_of_user = UpdateEmailOfUser.objects.get(user=request.user, email_id__in=pk)
-#         email_of_user.is_archived = True
-#         email_of_user.save()
-#         archives = UpdateEmailOfUser.objects.filter(user=request.user, is_archived=True)
-#         return render(request, self.template_name, {'archives': archives})
-#
-#
-# class TrashMail(LoginRequiredMixin, View):
-#     template_name = 'mail/trash.html'
-#
-#     def get(self, request, pk):
-#         email_of_user = UpdateEmailOfUser.objects.get(user=request.user, email_id__in=pk)
-#         email_of_user.is_trashed = True
-#         email_of_user.save()
-#         trashes = UpdateEmailOfUser.objects.filter(user=request.user, is_trashed=True)
-#         return render(request, self.template_name, {'trashes': trashes})
+class Archive(LoginRequiredMixin, View):
+    template_name = 'mail/archive.html'
+
+    def get(self, request, pk):
+        email = Email.objects.get(pk=pk)
+        if not email.is_archived:
+            email.is_archived = True
+            messages.info(request, 'email moved to Archive ', 'info')
+        elif email.is_archived:
+            email.is_archived = False
+            messages.info(request, 'email un-archived ', 'info')
+        email.save()
+        return render(request, self.template_name, {})
+
+
+class ArchiveMail(LoginRequiredMixin, View):
+    template_name = 'mail/archive.html'
+
+    def get(self, request):
+        user = Users.objects.get(id=request.user.id)
+        archives = Email.objects.filter(Q(recipients=user, is_archived=True) | Q(cc=user, is_archived=True) |
+                                        Q(bcc=user, is_archived=True) | Q(sender=user, is_archived=True))
+        return render(request, self.template_name, {'archives': archives})
+
+
+class Trash(LoginRequiredMixin, View):
+    template_name = 'mail/trash.html'
+
+    def get(self, request, pk):
+        email = Email.objects.get(pk=pk)
+        if not email.is_trashed:
+            email.is_trashed = True
+            messages.info(request, 'email moved to Trash ', 'info')
+        elif email.is_trashed:
+            email.is_trashed = False
+            messages.info(request, 'email un-trashed ', 'info')
+        email.save()
+        return render(request, self.template_name, {})
+
+
+class TrashMail(LoginRequiredMixin, View):
+    template_name = 'mail/trash.html'
+
+    def get(self, request):
+        user = Users.objects.get(id=request.user.id)
+        trashes = Email.objects.filter(
+            Q(recipients=user, is_trashed=True, is_archived=False) | Q(cc=user, is_trashed=True, is_archived=False) |
+            Q(bcc=user, is_trashed=True, is_archived=False) | Q(sender=user, is_trashed=True, is_archived=False))
+        return render(request, self.template_name, {'trashes': trashes})
 
 
 class CategoryDelete(LoginRequiredMixin, DeleteView):
