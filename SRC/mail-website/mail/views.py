@@ -125,11 +125,8 @@ class Categories(LoginRequiredMixin, View):
     def get(self, request):
         user_id = request.user.id
         user = Users.objects.get(id=user_id)
-        print(user)
         categories = Category.objects.filter(owner=user)
-        if categories:
-            return render(request, self.template_name, {'categories': categories})
-        return render(request, self.template_name, {})
+        return render(request, self.template_name, {'categories': categories})
 
 
 class AllEmailOfCategory(LoginRequiredMixin, View):
@@ -138,7 +135,7 @@ class AllEmailOfCategory(LoginRequiredMixin, View):
     def get(self, request, pk):
         category = Category.objects.get(pk=pk)
         emails = Email.objects.filter(category__owner=request.user, category__exact=category)
-        return render(request, self.template_name, {'emails': emails})
+        return render(request, self.template_name, {'emails': emails,'category':category})
 
 
 class CreateCategory(LoginRequiredMixin, View):
@@ -203,7 +200,8 @@ class SentMail(LoginRequiredMixin, View):
     template_name = 'mail/sent.html'
 
     def get(self, request):
-        sent = Email.objects.filter(sender__exact=request.user.id, is_sent=True, is_archived=False, is_trashed=False)
+        sent = Email.objects.filter(sender__exact=request.user.id,
+                                    is_sent=True, is_archived=False, is_trashed=False)
         return render(request, self.template_name, {'sent': sent})
 
 
@@ -211,23 +209,23 @@ class DraftMail(LoginRequiredMixin, View):
     template_name = 'mail/draft.html'
 
     def get(self, request):
-        drafts = Email.objects.filter(sender=request.user.id, is_sent=False, is_archived=False, is_trashed=False)
+        drafts = Email.objects.filter(sender=request.user.id,
+                                      is_sent=False, is_archived=False, is_trashed=False)
         return render(request, self.template_name, {'drafts': drafts})
 
 
-class Archive(LoginRequiredMixin, View):
-    template_name = 'mail/archive.html'
+def check_archive(request, pk):
+    email = Email.objects.get(pk=pk)
+    if not email.is_archived:
+        email.is_archived = True
+        messages.info(request, 'email moved to Archive ', 'info')
 
-    def get(self, request, pk):
-        email = Email.objects.get(pk=pk)
-        if not email.is_archived:
-            email.is_archived = True
-            messages.info(request, 'email moved to Archive ', 'info')
-        elif email.is_archived:
-            email.is_archived = False
-            messages.info(request, 'email un-archived ', 'info')
-        email.save()
-        return render(request, self.template_name, {})
+    elif email.is_archived:
+        email.is_archived = False
+        messages.info(request, 'email un-archived ', 'info')
+
+    email.save()
+    return redirect('archives')
 
 
 class ArchiveMail(LoginRequiredMixin, View):
@@ -235,24 +233,26 @@ class ArchiveMail(LoginRequiredMixin, View):
 
     def get(self, request):
         user = Users.objects.get(id=request.user.id)
-        archives = Email.objects.filter(Q(recipients=user, is_archived=True) | Q(cc=user, is_archived=True) |
-                                        Q(bcc=user, is_archived=True) | Q(sender=user, is_archived=True))
+        archives = Email.objects.filter(Q(recipients=user, is_archived=True) |
+                                        Q(cc=user, is_archived=True) |
+                                        Q(bcc=user, is_archived=True) |
+                                        Q(sender=user, is_archived=True)).order_by('-created_time')
+
         return render(request, self.template_name, {'archives': archives})
 
 
-class Trash(LoginRequiredMixin, View):
-    template_name = 'mail/trash.html'
+def check_trash(request, pk):
+    email = Email.objects.get(pk=pk)
 
-    def get(self, request, pk):
-        email = Email.objects.get(pk=pk)
-        if not email.is_trashed:
-            email.is_trashed = True
-            messages.info(request, 'email moved to Trash ', 'info')
-        elif email.is_trashed:
-            email.is_trashed = False
-            messages.info(request, 'email un-trashed ', 'info')
-        email.save()
-        return render(request, self.template_name, {})
+    if not email.is_trashed:
+        email.is_trashed = True
+        messages.info(request, 'email moved to Trash ', 'info')
+
+    elif email.is_trashed:
+        email.is_trashed = False
+        messages.info(request, 'email un-trashed ', 'info')
+    email.save()
+    return redirect('trashes')
 
 
 class TrashMail(LoginRequiredMixin, View):
@@ -261,8 +261,10 @@ class TrashMail(LoginRequiredMixin, View):
     def get(self, request):
         user = Users.objects.get(id=request.user.id)
         trashes = Email.objects.filter(
-            Q(recipients=user, is_trashed=True, is_archived=False) | Q(cc=user, is_trashed=True, is_archived=False) |
-            Q(bcc=user, is_trashed=True, is_archived=False) | Q(sender=user, is_trashed=True, is_archived=False))
+            Q(recipients=user, is_trashed=True, is_archived=False) |
+            Q(cc=user, is_trashed=True, is_archived=False) |
+            Q(bcc=user, is_trashed=True, is_archived=False) |
+            Q(sender=user, is_trashed=True, is_archived=False)).order_by('-created_time')
         return render(request, self.template_name, {'trashes': trashes})
 
 
@@ -337,3 +339,7 @@ class Forward(LoginRequiredMixin, View):
             messages.success(request, 'mail sent successfully', 'success')
             return redirect('home')
         return render(request, self.template_name, {'form': form})
+
+
+def create_new_email(request):
+    return render(request, 'mail/create_new_email.html', {})

@@ -1,10 +1,69 @@
 {% extends 'home.html' %}
+{% block title %}Archive{% endblock %}
 {% block content %}
     <center>
     <h3>you have {{ archives|length }} Archive Email{{ archives|length|pluralize }}</h3>
+        <br>
+    <div class="table-responsive" style="height: auto;width: 1000px">
+    <table class="table">
+    <tbody>
+            <td class="name">From</td>
+            <td class="subject">Subject</td>
+            <td class="text-body">Email</td>
+            <td class="time">Time</td>
     {% for email in archives %}
-        <li><a href="/mail/email_detail/{{ email.id }}"> {{ email.title }}-{{ email.body|truncatewords:5 }}
-         {{ email.created_time|date:"D d M Y" }}-{{ email.created_time|time:"H:i" }}</a> </li>
+       <tr>
+                <td class="name">{{ email.sender }}</td>
+                <td class="subject">{{ email.subject }}</td>
+                <td class="text-body"><a href="/mail/email_detail/{{ email.id }}">{{ email.body|truncatewords:7 }}</a></td>
+                <td class="time">{{ email.created_time|date:" d M Y" }}-{{ email.created_time|time:"H:i" }}</td>
+                </tr>
     {% endfor %}
+    </tbody></table>
+    </div>
     </center>
+<style type="text/css">
+body{
+    margin-top:20px;
+    background:#eee;
+}
+.email table {
+	font-weight: 600;
+}
+
+.email table a {
+	color: #666;
+}
+
+.email table tr.read > td {
+	background-color: #f6f6f6;
+}
+
+.email table tr.read > td {
+	font-weight: 400;
+}
+
+.email table tr td > i.fa {
+	font-size: 1.2em;
+	line-height: 1.5em;
+	text-align: center;
+}
+
+.email table tr td > i.fa-star {
+	color: #f39c12;
+}
+
+.email table tr td > i.fa-bookmark {
+	color: #e74c3c;
+}
+
+.email table tr > td.action {
+	padding-left: 0px;
+	padding-right: 2px;
+}
+</style>
+
+<script type="text/javascript">
+
+</script>
 {% endblock %}

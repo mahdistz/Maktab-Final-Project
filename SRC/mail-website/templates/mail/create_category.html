@@ -1,11 +1,17 @@
 {% extends 'home.html' %}
+{% block title %}Create Label{% endblock %}
 {% block content %}
+    <center>
+    <h3>Create Label</h3>
+        <br>
 <form method="post">
 {% csrf_token %}
     <table>
         {{ form.as_table }}
         </table>
-   <input type="submit" value="save">
-
+    <br>
+   <input class="btn btn-primary" type="submit" value="save">
+    <button class="btn btn-danger" ><a href="{% url 'categories' %}">Cancel</a></button>
 </form>
+    </center>
 {% endblock %}
