@@ -18,13 +18,21 @@ def user_directory_path(instance, filename):
 class Category(models.Model):
     name = models.CharField(max_length=100)
     owner = models.ForeignKey(
-        settings.AUTH_USER_MODEL, default='', on_delete=models.CASCADE, related_name="user_category")
+        settings.AUTH_USER_MODEL, default='', on_delete=models.CASCADE, related_name="owner_category")
 
     class Meta:
         unique_together = [('name', 'owner')]
 
     def __str__(self):
         return f"{self.name}"
+
+
+class Signature(models.Model):
+    text = models.CharField(max_length=100, null=True, blank=True)
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="owner_signature")
+
+    def __str__(self):
+        return f"{self.text}"
 
 
 class Email(models.Model):
@@ -62,7 +70,7 @@ class Email(models.Model):
         ('bcc', 'bcc'),
     ]
     status = models.CharField(max_length=10, choices=status_choices, default='')
-    signature = models.CharField(max_length=100, null=True, blank=True)
+    signature = models.ForeignKey(Signature, on_delete=models.CASCADE, null=True, blank=True)
     reply_to = models.ForeignKey('self', null=True, blank=True, related_name='replies', on_delete=models.CASCADE)
 
     class Meta:

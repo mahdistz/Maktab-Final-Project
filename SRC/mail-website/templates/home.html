@@ -127,7 +127,7 @@
                         <a class="nav-link" href="" data-toggle="modal" data-target="#Modal">New Email</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#">Page</a>
+                        <a class="nav-link" href="{% url 'signatures' %}">Signature</a>
                     </li>
                 </ul>
             </div>
@@ -143,17 +143,7 @@
 
     <div id="content-wrapper">
         {% block content %}
-            <div class="col-md-6 search-form">
-                <form action="#" class="text-right">
-                    <div class="input-group">
-                        <input type="text" class="form-control input-sm" placeholder="Search">
-                        <span class="input-group-btn">
-                            <button type="submit" name="search" class="btn_ btn-primary btn-sm search">
-                                <i class="fa fa-search"></i></button></span>
-                    </div>
-                    <br>
-                </form>
-            </div>
+            {% block modal %}
             <!-- Modal -->
             <div class="modal fade" id="Modal" data-backdrop="static" data-keyboard="false"
                  tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
@@ -178,6 +168,58 @@
                 </div>
               </div>
             </div>
+                {% endblock %}
+            {% block search %}
+                <div class="row">
+                    <div class="com-md-8"></div>
+                    <div class="com-md-4"></div>
+                    <div class="form-group">
+                        <input type="text" class="form-control" id="searchField" placeholder="Search">
+                    </div>
+                </div>
+                <div class="app-table" style="height: auto;width: 1000px">
+                <table class="table">
+                <tbody>
+                    <td class="name">From</td>
+                    <td class="subject">Subject</td>
+                    <td class="text-body">Email</td>
+                    <td class="file-upload">File</td>
+                    <td class="time">Time</td>
+                 {% for email in emails %}
+                    <tr>
+                    <td class="name">{{ email.sender }}</td>
+                    <td class="subject">{{ email.subject }}</td>
+                    <td class="text-body"><a href="/mail/email_detail/{{ email.id }}">{{ email.body|truncatewords:7 }}</a></td>
+                    {% if email.file %}
+                    <td class="file-upload"><a href="{{ email.file.url }}">Download file</a></td>
+                    {% else %}
+                    <td class="file-upload">No File</td>
+                    {% endif %}
+                    <td class="time">{{ email.created_time|date:" d M Y" }}-{{ email.created_time|time:"H:i" }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody></table>
+                </div>
+                </center>
+                <div class="table-output">
+                          <center>
+                        <table class="table">
+                        <thead>
+                        <tr>
+                        <td class="name">From</td>
+                        <td class="text-body">Email</td>
+                        <td class="time">Time</td>
+                        </tr>
+
+                        </thead>
+                        <tbody class="table-body">
+
+                        </tbody>
+                        </table>
+                         </center>
+
+                        </div>
+            {% endblock %}
         {% endblock %}
 
 </div>
@@ -412,6 +454,8 @@ body{
 {% endblock %}
 
   {% block script %}
+<script src="{% static 'js/searchEmails.js' %}"></script>
+
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
         integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
         crossorigin="anonymous"></script>

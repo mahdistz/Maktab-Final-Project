@@ -1,0 +1,16 @@
+{% extends 'home.html' %}
+{% block title %}Create Signature{% endblock %}
+{% block content %}
+    <center>
+    <h3>Create Signature</h3>
+        <br>
+<form method="post">
+{% csrf_token %}
+    <table>
+        {{ form.as_table }}
+        </table>
+    <br>
+   <input class="btn btn-primary" type="submit" value="save">
+</form>
+    </center>
+{% endblock %}

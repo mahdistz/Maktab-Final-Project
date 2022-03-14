@@ -1,13 +1,65 @@
 from django.shortcuts import render, redirect, HttpResponse, HttpResponseRedirect, Http404
 from django.views import View
 from django.contrib import messages
-from .models import Email, Category
+from .models import Email, Category, Signature
 from user.models import Users
-from mail.forms import CreateMailForm, CreateCategoryForm, AddEmailToCategoryForm, ForwardForm, ReplyForm
+from mail.forms import CreateMailForm, CreateCategoryForm, AddEmailToCategoryForm, ForwardForm, ReplyForm, SignatureForm
 from django.urls import reverse_lazy
-from django.views.generic import ListView, DetailView, DeleteView
+from django.views.generic import DetailView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Q
+from django.contrib.auth.decorators import login_required
+from django.conf import settings
+import json
+from django.http import JsonResponse
+
+
+def search_emails_inbox(request):
+    if request.method == 'POST':
+        search_str = json.loads(request.body).get('searchText')
+        emails = Email.objects.filter(body__icontains=search_str, recipients=request.user, is_sent=True)
+        data = emails.values()
+        return JsonResponse(list(data), safe=False)
+
+
+class CreateSignature(LoginRequiredMixin, View):
+    form_class = SignatureForm
+    template_name = 'mail/create_signature.html'
+
+    def get(self, request):
+        form = self.form_class()
+        return render(request, self.template_name, {'form': form})
+
+    def post(self, request):
+        form = self.form_class(request.POST)
+        if form.is_valid():
+            signature = form.save(commit=False)
+            owner = Users.objects.get(id=request.user.id)
+            signature.owner = owner
+            signature.save()
+            messages.success(request, 'signature saved successfully', 'success')
+            return redirect('signatures')
+        messages.error(request, 'error occurred', 'error')
+        return render(request, self.template_name, {'form': form})
+
+
+class SignatureDetail(LoginRequiredMixin, DetailView):
+    model = Signature
+
+
+class SignatureDelete(LoginRequiredMixin, DeleteView):
+    model = Signature
+    success_url = reverse_lazy('signatures')
+
+
+class Signatures(LoginRequiredMixin, View):
+    template_name = 'mail/signatures.html'
+
+    def get(self, request):
+        user_id = request.user.id
+        user = Users.objects.get(id=user_id)
+        signatures = Signature.objects.filter(owner=user)
+        return render(request, self.template_name, {'signatures': signatures})
 
 
 def to_cc_bcc(to, cc, bcc):
@@ -48,7 +100,8 @@ class CreateMail(LoginRequiredMixin, View):
                         if exist_receiver:
                             cd['recipients'] = receiver
                             email = Email.objects.create(sender=sender, subject=cd['subject'], body=cd['body'],
-                                                         file=cd['file'], is_sent=True, status='recipients')
+                                                         file=cd['file'], signature=cd['signature'],
+                                                         is_sent=True, status='recipients')
                             recipients = Users.objects.get_by_natural_key(username=cd['recipients'])
                             email.recipients.add(recipients)
                             email.save()
@@ -59,7 +112,8 @@ class CreateMail(LoginRequiredMixin, View):
                         if exist_receiver:
                             cd['cc'] = receiver
                             email = Email.objects.create(sender=sender, subject=cd['subject'], body=cd['body'],
-                                                         file=cd['file'], is_sent=True, status='cc')
+                                                         file=cd['file'], signature=cd['signature'],
+                                                         is_sent=True, status='cc')
 
                             recipients = Users.objects.get_by_natural_key(username=cd['cc'])
                             email.recipients.add(recipients)
@@ -71,7 +125,8 @@ class CreateMail(LoginRequiredMixin, View):
                         if exist_receiver:
                             cd['bcc'] = receiver
                             email = Email.objects.create(sender=sender, subject=cd['subject'], body=cd['body'],
-                                                         file=cd['file'], is_sent=True, status='bcc')
+                                                         file=cd['file'], signature=cd['signature'],
+                                                         is_sent=True, status='bcc')
 
                             recipients = Users.objects.get_by_natural_key(username=cd['bcc'])
                             email.recipients.add(recipients)
@@ -84,8 +139,8 @@ class CreateMail(LoginRequiredMixin, View):
                 # and email object saved. save with is_sent = False to show email on Draft
                 cd = form.cleaned_data
                 sender = Users.objects.get(id=request.user.id)
-                email = Email.objects.create(sender=sender, subject=cd['subject'], body=cd['body'],
-                                             file=cd['file'])
+                email = Email.objects.create(sender=sender, subject=cd['subject'], signature=cd['signature'],
+                                             body=cd['body'], file=cd['file'])
 
                 for people in cd['recipients']:
                     recipients = Users.objects.get_by_natural_key(username=people)
@@ -111,10 +166,6 @@ class CreateMail(LoginRequiredMixin, View):
             return render(request, 'home.html', {})
 
 
-class CategoryList(LoginRequiredMixin, ListView):
-    model = Category
-
-
 class CategoryDetail(LoginRequiredMixin, DetailView):
     model = Category
 
@@ -135,7 +186,7 @@ class AllEmailOfCategory(LoginRequiredMixin, View):
     def get(self, request, pk):
         category = Category.objects.get(pk=pk)
         emails = Email.objects.filter(category__owner=request.user, category__exact=category)
-        return render(request, self.template_name, {'emails': emails,'category':category})
+        return render(request, self.template_name, {'emails': emails, 'category': category})
 
 
 class CreateCategory(LoginRequiredMixin, View):
@@ -177,10 +228,6 @@ class AddEmailToCategory(LoginRequiredMixin, View):
         return render(request, self.template_name, {'form': form})
 
 
-class EmailList(LoginRequiredMixin, ListView):
-    model = Email
-
-
 class EmailDetail(LoginRequiredMixin, DetailView):
     model = Email
 
@@ -214,18 +261,21 @@ class DraftMail(LoginRequiredMixin, View):
         return render(request, self.template_name, {'drafts': drafts})
 
 
+@login_required(login_url=settings.LOGIN_URL)
 def check_archive(request, pk):
-    email = Email.objects.get(pk=pk)
-    if not email.is_archived:
-        email.is_archived = True
-        messages.info(request, 'email moved to Archive ', 'info')
+    if request.method == 'GET':
 
-    elif email.is_archived:
-        email.is_archived = False
-        messages.info(request, 'email un-archived ', 'info')
+        email = Email.objects.get(pk=pk)
+        if not email.is_archived:
+            email.is_archived = True
+            messages.info(request, 'email moved to Archive ', 'info')
 
-    email.save()
-    return redirect('archives')
+        elif email.is_archived:
+            email.is_archived = False
+            messages.info(request, 'email un-archived ', 'info')
+
+        email.save()
+        return redirect('archives')
 
 
 class ArchiveMail(LoginRequiredMixin, View):
@@ -241,18 +291,20 @@ class ArchiveMail(LoginRequiredMixin, View):
         return render(request, self.template_name, {'archives': archives})
 
 
+@login_required(login_url=settings.LOGIN_URL)
 def check_trash(request, pk):
-    email = Email.objects.get(pk=pk)
+    if request.method == 'GET':
 
-    if not email.is_trashed:
-        email.is_trashed = True
-        messages.info(request, 'email moved to Trash ', 'info')
+        email = Email.objects.get(pk=pk)
+        if not email.is_trashed:
+            email.is_trashed = True
+            messages.info(request, 'email moved to Trash ', 'info')
 
-    elif email.is_trashed:
-        email.is_trashed = False
-        messages.info(request, 'email un-trashed ', 'info')
-    email.save()
-    return redirect('trashes')
+        elif email.is_trashed:
+            email.is_trashed = False
+            messages.info(request, 'email un-trashed ', 'info')
+        email.save()
+        return redirect('trashes')
 
 
 class TrashMail(LoginRequiredMixin, View):

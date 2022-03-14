@@ -1,6 +1,8 @@
 from mail.views import CreateMail, CreateCategory, CategoryDetail, EmailDetail, \
     CategoryDelete, InboxMail, DraftMail, AllEmailOfCategory, AddEmailToCategory, Forward, \
-    Reply, SentMail, Categories, check_trash, TrashMail, ArchiveMail, check_archive, create_new_email
+    Reply, SentMail, Categories, check_trash, TrashMail, ArchiveMail, check_archive, create_new_email, \
+    search_emails_inbox, CreateSignature, SignatureDelete, SignatureDetail, Signatures
+from django.views.decorators.csrf import csrf_exempt
 from django.urls import path
 
 urlpatterns = [
@@ -22,5 +24,9 @@ urlpatterns = [
     path('emails_of_category/<int:pk>/', AllEmailOfCategory.as_view(), name='emails_of_category'),
     path('add_email_to_category/<int:pk>/', AddEmailToCategory.as_view(), name='add_email_to_category'),
     path('create_new_email/', create_new_email, name='create_new_email'),
-
+    path('search_emails/', csrf_exempt(search_emails_inbox), name='search_emails'),
+    path('create_signature/', CreateSignature.as_view(), name='create_signature'),
+    path('signature_delete/<int:pk>/', SignatureDelete.as_view(), name='signature_delete'),
+    path('signature_detail/<int:pk>/', SignatureDetail.as_view(), name='signature_detail'),
+    path('signatures/', Signatures.as_view(), name='signatures'),
 ]

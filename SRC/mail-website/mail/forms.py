@@ -1,5 +1,5 @@
 from django import forms
-from mail.models import Email, Category
+from mail.models import Email, Category, Signature
 from django.core import validators
 from django.utils.translation import ugettext_lazy as _
 
@@ -41,7 +41,7 @@ class CommaSeparatedCharField(forms.Field):
 class CreateMailForm(forms.ModelForm):
     class Meta:
         model = Email
-        fields = ['subject', 'body', 'file']
+        fields = ['subject', 'body', 'file', 'signature']
 
     recipients = CommaSeparatedCharField(max_length=200, required=True)
     cc = CommaSeparatedCharField(max_length=200, required=False)
@@ -72,3 +72,9 @@ class ForwardForm(forms.ModelForm):
     recipients = CommaSeparatedCharField(max_length=200, required=True)
     cc = CommaSeparatedCharField(max_length=200, required=False)
     bcc = CommaSeparatedCharField(max_length=200, required=False)
+
+
+class SignatureForm(forms.ModelForm):
+    class Meta:
+        model = Signature
+        exclude = ['owner']

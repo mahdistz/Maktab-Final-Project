@@ -3,7 +3,7 @@
     <center>
     <h3>you have {{ emails|length }} Email{{ emails|length|pluralize }}</h3>
     <br>
-    <div class="table-responsive" style="height: auto;width: 1000px">
+    <div class="app-table" style="height: auto;width: 1000px">
     <table class="table">
     <tbody>
             <td class="name">From</td>
@@ -27,6 +27,24 @@
     </tbody></table>
     </div>
     </center>
+    <div class="table-output">
+              <center>
+            <table class="table">
+            <thead>
+            <tr>
+            <td class="name">From</td>
+            <td class="text-body">Email</td>
+            <td class="time">Time</td>
+            </tr>
+
+            </thead>
+            <tbody class="table-body">
+
+            </tbody>
+            </table>
+             </center>
+
+            </div>
 <style >
 body{
     margin-top:20px;

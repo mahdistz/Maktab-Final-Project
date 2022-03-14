@@ -1,0 +1,68 @@
+{% extends 'home.html' %}
+{% block title %} Signature {% endblock %}
+{% block content %}
+    <center>
+    <h3>you have {{ signatures|length }} Signature{{ signatures|length|pluralize }}</h3>
+     <br>
+    <a href="{% url 'create_signature' %}" ><input type="submit" class="btn btn-primary" value="Create Signature"></a>
+    <br>
+    <br>
+    <div class="table-responsive" style="height: auto;width: 500px">
+    <table class="table">
+    <tbody>
+            <td class="text"><center>Text</center></td>
+
+    {% for signature in signatures %}
+                <tr>
+                <td class="text"><a href="/mail/signature_detail/{{ signature.id }}">
+                    <center>{{ signature.text }}</center></a></td>
+                </tr>
+    {% endfor %}
+    </tbody></table>
+    </div>
+    </center>
+<style >
+body{
+    margin-top:20px;
+    background:#eee;
+}
+.email table {
+	font-weight: 600;
+}
+
+.email table a {
+	color: #666;
+}
+
+.email table tr.read > td {
+	background-color: #f6f6f6;
+}
+
+.email table tr.read > td {
+	font-weight: 400;
+}
+
+.email table tr td > i.fa {
+	font-size: 1.2em;
+	line-height: 1.5em;
+	text-align: center;
+}
+
+.email table tr td > i.fa-star {
+	color: #f39c12;
+}
+
+.email table tr td > i.fa-bookmark {
+	color: #e74c3c;
+}
+
+.email table tr > td.action {
+	padding-left: 0px;
+	padding-right: 2px;
+}
+</style>
+
+<script type="text/javascript">
+
+</script>
+{% endblock %}

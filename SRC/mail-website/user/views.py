@@ -250,10 +250,6 @@ class ContactDelete(LoginRequiredMixin, DeleteView):
     success_url = reverse_lazy('contacts')
 
 
-class ContactList(LoginRequiredMixin, ListView):
-    model = Contact
-
-
 class ContactDetail(LoginRequiredMixin, DetailView):
     model = Contact
 
@@ -271,7 +267,10 @@ class ContactsOfUser(LoginRequiredMixin, View):
             form = SearchContactForm(request.GET)
             if form.is_valid():
                 cd = form.cleaned_data['search']
-                contacts = contacts.filter(name__icontains=cd)
+                contacts = contacts.filter(Q(name__icontains=cd) |
+                                           Q(phone_number__icontains=cd) |
+                                           Q(birth_date__icontains=cd) |
+                                           Q(email__username__icontains=cd))
         return render(request, self.template_name, {'contacts': contacts, 'form': form})
 
 
