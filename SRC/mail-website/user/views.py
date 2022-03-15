@@ -6,7 +6,6 @@ from django.contrib.sites.shortcuts import get_current_site
 from django.views import View
 from utils import send_otp_code
 from .forms import UserRegisterForm, VerifyCodeForm, CreateContactForm, ContactUpdateForm, SearchContactForm
-from django.shortcuts import render, redirect
 from django.contrib.auth import login, authenticate
 from django.utils.encoding import force_bytes, force_text
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
@@ -27,8 +26,7 @@ from django.contrib.auth.views import LoginView
 from .forms import LoginForm
 from django.contrib.auth.views import PasswordResetView
 from django.contrib.messages.views import SuccessMessageMixin
-from mail.forms import CreateMailForm
-from django.views.generic import ListView, DetailView, DeleteView, UpdateView
+from django.views.generic import DetailView
 from user.models import Contact
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render, redirect, HttpResponse, HttpResponseRedirect, Http404
@@ -41,8 +39,7 @@ def index(request):
 
 @login_required(login_url=settings.LOGIN_URL)
 def home(request):
-    form = CreateMailForm
-    return render(request, 'home.html', {'form': form})
+    return render(request, 'home.html', {})
 
 
 # Class based view that extends from the built-in login view to add remember me functionality
@@ -245,13 +242,15 @@ class ContactUpdate(LoginRequiredMixin, View):
         return render(request, self.template_name, {'form': form})
 
 
-class ContactDelete(LoginRequiredMixin, DeleteView):
-    model = Contact
-    success_url = reverse_lazy('contacts')
-
-
 class ContactDetail(LoginRequiredMixin, DetailView):
     model = Contact
+
+
+def contact_delete(request, pk):
+    contact = Contact.objects.filter(id=pk)
+    contact.delete()
+    messages.success(request, 'contact deleted successfully', 'success')
+    return redirect('contacts')
 
 
 class ContactsOfUser(LoginRequiredMixin, View):
@@ -286,7 +285,8 @@ class CreateContact(LoginRequiredMixin, View):
         form = self.form_class(request.POST)
         if form.is_valid():
             contact = form.save(commit=False)
-            contact.owner = request.user
+            contact.owner = Users.objects.get(id=request.user.id)
+            contact.email = Users.objects.get(username=form.cleaned_data['email'])
             contact.save()
             messages.success(request, 'contact created successfully', 'success')
             return redirect('contacts')

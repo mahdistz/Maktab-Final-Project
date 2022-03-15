@@ -17,7 +17,10 @@ from django.http import JsonResponse
 def search_emails_inbox(request):
     if request.method == 'POST':
         search_str = json.loads(request.body).get('searchText')
-        emails = Email.objects.filter(body__icontains=search_str, recipients=request.user, is_sent=True)
+        emails = Email.objects.filter(Q(body__icontains=search_str, recipients=request.user) |
+                                      Q(body__icontains=search_str, cc=request.user) |
+                                      Q(body__icontains=search_str, bcc=request.user) |
+                                      Q(body__icontains=search_str, sender=request.user))
         data = emails.values()
         return JsonResponse(list(data), safe=False)
 
@@ -76,16 +79,28 @@ def to_cc_bcc(to, cc, bcc):
     return all_receiver
 
 
-class CreateMail(LoginRequiredMixin, View):
+class CreateNewEmail(LoginRequiredMixin, View):
     form_class = CreateMailForm
+    template_name = 'mail/create_new_email.html'
 
     def get(self, request):
         form = self.form_class
-        return render(request, 'home.html', {'form': form})
+        owner = Users.objects.get(id=request.user.id)
+        signatures = Signature.objects.filter(owner=owner)
+        return render(request, self.template_name, {'form': form, 'signatures': signatures})
 
     def post(self, request):
         form = self.form_class(request.POST, request.FILES)
+        form.subject = request.POST.get('subject')
+        form.file = request.POST.get('file')
+        form.body = request.POST.get('body')
+        form.recipients = request.POST.get('recipients')
+        form.cc = request.POST.get('cc')
+        form.bcc = request.POST.get('bcc')
+        form.signature = request.POST.get('text')
         if form.is_valid():
+            owner = Users.objects.get(id=request.user.id)
+            signature = Signature.objects.get(owner=owner, text=form.signature)
             if 'save' in request.POST:
                 # When the user presses the save button, email's field is_sent=True,
                 # then email object saved.
@@ -99,8 +114,9 @@ class CreateMail(LoginRequiredMixin, View):
                         exist_receiver = Users.objects.filter(username=receiver)
                         if exist_receiver:
                             cd['recipients'] = receiver
-                            email = Email.objects.create(sender=sender, subject=cd['subject'], body=cd['body'],
-                                                         file=cd['file'], signature=cd['signature'],
+                            email = Email.objects.create(sender=sender, subject=cd['subject'],
+                                                         body=cd['body'], file=cd['file'],
+                                                         signature=signature,
                                                          is_sent=True, status='recipients')
                             recipients = Users.objects.get_by_natural_key(username=cd['recipients'])
                             email.recipients.add(recipients)
@@ -111,8 +127,9 @@ class CreateMail(LoginRequiredMixin, View):
                         exist_receiver = Users.objects.filter(username=receiver)
                         if exist_receiver:
                             cd['cc'] = receiver
-                            email = Email.objects.create(sender=sender, subject=cd['subject'], body=cd['body'],
-                                                         file=cd['file'], signature=cd['signature'],
+                            email = Email.objects.create(sender=sender, subject=cd['subject'],
+                                                         body=cd['body'], file=cd['file'],
+                                                         signature=signature,
                                                          is_sent=True, status='cc')
 
                             recipients = Users.objects.get_by_natural_key(username=cd['cc'])
@@ -124,8 +141,9 @@ class CreateMail(LoginRequiredMixin, View):
                         exist_receiver = Users.objects.filter(username=receiver)
                         if exist_receiver:
                             cd['bcc'] = receiver
-                            email = Email.objects.create(sender=sender, subject=cd['subject'], body=cd['body'],
-                                                         file=cd['file'], signature=cd['signature'],
+                            email = Email.objects.create(sender=sender, subject=cd['subject'],
+                                                         body=cd['body'], file=cd['file'],
+                                                         signature=signature,
                                                          is_sent=True, status='bcc')
 
                             recipients = Users.objects.get_by_natural_key(username=cd['bcc'])
@@ -139,8 +157,8 @@ class CreateMail(LoginRequiredMixin, View):
                 # and email object saved. save with is_sent = False to show email on Draft
                 cd = form.cleaned_data
                 sender = Users.objects.get(id=request.user.id)
-                email = Email.objects.create(sender=sender, subject=cd['subject'], signature=cd['signature'],
-                                             body=cd['body'], file=cd['file'])
+                email = Email.objects.create(sender=sender, subject=cd['subject'], file=cd['file']
+                                             , body=cd['body'], signature=signature)
 
                 for people in cd['recipients']:
                     recipients = Users.objects.get_by_natural_key(username=people)
@@ -158,12 +176,12 @@ class CreateMail(LoginRequiredMixin, View):
 
                 email.save()
 
-                messages.info(request, 'mail saved in draft', 'info')
-            return render(request, 'home.html', {})
+                messages.info(request, 'Email saved in draft', 'info')
+            return redirect('drafts')
 
         else:
-            messages.error(request, "mail doesn't sent,error occurred (file size should not exceed 25 MB)", 'error')
-            return render(request, 'home.html', {})
+            messages.error(request, "Email doesn't sent,Error occurred", 'error')
+            return render(request, 'mail/create_new_email.html', {'form': form})
 
 
 class CategoryDetail(LoginRequiredMixin, DetailView):
@@ -214,10 +232,13 @@ class AddEmailToCategory(LoginRequiredMixin, View):
 
     def get(self, request, pk):
         form = self.form_class
-        return render(request, self.template_name, {'form': form})
+        owner = Users.objects.get(id=request.user.id)
+        categories = Category.objects.filter(owner=owner)
+        return render(request, self.template_name, {'form': form, 'categories': categories})
 
     def post(self, request, pk):
         form = self.form_class(request.POST)
+        form.name = request.POST.get('name')
         if form.is_valid():
             email = Email.objects.get(pk=pk)
             category_obj = Category.objects.get(name=form.cleaned_data['name'])
@@ -391,7 +412,3 @@ class Forward(LoginRequiredMixin, View):
             messages.success(request, 'mail sent successfully', 'success')
             return redirect('home')
         return render(request, self.template_name, {'form': form})
-
-
-def create_new_email(request):
-    return render(request, 'mail/create_new_email.html', {})

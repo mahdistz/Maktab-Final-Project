@@ -8,8 +8,8 @@
 <p>Other Emails : {{ object.other_email }}</p>
 
 
-<a href="{% url 'contact_delete' pk=object.id %}"><input class="btn btn-primary" type="submit" value="Delete"></a>
+<a href="{% url 'contact_delete' object.id %}"><input class="btn btn-primary" type="submit" value="Delete"></a>
 
-<a href="{% url 'contact_update' pk=object.id %}"><input class="btn btn-primary" type="submit" value="Edit"></a>
+<a href="{% url 'contact_update' object.id %}"><input class="btn btn-primary" type="submit" value="Edit"></a>
 
 {% endblock %}

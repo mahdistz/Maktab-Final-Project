@@ -1,6 +1,6 @@
 from django.urls import path
 from .views import index, home, ResetPasswordEmailView, CreateContact, ContactDetail, ContactUpdate, \
-    ContactDelete, ContactsOfUser, export_to_csv
+    contact_delete, ContactsOfUser, export_to_csv
 
 urlpatterns = [
     path('', index, name='index'),
@@ -11,5 +11,5 @@ urlpatterns = [
     path('create_contact/', CreateContact.as_view(), name='create_contact'),
     path('contact_detail/<int:pk>/', ContactDetail.as_view(), name='contact_detail'),
     path('contact_update/<int:pk>/', ContactUpdate.as_view(), name='contact_update'),
-    path('contact_delete/<int:pk>/', ContactDelete.as_view(), name='contact_delete'),
+    path('contact_delete/<int:pk>/', contact_delete, name='contact_delete'),
 ]

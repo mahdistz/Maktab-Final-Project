@@ -1,7 +1,8 @@
 {% extends 'home.html' %}
+{% block title %} Inbox {% endblock %}
 {% block content %}
     <center>
-    <h3>you have {{ emails|length }} Email{{ emails|length|pluralize }}</h3>
+    <h3>Inbox - you have {{ emails|length }} Email{{ emails|length|pluralize }}</h3>
     <br>
     <div class="app-table" style="height: auto;width: 1000px">
     <table class="table">

@@ -2,7 +2,17 @@
 {% block content %}
 <form method="post">
 {% csrf_token %}
-    {{ form.as_p }}
+    <div class="form-group mt-4">
+        <label for="category" class="col-2 col-sm-1 col-form-label">Category:</label>
+        <select name="name" >
+             <option selected="selected" disabled>Categories:</option>
+             {% for category in categories %}
+                 <option
+                  value="{{ category }}"
+                 >{{ category }}</option>
+             {% endfor %}
+        </select>
+    </div>
     <br>
    <input type="submit" class="btn btn-primary" value="Add Email to this Label">
 </form>
