@@ -35,6 +35,15 @@ class Signature(models.Model):
         return f"{self.text}"
 
 
+class Filter(models.Model):
+    owner = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="owner_filter")
+    from_user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="from_user", null=True, blank=True)
+    text_include = models.CharField(max_length=100, null=True, blank=True)
+    label = models.ForeignKey(Category, on_delete=models.CASCADE, related_name="label")
+
+
 class Email(models.Model):
     sender = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="sender")

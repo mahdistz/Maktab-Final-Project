@@ -1,0 +1,17 @@
+{% extends 'home.html' %}
+{% block title %}Create Filter{% endblock %}
+{% block content %}
+    <center>
+    <h3>Create Filter</h3>
+        <br>
+<form method="post">
+{% csrf_token %}
+    <table>
+        {{ form.as_table }}
+        </table>
+    <br>
+   <input class="btn btn-primary" type="submit" value="save">
+    <a href="{% url 'filters' %}" class="btn btn-danger">Cancel</a>
+</form>
+    </center>
+{% endblock %}

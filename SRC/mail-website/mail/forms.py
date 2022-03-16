@@ -1,5 +1,5 @@
 from django import forms
-from mail.models import Email, Category, Signature
+from mail.models import Email, Category, Signature, Filter
 from user.models import Users
 from django.core import validators
 from django.utils.translation import ugettext_lazy as _
@@ -128,3 +128,10 @@ class SignatureForm(forms.ModelForm):
     class Meta:
         model = Signature
         exclude = ['owner']
+
+
+class CreateFilterForm(forms.ModelForm):
+    class Meta:
+        model = Filter
+        exclude = ['owner']
+

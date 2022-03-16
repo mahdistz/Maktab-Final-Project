@@ -66,7 +66,7 @@ class SignUpView(View):
     def dispatch(self, request, *args, **kwargs):
         # will redirect to the home page if a user tries to access the register page while logged in
         if request.user.is_authenticated:
-            return redirect(to='/')
+            return redirect(to='/home/')
         # else process dispatch as it otherwise normally would
         return super(SignUpView, self).dispatch(request, *args, **kwargs)
 
@@ -246,6 +246,7 @@ class ContactDetail(LoginRequiredMixin, DetailView):
     model = Contact
 
 
+@login_required(login_url=settings.LOGIN_URL)
 def contact_delete(request, pk):
     contact = Contact.objects.filter(id=pk)
     contact.delete()

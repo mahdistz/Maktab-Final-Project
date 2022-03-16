@@ -28,7 +28,7 @@ searchField.addEventListener("keyup",(e)=>{
                     data.forEach((item)=>{
                         tbody.innerHTML += `
                         <tr>
-                        <td>${item.sender}</td>
+                        <td>${item.sender_id}</td>
                         <td>${item.body}</td>
                         <td>${item.created_time}</td>
                         </tr>`;

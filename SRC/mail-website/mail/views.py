@@ -1,9 +1,10 @@
 from django.shortcuts import render, redirect, HttpResponse, HttpResponseRedirect, Http404
 from django.views import View
 from django.contrib import messages
-from .models import Email, Category, Signature
+from .models import Email, Category, Signature, Filter
 from user.models import Users
-from mail.forms import CreateMailForm, CreateCategoryForm, AddEmailToCategoryForm, ForwardForm, ReplyForm, SignatureForm
+from mail.forms import CreateMailForm, CreateCategoryForm, \
+    AddEmailToCategoryForm, ForwardForm, ReplyForm, SignatureForm, CreateFilterForm
 from django.urls import reverse_lazy
 from django.views.generic import DetailView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -14,7 +15,8 @@ import json
 from django.http import JsonResponse
 
 
-def search_emails_inbox(request):
+@login_required(login_url=settings.LOGIN_URL)
+def search_emails(request):
     if request.method == 'POST':
         search_str = json.loads(request.body).get('searchText')
         emails = Email.objects.filter(Q(body__icontains=search_str, recipients=request.user) |
@@ -22,6 +24,9 @@ def search_emails_inbox(request):
                                       Q(body__icontains=search_str, bcc=request.user) |
                                       Q(body__icontains=search_str, sender=request.user))
         data = emails.values()
+        for email in data:
+            email['sender_id'] = Users.objects.get(pk=email['sender_id']).username
+            email['created_time'] = email['created_time'].strftime('%Y-%m-%d %H:%M:%S')
         return JsonResponse(list(data), safe=False)
 
 
@@ -412,3 +417,43 @@ class Forward(LoginRequiredMixin, View):
             messages.success(request, 'mail sent successfully', 'success')
             return redirect('home')
         return render(request, self.template_name, {'form': form})
+
+
+class Settings(LoginRequiredMixin, View):
+    template_name = 'mail/settings.html'
+
+    def get(self, request):
+        return render(request, self.template_name, {})
+
+
+class Filters(LoginRequiredMixin, View):
+    template_name = 'mail/filters.html'
+
+    def get(self, request):
+        owner = Users.objects.get(id=request.user.id)
+        filters = Filter.objects.filter(owner=owner)
+        return render(request, self.template_name, {'filters': filters})
+
+
+class FilterDetail(LoginRequiredMixin, DetailView):
+    model = Filter
+
+
+class CreateFilter(LoginRequiredMixin, View):
+    form_class = CreateFilterForm
+    template_name = 'mail/create_filter.html'
+
+    def get(self, request):
+        form = self.form_class
+        return render(request, self.template_name, {'form': form})
+
+    def post(self, request):
+        form = self.form_class(request.POST)
+        if form.is_valid():
+            filter = form.save(commit=False)
+            filter.owner = Users.objects.get(id=request.user.id)
+            filter.save()
+            messages.success(request, 'filter created successfully', 'success')
+            return redirect('filters')
+        return render(request, self.template_name, {'form': form})
+

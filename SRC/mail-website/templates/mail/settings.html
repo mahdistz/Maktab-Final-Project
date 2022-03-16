@@ -1,0 +1,11 @@
+{% extends 'home.html' %}
+{% block title %}Settings{% endblock %}
+{% block content %}
+    <center>
+    <h3>Settings</h3>
+        <br>
+    <a href="{% url 'signatures' %}" ><input type="submit" class="btn btn-primary" value="Signatures"></a>
+    <a href="{% url 'filters' %}" ><input type="submit" class="btn btn-primary" value="Filter"></a>
+    <br>
+    </center>
+{% endblock %}
