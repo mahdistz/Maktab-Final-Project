@@ -1,4 +1,4 @@
-"""SRC URL Configuration
+"""mail-website URL Configuration
 
 The `urlpatterns` list routes URLs to views. For more information please see:
     https://docs.djangoproject.com/en/4.0/topics/http/urls/
@@ -37,7 +37,7 @@ urlpatterns = [
                   path('logout/', auth.LogoutView.as_view(template_name='user/logout.html'), name='logout'),
                   path('activate/<uidb64>/<token>/', ActivateAccount.as_view(), name='activate'),
                   path('register/', SignUpView.as_view(), name='register'),
-                  path('verify/', VerifyCodeView.as_view(), name='verify'),
+                  path('verify/', VerifyCodeView.as_view(), name='verify')
 
               ] + static(settings.STATIC_URL)
 

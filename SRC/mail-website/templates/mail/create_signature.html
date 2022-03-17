@@ -1,8 +1,8 @@
 {% extends 'home.html' %}
-{% block title %}Create Label{% endblock %}
+{% block title %}Create Signature{% endblock %}
 {% block content %}
     <center>
-    <h3>Create Label</h3>
+    <h3>Create Signature</h3>
         <br>
 <form method="post">
 {% csrf_token %}
@@ -11,7 +11,6 @@
         </table>
     <br>
    <input class="btn btn-primary" type="submit" value="save">
-    <a href="{% url 'categories' %}" class="btn btn-danger">Cancel</a>
 </form>
     </center>
 {% endblock %}

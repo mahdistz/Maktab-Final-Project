@@ -1,11 +1,11 @@
 import random
+import csv
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.sites.shortcuts import get_current_site
 from django.views import View
 from utils import send_otp_code
-from .forms import UserRegisterForm, VerifyCodeForm, CreateContactForm, ContactUpdateForm
-from django.shortcuts import render, redirect
+from .forms import UserRegisterForm, VerifyCodeForm, CreateContactForm, ContactUpdateForm, SearchContactForm
 from django.contrib.auth import login, authenticate
 from django.utils.encoding import force_bytes, force_text
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
@@ -26,10 +26,11 @@ from django.contrib.auth.views import LoginView
 from .forms import LoginForm
 from django.contrib.auth.views import PasswordResetView
 from django.contrib.messages.views import SuccessMessageMixin
-from mail.forms import CreateMailForm
-from django.views.generic import ListView, DetailView, DeleteView, UpdateView
+from django.views.generic import DetailView
 from user.models import Contact
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.shortcuts import render, redirect, HttpResponse, HttpResponseRedirect, Http404
+from django.db.models import Q
 
 
 def index(request):
@@ -38,8 +39,7 @@ def index(request):
 
 @login_required(login_url=settings.LOGIN_URL)
 def home(request):
-    form = CreateMailForm
-    return render(request, 'home.html', {'form': form})
+    return render(request, 'home.html', {})
 
 
 # Class based view that extends from the built-in login view to add remember me functionality
@@ -66,7 +66,7 @@ class SignUpView(View):
     def dispatch(self, request, *args, **kwargs):
         # will redirect to the home page if a user tries to access the register page while logged in
         if request.user.is_authenticated:
-            return redirect(to='/')
+            return redirect(to='/home/')
         # else process dispatch as it otherwise normally would
         return super(SignUpView, self).dispatch(request, *args, **kwargs)
 
@@ -101,17 +101,21 @@ class SignUpView(View):
                 code = random.randint(100000, 999999)
                 CodeRegister.objects.create(phone_number=form.cleaned_data['phone'],
                                             code=code)
-                # to show on terminal and complete the request
-                print(code)
-                # kavenegar service --> can't send sms because 'sender' is None
+                # kavenegar service
                 send_otp_code(form.cleaned_data['phone'], code)
                 # Sending session to other url for verifying user with sms code.
                 request.session['user_registering'] = {
-                    'phone': form.cleaned_data['phone'],
-                    'email': form.cleaned_data['email'],
+                    'username': form.cleaned_data['username'],
                     'password1': form.cleaned_data['password1'],
                     'password2': form.cleaned_data['password2'],
-                    'username': form.cleaned_data['username'],
+                    'verification': form.cleaned_data['verification'],
+                    'phone': form.cleaned_data['phone'],
+                    'email': form.cleaned_data['email'],
+                    'first_name': form.cleaned_data['first_name'],
+                    'last_name': form.cleaned_data['last_name'],
+                    'nationality': form.cleaned_data['nationality'],
+                    'birth_date': form.cleaned_data['birth_date'].isoformat(),
+                    'gender': form.cleaned_data['gender'],
                 }
                 messages.success(request, 'we sent you a code', 'success')
                 return redirect('verify')
@@ -217,40 +221,57 @@ class ContactUpdate(LoginRequiredMixin, View):
     form_class = ContactUpdateForm
     template_name = 'user/contact_update.html'
 
-    def get(self, request, pk):
-        form = self.form_class
+    def get(self, request, pk, *args, **kwargs):
+        contact = Contact.objects.get(pk=pk)
+        form = self.form_class(instance=contact)
         return render(request, self.template_name, {'form': form})
 
     def post(self, request, pk):
         form = self.form_class(request.POST)
         if form.is_valid():
-            update_contact = form.save(commit=False)
+            update_contact = form.cleaned_data
             contact = Contact.objects.get(pk=pk)
-            contact.user = request.user
-            contact.name = update_contact.name
-            contact.birth_date1 = update_contact.birth_date1
-            if update_contact.other_email:
-                contact.other_email = update_contact.other_email
-            contact.other_email = 'default@mail.com'
-            contact.email = update_contact.email
-            contact.phone_number1 = update_contact.phone_number1
-            contact.save(update_fields=['name', 'birth_date1', 'other_email', 'email', 'phone_number1'])
+            contact.name = update_contact['name']
+            contact.email = update_contact['email']
+            contact.phone_number = update_contact['phone_number']
+            contact.other_email = update_contact['other_email']
+            contact.birth_date = update_contact['birth_date']
+            contact.save()
             messages.success(request, 'contact updated successfully', 'success')
             return redirect('contacts')
         return render(request, self.template_name, {'form': form})
 
 
-class ContactDelete(LoginRequiredMixin, DeleteView):
-    model = Contact
-    success_url = reverse_lazy('contacts')
-
-
-class ContactList(LoginRequiredMixin, ListView):
-    model = Contact
-
-
 class ContactDetail(LoginRequiredMixin, DetailView):
     model = Contact
+
+
+@login_required(login_url=settings.LOGIN_URL)
+def contact_delete(request, pk):
+    contact = Contact.objects.filter(id=pk)
+    contact.delete()
+    messages.success(request, 'contact deleted successfully', 'success')
+    return redirect('contacts')
+
+
+class ContactsOfUser(LoginRequiredMixin, View):
+    template_name = 'user/contacts.html'
+
+    def get(self, request):
+        user_id = request.user.id
+        user = Users.objects.get(id=user_id)
+        contacts = user.contacts.all()
+        # search in name or email of contacts
+        form = SearchContactForm()
+        if 'search' in request.GET:
+            form = SearchContactForm(request.GET)
+            if form.is_valid():
+                cd = form.cleaned_data['search']
+                contacts = contacts.filter(Q(name__icontains=cd) |
+                                           Q(phone_number__icontains=cd) |
+                                           Q(birth_date__icontains=cd) |
+                                           Q(email__username__icontains=cd))
+        return render(request, self.template_name, {'contacts': contacts, 'form': form})
 
 
 class CreateContact(LoginRequiredMixin, View):
@@ -265,8 +286,26 @@ class CreateContact(LoginRequiredMixin, View):
         form = self.form_class(request.POST)
         if form.is_valid():
             contact = form.save(commit=False)
-            contact.user = request.user
+            contact.owner = Users.objects.get(id=request.user.id)
+            contact.email = Users.objects.get(username=form.cleaned_data['email'])
             contact.save()
             messages.success(request, 'contact created successfully', 'success')
             return redirect('contacts')
         return render(request, self.template_name, {'form': form})
+
+
+def export_to_csv(request):
+    model_class = Contact
+
+    meta = model_class._meta
+    field_names = [field.name for field in meta.fields]
+
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename={}.csv'.format(meta)
+    writer = csv.writer(response)
+
+    writer.writerow(field_names)
+    for obj in model_class.objects.filter(owner_id=request.user):
+        row = writer.writerow([getattr(obj, field) for field in field_names])
+
+    return response

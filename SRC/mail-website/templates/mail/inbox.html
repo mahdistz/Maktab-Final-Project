@@ -1,17 +1,93 @@
 {% extends 'home.html' %}
+{% block title %} Inbox {% endblock %}
 {% block content %}
     <center>
-    {% for email in recipients %}
-        <li><a href="/mail/email_detail/{{ email.id }}"> {{ email.title }}-{{ email.body|truncatewords:5 }}
-         {{ email.created_time|date:"D d M Y" }}-{{ email.created_time|time:"H:i" }}</a> </li>
+    <h3>Inbox - you have {{ emails|length }} Email{{ emails|length|pluralize }}</h3>
+    <br>
+    <div class="app-table" style="height: auto;width: 1000px">
+    <table class="table">
+    <tbody>
+            <td class="name">From</td>
+            <td class="subject">Subject</td>
+            <td class="text-body">Email</td>
+            <td class="file-upload">File</td>
+            <td class="time">Time</td>
+    {% for email in emails %}
+                <tr>
+                <td class="name">{{ email.sender }}</td>
+                <td class="subject">{{ email.subject }}</td>
+                <td class="text-body"><a href="/mail/email_detail/{{ email.id }}">{{ email.body|truncatewords:7 }}</a></td>
+                {% if email.file %}
+                <td class="file-upload"><a href="{{ email.file.url }}">Download file</a></td>
+                {% else %}
+                <td class="file-upload">No File</td>
+                {% endif %}
+                <td class="time">{{ email.created_time|date:" d M Y" }}-{{ email.created_time|time:"H:i" }}</td>
+                </tr>
     {% endfor %}
-     {% for email in cc %}
-        <li><a href="/mail/email_detail/{{ email.id }}"> {{ email.title }}-{{ email.body|truncatewords:5 }}
-         {{ email.created_time|date:"D d M Y" }}-{{ email.created_time|time:"H:i" }}</a> </li>
-    {% endfor %}
-     {% for email in bcc %}
-        <li><a href="/mail/email_detail/{{ email.id }}"> {{ email.title }}-{{ email.body|truncatewords:5 }}
-         {{ email.created_time|date:"D d M Y" }}-{{ email.created_time|time:"H:i" }}</a> </li>
-    {% endfor %}
+    </tbody></table>
+    </div>
     </center>
+    <div class="table-output">
+              <center>
+            <table class="table">
+            <thead>
+            <tr>
+            <td class="name">From</td>
+            <td class="text-body">Email</td>
+            <td class="time">Time</td>
+            </tr>
+
+            </thead>
+            <tbody class="table-body">
+
+            </tbody>
+            </table>
+             </center>
+
+            </div>
+<style >
+body{
+    margin-top:20px;
+    background:#eee;
+}
+.email table {
+	font-weight: 600;
+}
+
+.email table a {
+	color: #666;
+}
+
+.email table tr.read > td {
+	background-color: #f6f6f6;
+}
+
+.email table tr.read > td {
+	font-weight: 400;
+}
+
+.email table tr td > i.fa {
+	font-size: 1.2em;
+	line-height: 1.5em;
+	text-align: center;
+}
+
+.email table tr td > i.fa-star {
+	color: #f39c12;
+}
+
+.email table tr td > i.fa-bookmark {
+	color: #e74c3c;
+}
+
+.email table tr > td.action {
+	padding-left: 0px;
+	padding-right: 2px;
+}
+</style>
+
+<script type="text/javascript">
+
+</script>
 {% endblock %}

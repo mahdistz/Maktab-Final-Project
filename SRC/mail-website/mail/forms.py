@@ -1,5 +1,6 @@
 from django import forms
-from mail.models import Email, Category
+from mail.models import Email, Category, Signature, Filter
+from user.models import Users
 from django.core import validators
 from django.utils.translation import ugettext_lazy as _
 
@@ -41,11 +42,39 @@ class CommaSeparatedCharField(forms.Field):
 class CreateMailForm(forms.ModelForm):
     class Meta:
         model = Email
-        fields = ['subject', 'body', 'file']
+        fields = ['subject', 'body', 'file', 'signature']
 
     recipients = CommaSeparatedCharField(max_length=200, required=True)
     cc = CommaSeparatedCharField(max_length=200, required=False)
     bcc = CommaSeparatedCharField(max_length=200, required=False)
+
+    def clean_recipients(self):
+        recipients = self.cleaned_data['recipients']
+        for receiver in recipients:
+            if not Users.objects.filter(username=receiver).exists():
+                raise forms.ValidationError(f'there is no user with this email: {receiver}')
+        return recipients
+
+    def clean_cc(self):
+        cc = self.cleaned_data['cc']
+        for receiver in cc:
+            if not Users.objects.filter(username=receiver).exists():
+                raise forms.ValidationError(f'there is no user with this email: {receiver}')
+        return cc
+
+    def clean_bcc(self):
+        bcc = self.cleaned_data['bcc']
+        for receiver in bcc:
+            if not Users.objects.filter(username=receiver).exists():
+                raise forms.ValidationError(f'there is no user with this email: {receiver}')
+        return bcc
+
+    def clean_file(self):
+        if self.cleaned_data['file']:
+            file = self.cleaned_data['file']
+            if file.size > 25 * 1024 * 1024:
+                raise forms.ValidationError('file size should not exceed 25 MB')
+            return file
 
 
 class CreateCategoryForm(forms.ModelForm):
@@ -55,7 +84,7 @@ class CreateCategoryForm(forms.ModelForm):
 
 
 class AddEmailToCategoryForm(forms.Form):
-    name = forms.ModelChoiceField(queryset=Category.objects.all())
+    name = forms.CharField(max_length=100)
 
 
 class ReplyForm(forms.ModelForm):
@@ -72,3 +101,37 @@ class ForwardForm(forms.ModelForm):
     recipients = CommaSeparatedCharField(max_length=200, required=True)
     cc = CommaSeparatedCharField(max_length=200, required=False)
     bcc = CommaSeparatedCharField(max_length=200, required=False)
+
+    def clean_recipients(self):
+        recipients = self.cleaned_data['recipients']
+        for receiver in recipients:
+            if not Users.objects.filter(username=receiver).exists():
+                raise forms.ValidationError(f'there is no user with this email: {receiver}')
+        return recipients
+
+    def clean_cc(self):
+        cc = self.cleaned_data['cc']
+        for receiver in cc:
+            if not Users.objects.filter(username=receiver).exists():
+                raise forms.ValidationError(f'there is no user with this email: {receiver}')
+        return cc
+
+    def clean_bcc(self):
+        bcc = self.cleaned_data['bcc']
+        for receiver in bcc:
+            if not Users.objects.filter(username=receiver).exists():
+                raise forms.ValidationError(f'there is no user with this email: {receiver}')
+        return bcc
+
+
+class SignatureForm(forms.ModelForm):
+    class Meta:
+        model = Signature
+        exclude = ['owner']
+
+
+class CreateFilterForm(forms.ModelForm):
+    class Meta:
+        model = Filter
+        exclude = ['owner']
+

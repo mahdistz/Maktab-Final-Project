@@ -1,0 +1,12 @@
+{% extends 'home.html' %}
+{% block title %} Signature Detail{% endblock %}
+{% block content %}
+    <center>
+<p>Signature Text : {{ object.text }}</p>
+
+ <form action="{% url 'signature_delete' object.id %}" method="post">
+    {% csrf_token %}
+    <input class="btn btn-primary" type="submit" value="Delete Signature">
+</form>
+</center>
+{% endblock %}

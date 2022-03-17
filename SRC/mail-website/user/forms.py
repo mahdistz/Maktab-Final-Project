@@ -103,20 +103,34 @@ class LoginForm(AuthenticationForm):
 
 
 class CreateContactForm(forms.ModelForm):
+    email = forms.EmailField()
+
     class Meta:
         model = Contact
-        exclude = ['user']
+        exclude = ['owner', 'email']
 
         widgets = {
-            'birth_date1': DateInput(),
+            'birth_date': DateInput(),
         }
+
+    def clean_email(self):
+        email = self.cleaned_data['email']
+        if not Users.objects.filter(username=email).exists():
+            raise forms.ValidationError(f'there is no user with this email: {email}')
+        if Contact.objects.filter(email__username=email).exists():  # here we must pass the owner in filter
+            raise forms.ValidationError(f'you have a contact with this email: {email}')
+        return email
 
 
 class ContactUpdateForm(forms.ModelForm):
     class Meta:
         model = Contact
-        exclude = ['user']
+        exclude = ['owner']
 
         widgets = {
-            'birth_date1': DateInput(),
+            'birth_date': DateInput(),
         }
+
+
+class SearchContactForm(forms.Form):
+    search = forms.CharField()

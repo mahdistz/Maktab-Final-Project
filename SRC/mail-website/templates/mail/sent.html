@@ -1,34 +1,26 @@
 {% extends 'home.html' %}
-{% block title %}Emails of Label{% endblock %}
+{% block title %}Sent{% endblock %}
 {% block content %}
     <center>
-    <h3>Emails of Label : {{ category.name }}</h3>
-    <br>
+    <h3>Sent - you have {{ sent|length }} Email{{ sent|length|pluralize }}</h3>
+        <br>
     <div class="table-responsive" style="height: auto;width: 1000px">
     <table class="table">
     <tbody>
-            <td class="name">From</td>
             <td class="subject">Subject</td>
             <td class="text-body">Email</td>
-            <td class="file-upload">File</td>
             <td class="time">Time</td>
-    {% for email in emails %}
+    {% for email in sent %}
         <tr>
-                <td class="name">{{ email.sender }}</td>
                 <td class="subject">{{ email.subject }}</td>
                 <td class="text-body"><a href="/mail/email_detail/{{ email.id }}">{{ email.body|truncatewords:7 }}</a></td>
-                {% if email.file %}
-                <td class="file-upload"><a href="{{ email.file.url }}">Download file</a></td>
-                {% else %}
-                <td class="file-upload">No File</td>
-                {% endif %}
                 <td class="time">{{ email.created_time|date:" d M Y" }}-{{ email.created_time|time:"H:i" }}</td>
                 </tr>
     {% endfor %}
     </tbody></table>
     </div>
     </center>
-<style >
+<style type="text/css">
 body{
     margin-top:20px;
     background:#eee;

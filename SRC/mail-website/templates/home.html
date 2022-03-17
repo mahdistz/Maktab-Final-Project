@@ -15,9 +15,12 @@
     <link href="{% static 'fonts.css' %}" rel="stylesheet">
     <link href="{% static 'layout.css' %}" rel="stylesheet">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-
+    <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
+    <link href="https://netdna.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" rel="stylesheet">
+	<script src="https://netdna.bootstrapcdn.com/bootstrap/4.0.0-beta/js/bootstrap.min.js"></script>
     {% block custom-css %}
-
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet">
+<br>
     {% endblock %}
 
     {% block head %}
@@ -48,7 +51,7 @@
     <hr />
     <ul class="list-unstyled components">
     <li>
-        <a href="" data-toggle="modal" data-target="#Modal">Create New Mail</a>
+        <a href="{% url 'create_new_email' %}" >New Email</a>
     </li>
     <li>
         <a href="{% url 'inbox' %}">Inbox</a>
@@ -60,7 +63,7 @@
         <a href="{% url 'draft' %}">Draft</a>
     </li>
     <li>
-        <a href="{% url 'home' %}">Archive</a>
+        <a href="{% url 'archives' %}">Archive</a>
     </li>
     <li>
         <a href="{% url 'categories' %}">Label</a>
@@ -69,7 +72,7 @@
         <a href="{% url 'contacts' %}">Contacts</a>
     </li>
     <li>
-        <a href="{% url 'home' %}">Trash</a>
+        <a href="{% url 'trashes' %}">Trash</a>
     </li>
     </ul>
 
@@ -104,26 +107,24 @@
             <div class="collapse navbar-collapse" id="navbarTop">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="navbarAdmin" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                          Menu
-                        </a>
-                        <ul class="dropdown-menu" aria-labelledby="navbarAdmin">
-                          <li><a class="dropdown-item" href="#">
-                              Item</a></li>
-                          <li><a class="dropdown-item" href="#">
-                              Item</a></li>
-                          <li><hr class="dropdown-divider"></li>
-                          <li><a class="dropdown-item" href="#">Item</a></li>
-                        </ul>
+                         <div class="form-inline active-cyan-3 active-cyan-4">
+                             <i class="fa fa-search" aria-hidden="true"></i>
+                            <input type="text" class="form-control ml-3 w-75"
+                                   id="searchField" placeholder="Search"
+                                   aria-label="Search">
+                        </div>
                       </li>
                       <li class="nav-item active">
                         <a class="nav-link" href="{% url 'home' %}">Home</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="" data-toggle="modal" data-target="#Modal">New Mail</a>
+                        <a class="nav-link" href="{% url 'create_new_email' %}" >New Email</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#">Page</a>
+                        <div class="form-inline active-cyan-3 active-cyan-4">
+                        <i class="fa fa-gear"></i>
+                        <a class="nav-link" href="{% url 'settings' %}">Settings</a>
+                            </div>
                     </li>
                 </ul>
             </div>
@@ -139,38 +140,98 @@
 
     <div id="content-wrapper">
         {% block content %}
-            <!-- Modal -->
-            <div class="modal fade" id="Modal" data-backdrop="static" data-keyboard="false"
-                 tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-              <div class="modal-dialog">
-                <div class="modal-content">
-                  <div class="modal-header">
-                    <h5 class="modal-title" id="staticBackdropLabel">Create New Email</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                      <span aria-hidden="true">&times;</span>
-                    </button>
-                  </div>
-                  <div class="modal-body">
-                  <form action="{% url 'create_mail' %}" method="post" enctype="multipart/form-data">
-                      {% csrf_token %}
-                      {{form|crispy}}
-                  </div>
-                  <div class="modal-footer">
-                    <input type="submit" class="btn btn-primary" name="cancel" value="Cancel" >
-                      <input type="submit" class="btn btn-primary" name="save" value="Save" >
-                  </div>
-                    </form>
+                <div class="app-table" style="height: auto;width: 1000px">
+                <table class="table">
+                <tbody>
+                    <td class="name">From</td>
+                    <td class="subject">Subject</td>
+                    <td class="text-body">Email</td>
+                    <td class="time">Time</td>
+                {% for email in emails %}
+                    <tr>
+                    <td class="name">{{ email.sender }}</td>
+                    <td class="subject">{{ email.subject }}</td>
+                    <td class="text-body"><a href="/mail/email_detail/{{ email.id }}">
+                        {{ email.body|truncatewords:7 }}</a></td>
+                    <td class="time">{{ email.created_time|date:" d M Y" }}-{{ email.created_time|time:"H:i" }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody></table>
                 </div>
-              </div>
-            </div>
+            <div class="table-output">
+                          <center>
+                        <table class="table">
+                        <thead>
+                        <tr>
+                        <td class="name">From</td>
+                        <td class="subject">Subject</td>
+                        <td class="text-body">Email</td>
+                        <td class="time">Time</td>
+                        </tr>
+
+                        </thead>
+                        <tbody class="table-body">
+
+                        </tbody>
+                        </table>
+                         </center>
+
+                        </div>
         {% endblock %}
 
-</div>
+    </div>
 </div>
 
 {% endblock %}
 
   {% block script %}
+<script >
+const searchField=document.querySelector("#searchField")
+
+const tableOutput = document.querySelector(".table-output");
+const appTable = document.querySelector(".app-table");
+const tbody = document.querySelector(".table-body");
+tableOutput.style.display='none';
+
+searchField.addEventListener("keyup",(e)=>{
+    const searchValue = e.target.value;
+
+    if(searchValue.trim().length>0) {
+        console.log("searchValue", searchValue);
+        tbody.innerHTML = "";
+
+        fetch('/mail/search_emails/', {
+            body: JSON.stringify({searchText: searchValue}),
+            method: "POST",
+        })
+            .then((res) => res.json())
+            .then((data) => {
+                console.log("data", data);
+                appTable.style.display = 'none';
+                tableOutput.style.display = 'block';
+
+                if (data.length === 0) {
+                    tableOutput.innerHTML = "No results found";
+                }else {
+                    data.forEach((item)=>{
+                        tbody.innerHTML += `
+                        <tr>
+                        <td>${item.sender_id}</td>
+                        <td>${item.subject}</td>
+                        <td><a href="/mail/email_detail/" onclick="location.href=this.href+${item.id}+'/';return false">
+                            ${item.body}</a></td>
+                        <td>${item.created_time}</td>
+                        </tr>`;
+                    });
+                }
+            });
+    }else {
+         appTable.style.display = 'block';
+         tableOutput.style.display = 'none';
+    }
+});
+</script>
+
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
         integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
         crossorigin="anonymous"></script>
@@ -187,7 +248,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
     document.getElementById("sidebarCollapse").onclick = function () {
         document.getElementById("sidebar").classList.toggle("active");
         document.getElementById("content").classList.toggle("active");
-        document.getElementById("Modal").classList.toggle("active");
+        document.getElementById("Mo dal").classList.toggle("active");
         }
     });
 

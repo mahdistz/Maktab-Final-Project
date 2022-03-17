@@ -1,28 +1,30 @@
 {% extends 'home.html' %}
-{% block title %}Trash{% endblock %}
+{% block title %} Filters{% endblock %}
 {% block content %}
     <center>
-    <h3> Trash - you have {{ trashes|length }} Email{{ trashes|length|pluralize }}</h3>
-        <br>
+
+    <h3>You Have {{ filters|length }}  Filter{{ filters|length|pluralize }}</h3>
+    <a href="{% url 'create_filter' %}" ><input type="submit" class="btn btn-primary" value="Create  Filter"></a>
+    <br>
+
     <div class="table-responsive" style="height: auto;width: 1000px">
     <table class="table">
     <tbody>
-            <td class="name">From</td>
-            <td class="subject">Subject</td>
-            <td class="text-body">Email</td>
-            <td class="time">Time</td>
-    {% for email in trashes %}
-        <tr>
-                <td class="name">{{ email.sender }}</td>
-                <td class="subject">{{ email.subject }}</td>
-                <td class="text-body"><a href="/mail/email_detail/{{ email.id }}">{{ email.body|truncatewords:7 }}</a></td>
-                <td class="time">{{ email.created_time|date:" d M Y" }}-{{ email.created_time|time:"H:i" }}</td>
+
+            <td class="filter">Filter</td>
+            <td class="label">Label</td>
+    {% for filter in filters %}
+
+          <tr>
+                <td class="filter"><a href="/mail/filter_detail/{{ filter.id }}">text: {{ filter.text_include }} -
+                    from user: {{ filter.from_user.username }} </a></td>
+                <td class="label">{{ filter.label.name }}</td>
                 </tr>
     {% endfor %}
     </tbody></table>
     </div>
     </center>
-<style type="text/css">
+<style>
 body{
     margin-top:20px;
     background:#eee;
