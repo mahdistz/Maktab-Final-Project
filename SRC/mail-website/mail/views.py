@@ -390,30 +390,56 @@ class Forward(LoginRequiredMixin, View):
     def post(self, request, pk):
         form = self.form_class(request.POST, request.FILES)
         if form.is_valid():
-
             sender = Users.objects.get(id=request.user.id)
-            forward = Email.objects.create(sender=sender,
-                                           subject=form.cleaned_data['subject'],
-                                           body=form.cleaned_data['body'],
-                                           file=form.cleaned_data['file'],
-                                           )
+            signature = Signature.objects.get(owner=sender, text=form.signature)
+            cd = form.cleaned_data
+            to_cc_bcc_list = to_cc_bcc(cd['recipients'], cd['cc'], cd['bcc'])
+            # Clear duplicates receiver
+            receivers_list = list(dict.fromkeys(to_cc_bcc_list))
 
-            for people in form.cleaned_data['recipients']:
-                recipients = Users.objects.get_by_natural_key(username=people)
-                forward.recipients.add(recipients)
+            for receiver in receivers_list:
 
-            if form.cleaned_data['cc']:
-                for people in form.cleaned_data['cc']:
-                    cc_receiver = Users.objects.get_by_natural_key(username=people)
-                    forward.cc.add(cc_receiver)
+                if receiver in cd['recipients']:
+                    exist_receiver = Users.objects.filter(username=receiver)
+                    if exist_receiver:
+                        cd['recipients'] = receiver
+                        email = Email.objects.create(sender=sender, subject=cd['subject'],
+                                                     body=cd['body'], file=cd['file'],
+                                                     signature=signature,
+                                                     is_sent=True, status='recipients')
 
-            if form.cleaned_data['bcc']:
-                for people in form.cleaned_data['bcc']:
-                    bcc_receiver = Users.objects.get_by_natural_key(username=people)
-                    forward.bcc.add(bcc_receiver)
+                        recipients = Users.objects.get_by_natural_key(username=cd['recipients'])
+                        email.recipients.add(recipients)
+                        email.save()
 
-            forward.is_sent = True
-            forward.save()
+                elif receiver in cd['cc']:
+
+                    exist_receiver = Users.objects.filter(username=receiver)
+                    if exist_receiver:
+                        cd['cc'] = receiver
+                        email = Email.objects.create(sender=sender, subject=cd['subject'],
+                                                     body=cd['body'], file=cd['file'],
+                                                     signature=signature,
+                                                     is_sent=True, status='cc')
+
+                        recipients = Users.objects.get_by_natural_key(username=cd['cc'])
+                        email.recipients.add(recipients)
+                        email.save()
+
+                elif receiver in cd['bcc']:
+
+                    exist_receiver = Users.objects.filter(username=receiver)
+                    if exist_receiver:
+                        cd['bcc'] = receiver
+                        email = Email.objects.create(sender=sender, subject=cd['subject'],
+                                                     body=cd['body'], file=cd['file'],
+                                                     signature=signature,
+                                                     is_sent=True, status='bcc')
+
+                        recipients = Users.objects.get_by_natural_key(username=cd['bcc'])
+                        email.recipients.add(recipients)
+                        email.save()
+
             messages.success(request, 'mail sent successfully', 'success')
             return redirect('home')
         return render(request, self.template_name, {'form': form})
@@ -456,4 +482,5 @@ class CreateFilter(LoginRequiredMixin, View):
             messages.success(request, 'filter created successfully', 'success')
             return redirect('filters')
         return render(request, self.template_name, {'form': form})
+
 
