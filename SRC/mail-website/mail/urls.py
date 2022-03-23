@@ -2,7 +2,7 @@ from mail.views import CreateCategory, CategoryDetail, EmailDetail, \
     CategoryDelete, InboxMail, DraftMail, AllEmailOfCategory, AddEmailToCategory, Forward, \
     Reply, SentMail, Categories, check_trash, TrashMail, ArchiveMail, check_archive, CreateNewEmail, \
     search_emails, CreateSignature, SignatureDelete, SignatureDetail, Signatures, Settings, Filters, FilterDetail, \
-    CreateFilter
+    CreateFilter, filter_delete
 from django.views.decorators.csrf import csrf_exempt
 from django.urls import path
 
@@ -33,4 +33,5 @@ urlpatterns = [
     path('filters/', Filters.as_view(), name='filters'),
     path('filter_detail/<int:pk>/', FilterDetail.as_view(), name='filter_detail'),
     path('create_filter/', CreateFilter.as_view(), name='create_filter'),
+    path('filter_delete/<int:pk>/', filter_delete, name='filter_delete')
 ]

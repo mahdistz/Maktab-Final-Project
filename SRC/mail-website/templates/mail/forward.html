@@ -10,21 +10,4 @@
 
 </form>
     <br>
-<h3>forwarding email :</h3>
-<div style="width: 500px;height: auto" >
-    <p>Sender:{{ email.sender }}</p>
-    <p>to:{% for recipients in email.recipients.all %}
-            {{ recipients }},
-        {% endfor%}</p>
-    <p>cc:{% for cc in email.cc.all %}
-            {{ cc }},
-        {% endfor%}</p>
-    <p>subject:{{ email.subject }}</p>
-    <p>body:</p>
-    <p>{{ email.body }}</p>
-    <p>{% if email.file %}
-        file: <a href="{{ email.file.url }}" >Download file</a></p>
-        {% endif %}
-    <p>Date Time: {{ email.created_time }}</p>
-</div>
 {% endblock %}

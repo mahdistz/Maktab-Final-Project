@@ -81,9 +81,6 @@ class Users(AbstractUser):
         return self.username
 
 
-validate_email = EmailValidator()
-
-
 class Contact(models.Model):
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='contacts')
     email = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True,
@@ -97,6 +94,9 @@ class Contact(models.Model):
     class Meta:
         unique_together = [('owner', 'email')]
 
+    def __str__(self):
+        return self.email
+
 
 class CodeRegister(models.Model):
     code = models.IntegerField()
@@ -104,4 +104,4 @@ class CodeRegister(models.Model):
     create_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.code}"
+        return self.code

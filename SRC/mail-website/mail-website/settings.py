@@ -40,6 +40,8 @@ INSTALLED_APPS = [
     'crispy_forms',
     'dbbackup',
     'bootstrapsidebar',
+    'django_filters',
+    'bootstrapform',
 ]
 
 DBBACKUP_STORAGE = 'django.core.files.storage.FileSystemStorage'

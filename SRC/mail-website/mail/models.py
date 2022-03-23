@@ -39,9 +39,10 @@ class Filter(models.Model):
     owner = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="owner_filter")
     from_user = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="from_user", null=True, blank=True)
-    text_include = models.CharField(max_length=100, null=True, blank=True)
-    label = models.ForeignKey(Category, on_delete=models.CASCADE, related_name="label")
+        settings.AUTH_USER_MODEL, verbose_name='from', on_delete=models.PROTECT, related_name="from_user", null=True,
+        blank=True)
+    text = models.CharField(max_length=100, verbose_name='text', null=True, blank=True)
+    label = models.ForeignKey(Category, on_delete=models.CASCADE, related_name="label", null=True, blank=True)
 
 
 class Email(models.Model):

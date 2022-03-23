@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect, HttpResponse, HttpResponseRedirect, Http404
+from django.shortcuts import render, redirect
 from django.views import View
 from django.contrib import messages
 from .models import Email, Category, Signature, Filter
@@ -182,7 +182,7 @@ class CreateNewEmail(LoginRequiredMixin, View):
                 email.save()
 
                 messages.info(request, 'Email saved in draft', 'info')
-            return redirect('drafts')
+            return redirect('draft')
 
         else:
             messages.error(request, "Email doesn't sent,Error occurred", 'error')
@@ -471,16 +471,74 @@ class CreateFilter(LoginRequiredMixin, View):
 
     def get(self, request):
         form = self.form_class
-        return render(request, self.template_name, {'form': form})
+        user = Users.objects.get(id=request.user.id)
+        labels = Category.objects.filter(owner=user)
+
+        return render(request, self.template_name, {'form': form, 'labels': labels})
 
     def post(self, request):
-        form = self.form_class(request.POST)
-        if form.is_valid():
-            filter = form.save(commit=False)
-            filter.owner = Users.objects.get(id=request.user.id)
-            filter.save()
-            messages.success(request, 'filter created successfully', 'success')
-            return redirect('filters')
-        return render(request, self.template_name, {'form': form})
+
+        user = Users.objects.get(id=request.user.id)
+        emails = Email.objects.filter(Q(sender=user) | Q(recipients=user) | Q(cc=user) | Q(bcc=user))
+
+        if 'text' in request.POST:
+
+            form = self.form_class(request.POST)
+            form.owner = user
+
+            if form.is_valid():
+                cd = form.cleaned_data['text']
+                for email in emails.filter(Q(body__icontains=cd) | Q(subject__icontains=cd)):
+
+                    if 'Add to Label' in request.POST:
+                        label = Category.objects.get(name=request.POST.get('label'))
+                        email.category.add(label)
+                        email.save()
+
+                    elif 'Trash' in request.POST:
+                        email.is_trashed = True
+                        email.save()
+
+                    elif 'Archive' in request.POST:
+                        email.is_archived = True
+                        email.save()
+
+                messages.success(request, 'filter created successfully', 'success')
+                return redirect('filters')
+            messages.error(request, 'error')
+            return render(request, self.template_name, {'form': form})
+
+        if 'from_user' in request.POST:
+
+            form = self.form_class(request.POST)
+
+            if form.is_valid():
+                cd = form.cleaned_data['from_user']
+                user = Users.objects.get(username=cd)
+                for email in emails.filter(sender=user):
+
+                    if 'Add to Label' in request.POST:
+                        label = Category.objects.get(name=request.POST.get('label'))
+                        email.category.add(label)
+                        email.save()
+
+                    elif 'Trash' in request.POST:
+                        email.is_trashed = True
+                        email.save()
+
+                    elif 'Archive' in request.POST:
+                        email.is_archived = True
+                        email.save()
+
+                messages.success(request, 'filter created successfully', 'success')
+                return redirect('filters')
+            messages.error(request, 'error!!!!!')
+            return render(request, self.template_name, {'form': form})
 
 
+@login_required(login_url=settings.LOGIN_URL)
+def filter_delete(request, pk):
+    filter_obj = Filter.objects.filter(id=pk)
+    filter_obj.delete()
+    messages.success(request, 'filter deleted successfully', 'success')
+    return redirect('filters')
