@@ -81,6 +81,15 @@ class Users(AbstractUser):
     def __str__(self):
         return f"{self.username}"
 
+    def get_full_name(self):
+        # If the full name is not specified, return username
+        if self.first_name == "" and self.last_name == "":
+            return self.username
+        else:
+            return self.first_name + " " + self.last_name
+
+    get_full_name.short_description = 'Name'
+
 
 class Contact(models.Model):
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='contacts')

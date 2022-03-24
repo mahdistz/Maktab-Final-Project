@@ -1,15 +1,18 @@
 from django.contrib import admin
 from mail.models import Email, Category, Signature, Filter
+from user.models import Users
 
 
 class EmailAdmin(admin.ModelAdmin):
-    list_display = ('subject', 'body', 'file', 'created_time', 'is_sent', 'is_trashed', 'is_archived', 'is_read')
+    list_display = ('subject', 'body', 'is_sent', 'is_trashed', 'is_archived', 'is_read')
     list_filter = ('is_sent', 'is_trashed', 'is_archived', 'is_read')
     date_hierarchy = 'created_time'
     search_fields = ('subject', 'body', 'sender')
     raw_id_fields = ('sender', 'signature', 'reply_to')
     filter_horizontal = ('recipients', 'cc', 'bcc', 'category')
     ordering = ('-created_time', '-sender',)
+    readonly_fields = ['created_time', ]
+    list_per_page = 10
 
 
 class CategoryAdmin(admin.ModelAdmin):
