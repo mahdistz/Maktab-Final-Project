@@ -51,7 +51,8 @@ class Users(AbstractUser):
                                     choices=verification_choice
                                     )
     phone = models.CharField(
-        default=None,
+        null=True,
+        blank=True,
         max_length=11,
         unique=True,
         verbose_name=_('Phone Number'),
@@ -61,7 +62,7 @@ class Users(AbstractUser):
         },
         help_text=_('Example') + " : 09125573688")
 
-    email = models.EmailField(_('email address'), unique=True)
+    email = models.EmailField(_('email address'), unique=True, null=True, blank=True)
 
     birth_date = models.DateField(null=True, blank=True)
     nationality = models.CharField(max_length=100, null=True, blank=True)
@@ -78,7 +79,7 @@ class Users(AbstractUser):
     objects = CustomUserManager()
 
     def __str__(self):
-        return self.username
+        return f"{self.username}"
 
 
 class Contact(models.Model):
@@ -95,7 +96,7 @@ class Contact(models.Model):
         unique_together = [('owner', 'email')]
 
     def __str__(self):
-        return self.email
+        return f"{self.email}"
 
 
 class CodeRegister(models.Model):
@@ -104,4 +105,4 @@ class CodeRegister(models.Model):
     create_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return self.code
+        return f"{self.code}"

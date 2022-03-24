@@ -294,6 +294,7 @@ class CreateContact(LoginRequiredMixin, View):
         return render(request, self.template_name, {'form': form})
 
 
+@login_required(login_url=settings.LOGIN_URL)
 def export_to_csv(request):
     model_class = Contact
 

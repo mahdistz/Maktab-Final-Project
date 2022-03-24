@@ -1,26 +1,32 @@
 from django.contrib import admin
-from django.contrib.auth.admin import UserAdmin
-from .models import Users,Contact,CodeRegister
+from .models import Users, Contact, CodeRegister
 
 
-class CustomUserAdmin(UserAdmin):
-    model = Users
-    list_display = ('email', 'is_staff', 'is_active',)
+class UsersAdmin(admin.ModelAdmin):
+    list_display = ('username', 'email', 'phone',)
     list_filter = ('email', 'is_staff', 'is_active',)
+    search_fields = ('first_name', 'last_name', 'username', 'email', 'phone')
     fieldsets = (
-        (None, {'fields': ('email', 'password')}),
+        ('Info', {'fields': ('username', 'verification', 'email', 'phone', 'last_login')}),
         ('Permissions', {'fields': ('is_staff', 'is_active')}),
+        ('Other Information', {'fields': ('first_name', 'last_name', 'date_joined', 'birth_date',
+                                          'nationality', 'gender')}),
     )
-    add_fieldsets = (
-        (None, {
-            'classes': ('wide',),
-            'fields': ('email', 'password1', 'password2', 'is_staff', 'is_active')}
-         ),
-    )
-    search_fields = ('email',)
-    ordering = ('email',)
+    ordering = ('-date_joined', '-username',)
 
 
-admin.site.register(Users, CustomUserAdmin)
-admin.site.register(Contact)
-admin.site.register(CodeRegister)
+class ContactAdmin(admin.ModelAdmin):
+    list_display = ('owner', 'email',)
+    list_filter = ('owner', 'email', 'name',)
+    search_fields = ('owner', 'email', 'name',)
+    raw_id_fields = ('owner', 'email',)
+    ordering = ('-email', '-owner',)
+
+
+class CodeRegisterAdmin(admin.ModelAdmin):
+    list_display = ('code', 'phone_number','create_at')
+
+
+admin.site.register(Users, UsersAdmin)
+admin.site.register(Contact, ContactAdmin)
+admin.site.register(CodeRegister, CodeRegisterAdmin)
