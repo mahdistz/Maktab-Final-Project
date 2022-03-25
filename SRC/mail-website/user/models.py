@@ -51,7 +51,8 @@ class Users(AbstractUser):
                                     choices=verification_choice
                                     )
     phone = models.CharField(
-        default=None,
+        null=True,
+        blank=True,
         max_length=11,
         unique=True,
         verbose_name=_('Phone Number'),
@@ -61,7 +62,7 @@ class Users(AbstractUser):
         },
         help_text=_('Example') + " : 09125573688")
 
-    email = models.EmailField(_('email address'), unique=True)
+    email = models.EmailField(_('email address'), unique=True, null=True, blank=True)
 
     birth_date = models.DateField(null=True, blank=True)
     nationality = models.CharField(max_length=100, null=True, blank=True)
@@ -78,10 +79,16 @@ class Users(AbstractUser):
     objects = CustomUserManager()
 
     def __str__(self):
-        return self.username
+        return f"{self.username}"
 
+    def get_full_name(self):
+        # If the full name is not specified, return username
+        if self.first_name == "" and self.last_name == "":
+            return self.username
+        else:
+            return self.first_name + " " + self.last_name
 
-validate_email = EmailValidator()
+    get_full_name.short_description = 'Name'
 
 
 class Contact(models.Model):
@@ -96,6 +103,9 @@ class Contact(models.Model):
 
     class Meta:
         unique_together = [('owner', 'email')]
+
+    def __str__(self):
+        return f"{self.email}"
 
 
 class CodeRegister(models.Model):

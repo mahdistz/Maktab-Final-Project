@@ -130,8 +130,12 @@ class SignatureForm(forms.ModelForm):
         exclude = ['owner']
 
 
-class CreateFilterForm(forms.ModelForm):
-    class Meta:
-        model = Filter
-        exclude = ['owner']
+class CreateFilterForm(forms.Form):
+    text = forms.CharField(max_length=100, required=False)
+    from_user = forms.EmailField(required=False)
 
+    def clean_from_user(self):
+        from_user = self.cleaned_data['from_user']
+        if not Users.objects.filter(username=from_user).exists() and from_user is None:
+            raise forms.ValidationError(f'there is no user with this email: {from_user}')
+        return from_user
