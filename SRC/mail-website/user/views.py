@@ -11,6 +11,7 @@ from django.utils.encoding import force_bytes, force_text
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.template.loader import render_to_string
 from .models import Users, CodeRegister, Contact
+from .serializers import ContactSerializer
 from .tokens import account_activation_token
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.auth import get_user_model
@@ -31,6 +32,34 @@ from user.models import Contact
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render, redirect, HttpResponse, HttpResponseRedirect, Http404
 from django.db.models import Q
+from django.views.decorators.csrf import csrf_exempt
+from rest_framework.decorators import api_view
+from rest_framework.status import (
+    HTTP_400_BAD_REQUEST,
+    HTTP_404_NOT_FOUND,
+    HTTP_200_OK
+)
+from rest_framework.response import Response
+
+
+@csrf_exempt
+@api_view(["GET"])
+def sample_api(request):
+    data = {'sample_data': 123}
+    return Response(data, status=HTTP_200_OK)
+
+
+@csrf_exempt
+@api_view(["GET"])
+def api_contacts_of_user(request):
+    user_id = request.user.id
+    user = Users.objects.get(id=user_id)
+    contacts = user.contacts.values('name', 'email__username', 'phone_number', 'other_email',
+                                    'birth_date')
+    # serializer = ContactSerializer(contacts, many=True)
+    # return Response(serializer.data, status=HTTP_200_OK)
+    data = {'contacts': contacts}
+    return Response(data, status=HTTP_200_OK)
 
 
 def index(request):

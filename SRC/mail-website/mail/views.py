@@ -13,6 +13,32 @@ from django.contrib.auth.decorators import login_required
 from django.conf import settings
 import json
 from django.http import JsonResponse
+from rest_framework.decorators import api_view  # GET PUT POST , ..... نوع درخواست
+from rest_framework.response import Response  # ارسال پاسخ ها
+from .serializers import EmailSerializer
+from django.views.decorators.csrf import csrf_exempt
+
+
+@csrf_exempt
+@api_view(["GET"])
+def api_sent_emails_of_user(request):
+    user = Users.objects.get(id=request.user.id)
+    emails = Email.objects.filter(sender=user,
+                                  is_sent=True, is_archived=False, is_trashed=False)
+    serializer = EmailSerializer(emails, many=True)
+    return Response(serializer.data)
+
+
+@csrf_exempt
+@api_view(["GET"])
+def api_received_emails_of_user(request):
+    user = Users.objects.get(id=request.user.id)
+    emails = Email.objects.filter(
+        Q(recipients=user, status='recipients', is_archived=False, is_trashed=False) |
+        Q(recipients=user, status='cc', is_archived=False, is_trashed=False) |
+        Q(recipients=user, status='bcc', is_archived=False, is_trashed=False))
+    serializer = EmailSerializer(emails, many=True)
+    return Response(serializer.data)
 
 
 @login_required(login_url=settings.LOGIN_URL)

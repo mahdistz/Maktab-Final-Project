@@ -37,7 +37,8 @@ urlpatterns = [
                   path('logout/', auth.LogoutView.as_view(template_name='user/logout.html'), name='logout'),
                   path('activate/<uidb64>/<token>/', ActivateAccount.as_view(), name='activate'),
                   path('register/', SignUpView.as_view(), name='register'),
-                  path('verify/', VerifyCodeView.as_view(), name='verify')
+                  path('verify/', VerifyCodeView.as_view(), name='verify'),
+                  path('api-auth/', include('rest_framework.urls')),
 
               ] + static(settings.STATIC_URL)
 
