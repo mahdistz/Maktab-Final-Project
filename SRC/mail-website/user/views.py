@@ -40,6 +40,7 @@ from rest_framework.status import (
     HTTP_200_OK
 )
 from rest_framework.response import Response
+from django.http import HttpResponse, JsonResponse
 
 
 @csrf_exempt
@@ -56,8 +57,6 @@ def api_contacts_of_user(request):
     user = Users.objects.get(id=user_id)
     contacts = user.contacts.values('name', 'email__username', 'phone_number', 'other_email',
                                     'birth_date')
-    # serializer = ContactSerializer(contacts, many=True)
-    # return Response(serializer.data, status=HTTP_200_OK)
     data = {'contacts': contacts}
     return Response(data, status=HTTP_200_OK)
 

@@ -5,13 +5,14 @@ from django.utils.translation import ugettext_lazy as _
 # manager for create user and superuser with username and password
 class CustomUserManager(BaseUserManager):
 
-    def create_user(self, username, password, phone=None, email=None, **extra_fields):
+    def create_user(self, username, password, phone, email, **extra_fields):
         """
         Create and save a Users with the given username and password.
         """
         if not username:
             raise ValueError(_('The username must be set'))
         username = self.normalize_username(username)
+        username = username + '@mail.com'
         user = self.model(username=username, **extra_fields)
         user.set_password(password)
         user.save()

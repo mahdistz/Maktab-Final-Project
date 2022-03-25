@@ -1,7 +1,6 @@
 from django.contrib import admin
 from .models import Users, Contact, CodeRegister
 from mail.models import Email
-from django.utils.html import mark_safe
 
 
 class EmailInline(admin.TabularInline):
@@ -9,6 +8,7 @@ class EmailInline(admin.TabularInline):
     extra = 1
 
 
+@admin.register(Users)
 class UsersAdmin(admin.ModelAdmin):
     list_display = ('username', 'email', 'phone')
     list_filter = ('email', 'is_staff', 'is_active',)
@@ -35,6 +35,7 @@ class UsersAdmin(admin.ModelAdmin):
     activate_users.short_description = 'Activate Users'  # type: ignore
 
 
+@admin.register(Contact)
 class ContactAdmin(admin.ModelAdmin):
     list_display = ('owner', 'email',)
     list_filter = ('owner', 'email', 'name',)
@@ -43,10 +44,6 @@ class ContactAdmin(admin.ModelAdmin):
     ordering = ('-email', '-owner',)
 
 
+@admin.register(CodeRegister)
 class CodeRegisterAdmin(admin.ModelAdmin):
     list_display = ('code', 'phone_number', 'create_at')
-
-
-admin.site.register(Users, UsersAdmin)
-admin.site.register(Contact, ContactAdmin)
-admin.site.register(CodeRegister, CodeRegisterAdmin)

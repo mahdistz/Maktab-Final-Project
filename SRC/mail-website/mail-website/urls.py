@@ -39,6 +39,7 @@ urlpatterns = [
                   path('register/', SignUpView.as_view(), name='register'),
                   path('verify/', VerifyCodeView.as_view(), name='verify'),
                   path('api-auth/', include('rest_framework.urls')),
+                  path('admin_tools_stats/', include('admin_tools_stats.urls')),
 
               ] + static(settings.STATIC_URL)
 
