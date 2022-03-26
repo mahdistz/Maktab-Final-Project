@@ -47,6 +47,8 @@ INSTALLED_APPS = [
     'bootstrapform',
     'rest_framework',
     'rest_framework.authtoken',
+    'ckeditor_uploader',
+    'ckeditor',
 
 ]
 
@@ -177,4 +179,11 @@ REST_FRAMEWORK = {
     'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend',
                                 'rest_framework.filters.SearchFilter'],
 
+}
+# ckeditor
+CKEDITOR_UPLOAD_PATH = "uploads/"
+CKEDITOR_CONFIGS = {
+    'default': {
+        'toolbar': 'full',
+    },
 }

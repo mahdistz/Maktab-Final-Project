@@ -16,3 +16,7 @@ def send_otp_code(phone_number, code):
         print(e)
     except HTTPException as e:
         print(e)
+
+
+def get_filename(filename):
+    return filename.upper()

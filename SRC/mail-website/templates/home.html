@@ -20,6 +20,7 @@
 	<script src="https://netdna.bootstrapcdn.com/bootstrap/4.0.0-beta/js/bootstrap.min.js"></script>
     {% block custom-css %}
     <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet">
+
 <br>
     {% endblock %}
 
@@ -253,6 +254,8 @@ document.addEventListener("DOMContentLoaded", function(event) {
     });
 
 </script>
+       <script type="text/javascript" src="{% static "ckeditor/ckeditor-init.js" %}"></script>
+    <script type="text/javascript" src="{% static "ckeditor/ckeditor/ckeditor.js" %}"></script>
 {% endblock %}
 </body>
 </html>

@@ -20,7 +20,7 @@
         {% endfor%}</p>
     <p>subject:{{ email.subject }}</p>
     <p>body:</p>
-    <p>{{ email.body }}</p>
+    <p>{{ email.body|safe }}</p>
     <p>{% if email.file %}
         file: <a href="{{ email.file.url }}" >Download file</a></p>
         {% endif %}

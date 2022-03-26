@@ -13,7 +13,7 @@
         {% endfor%}</p>
     <p>subject:{{ object.subject }}</p>
     <p>body:</p>
-    <p>{{ object.body }}</p>
+    <p>{{ object.body|safe }}</p>
     <p>{% if object.signature %}
     <p>Signature: <strong>{{ object.signature.text }}</strong></p>
     {% endif %}

@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.db import models
 from django.core.exceptions import ValidationError
+from ckeditor_uploader.fields import RichTextUploadingField
 
 
 def file_validator(value):
@@ -59,7 +60,8 @@ class Email(models.Model):
 
     subject = models.CharField(max_length=255, null=True, blank=True)
 
-    body = models.TextField(blank=True, null=True)
+    # body = models.TextField(blank=True, null=True)
+    body = RichTextUploadingField(blank=True, null=True)
 
     created_time = models.DateTimeField(auto_now_add=True)
 

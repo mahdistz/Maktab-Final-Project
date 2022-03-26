@@ -16,7 +16,7 @@
                 <tr>
                 <td class="name">{{ email.sender }}</td>
                 <td class="subject">{{ email.subject }}</td>
-                <td class="text-body"><a href="/mail/email_detail/{{ email.id }}">{{ email.body|truncatewords:7 }}</a></td>
+                <td class="text-body"><a href="/mail/email_detail/{{ email.id }}">{{ email.body|safe|truncatewords:7 }}</a></td>
                 {% if email.file %}
                 <td class="file-upload"><a href="{{ email.file.url }}">Download file</a></td>
                 {% else %}
