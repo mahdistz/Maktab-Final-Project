@@ -51,8 +51,6 @@ class Users(AbstractUser):
                                     choices=verification_choice
                                     )
     phone = models.CharField(
-        null=True,
-        blank=True,
         max_length=11,
         unique=True,
         verbose_name=_('Phone Number'),
@@ -62,7 +60,7 @@ class Users(AbstractUser):
         },
         help_text=_('Example') + " : 09125573688")
 
-    email = models.EmailField(_('email address'), unique=True, null=True, blank=True)
+    email = models.EmailField(_('email address'), unique=True,)
 
     birth_date = models.DateField(null=True, blank=True)
     nationality = models.CharField(max_length=100, null=True, blank=True)
@@ -89,6 +87,12 @@ class Users(AbstractUser):
             return self.first_name + " " + self.last_name
 
     get_full_name.short_description = 'Name'
+
+    def save(self, *args, **kwargs):
+        if '@mail.com' not in self.username:
+            self.username += '@mail.com'
+        self.set_password(self.password)
+        super(Users, self).save(*args, **kwargs)
 
 
 class Contact(models.Model):

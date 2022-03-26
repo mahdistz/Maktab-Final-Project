@@ -88,3 +88,13 @@ class Email(models.Model):
 
     def __str__(self):
         return f"From: {self.sender}, Sub: {self.subject}"
+
+    def get_recipients(self):
+        return "\n".join([p.username for p in self.recipients.all()])
+
+    def get_cc(self):
+        return "\n".join([p.username for p in self.cc.all()])
+
+    def get_bcc(self):
+        return "\n".join([p.username for p in self.bcc.all()])
+

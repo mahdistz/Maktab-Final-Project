@@ -9,7 +9,7 @@ from django.contrib.sites.shortcuts import get_current_site
 from django.urls import reverse
 from django.conf import settings
 import kavenegar
-from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm, UserChangeForm
 
 
 class DateInput(forms.DateInput):
@@ -21,6 +21,15 @@ class UserRegisterForm(UserCreationForm):
         model = Users
         fields = ['first_name', 'last_name', 'username', 'verification', 'email', 'phone',
                   'password1', 'password2', 'birth_date', 'nationality', 'gender']
+        widgets = {
+            'birth_date': DateInput()
+        }
+
+
+class CustomUserChangeForm(UserChangeForm):
+    class Meta:
+        model = Users
+        fields = ('first_name', 'last_name', 'birth_date', 'nationality', 'gender')
         widgets = {
             'birth_date': DateInput()
         }
