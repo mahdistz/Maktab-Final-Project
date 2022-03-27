@@ -100,3 +100,13 @@ class Email(models.Model):
     def get_bcc(self):
         return "\n".join([p.username for p in self.bcc.all()])
 
+    @property
+    def file_url(self):
+        if self.file and hasattr(self.file, 'url'):
+            return self.file.url
+
+    @property
+    def file_size(self):
+        if self.file and hasattr(self.file, 'size'):
+            return self.file.size
+
