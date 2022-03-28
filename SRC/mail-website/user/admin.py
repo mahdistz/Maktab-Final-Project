@@ -4,11 +4,11 @@ from mail.models import Email
 from django.db.models import Q
 
 
-def sizify(value):
+def size_handle(value):
     """
-    Simple kb/mb/gb size:
+    Simple kb/mb/gb size
     """
-    # value = ing(value)
+    value = int(value)
     if value < 512000:
         value = value / 1024.0
         ext = 'kb'
@@ -60,7 +60,7 @@ class UsersAdmin(admin.ModelAdmin):
     activate_users.short_description = 'Activate Users'
 
     def count_sent_email(self, obj):
-        qs = Email.objects.filter(sender=obj).count()
+        qs = Email.objects.filter(sender=obj, is_sent=True).count()
         return qs
 
     count_sent_email.short_description = 'Sent Mails'
@@ -72,12 +72,34 @@ class UsersAdmin(admin.ModelAdmin):
     count_received_email.short_description = 'Received Mails'
 
     def get_user_storage(self, obj):
-        user_files = Email.objects.filter(sender=obj).exclude(file=None)
+        # to show on list display
+        user_files = Email.objects.filter(sender=obj).exclude(Q(file=None) | Q(file__isnull=True))
         total = sum(int(objects.file_size) for objects in user_files if objects.file_size)
-        total = sizify(total)
+        total = size_handle(total)
         return total
 
     get_user_storage.short_description = 'Storage Used'
+
+    # override changelist_view method to display chart on admin page
+    def changelist_view(self, request, extra_context=None):
+        all_emails_with_file = Email.objects.filter(file__isnull=False).exclude(file='')
+
+        usernames = []
+        for email in all_emails_with_file:
+            usernames.append(Users.objects.get(pk=email.sender_id))
+        usernames = list(set(usernames))
+
+        file_data = []
+        for user in usernames:
+            file_of_user = all_emails_with_file.filter(sender_id=user.id)
+            total = sum(int(objects.file_size) for objects in file_of_user if objects.file_size)
+            file_data.append({"user": user.username, "user_size": total})
+
+        # attach the chart data to the template context
+        extra_context = extra_context or {"file_data": file_data}
+
+        # Call the superclass changelist_view to render the page
+        return super().changelist_view(request, extra_context=extra_context)
 
 
 @admin.register(Contact)
