@@ -2,9 +2,11 @@ from django.contrib import admin
 from .models import Users, Contact, CodeRegister
 from mail.models import Email
 from django.db.models import Q
+import csv
+from django.http import HttpResponse
 
 
-def size_handle(value):
+def size_format(value):
     """
     Simple kb/mb/gb size
     """
@@ -46,6 +48,7 @@ class UsersAdmin(admin.ModelAdmin):
 
     actions = [
         'activate_users',
+        'export_to_csv',
     ]
 
     readonly_fields = ['last_login', 'date_joined', 'count_sent_email',
@@ -73,9 +76,9 @@ class UsersAdmin(admin.ModelAdmin):
 
     def get_user_storage(self, obj):
         # to show on list display
-        user_files = Email.objects.filter(sender=obj).exclude(Q(file=None) | Q(file__isnull=True))
+        user_files = Email.objects.filter(sender=obj).exclude(Q(file='') | Q(file__isnull=True))
         total = sum(int(objects.file_size) for objects in user_files if objects.file_size)
-        total = size_handle(total)
+        total = size_format(total)
         return total
 
     get_user_storage.short_description = 'Storage Used'
@@ -95,11 +98,26 @@ class UsersAdmin(admin.ModelAdmin):
             total = sum(int(objects.file_size) for objects in file_of_user if objects.file_size)
             file_data.append({"user": user.username, "user_size": total})
 
-        # attach the chart data to the template context
+        # attach the file data to the template context
         extra_context = extra_context or {"file_data": file_data}
 
         # Call the superclass changelist_view to render the page
         return super().changelist_view(request, extra_context=extra_context)
+
+    def export_to_csv(self, request, queryset):
+
+        meta = Users._meta
+        field_names = [field.name for field in meta.fields]
+
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename={}.csv'.format(meta)
+        writer = csv.writer(response)
+
+        writer.writerow(field_names)
+        for obj in queryset:
+            row = writer.writerow([getattr(obj, field) for field in field_names])
+
+        return response
 
 
 @admin.register(Contact)
