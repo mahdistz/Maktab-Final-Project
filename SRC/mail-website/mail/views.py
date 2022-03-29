@@ -182,6 +182,7 @@ class CreateNewEmail(LoginRequiredMixin, View):
                             email.save()
 
                 messages.success(request, 'mail sent successfully', 'success')
+                return redirect('sent')
 
             if 'cancel' in request.POST:
                 # When the user presses the cancel button, email's field is_sent=False (by default),
@@ -208,7 +209,7 @@ class CreateNewEmail(LoginRequiredMixin, View):
                 email.save()
 
                 messages.info(request, 'Email saved in draft', 'info')
-            return redirect('draft')
+                return redirect('draft')
 
         else:
             messages.error(request, "Email doesn't sent,Error occurred", 'error')
@@ -284,14 +285,51 @@ class EmailDetail(LoginRequiredMixin, DetailView):
     model = Email
 
 
+def find_filter_emails(emails):
+    pass
+
+
 class InboxMail(LoginRequiredMixin, View):
     template_name = 'mail/inbox.html'
 
     def get(self, request):
         emails = Email.objects.filter(
-            Q(recipients=request.user.id, status='recipients', is_archived=False, is_trashed=False) |
-            Q(recipients=request.user.id, status='cc', is_archived=False, is_trashed=False) |
-            Q(recipients=request.user.id, status='bcc', is_archived=False, is_trashed=False)).order_by('-created_time')
+            Q(recipients=request.user.id, status='recipients', is_archived=False, is_trashed=False, is_filter=False) |
+            Q(recipients=request.user.id, status='cc', is_archived=False, is_trashed=False, is_filter=False) |
+            Q(recipients=request.user.id, status='bcc', is_archived=False, is_trashed=False, is_filter=False)).order_by(
+            '-created_time')
+
+        filters = Filter.objects.filter(owner_id=request.user.id)
+        if filters:
+            for filter_obj in filters:
+                for email in emails:
+
+                    if filter_obj.from_user == email.sender:
+
+                        if filter_obj.trash_or_archive == 'Archive':
+                            email.is_archived = True
+                        elif filter_obj.trash_or_archive == 'Trash':
+                            email.is_trashed = True
+                        elif filter_obj.label:
+                            label = Category.objects.get(name=filter_obj.label)
+                            email.category.add(label)
+
+                        email.is_filter = True
+                        email.save()
+
+                    elif filter_obj.text in email.body or filter_obj.text in email.subject:
+
+                        if filter_obj.trash_or_archive == 'Archive':
+                            email.is_archived = True
+                        elif filter_obj.trash_or_archive == 'Trash':
+                            email.is_trashed = True
+                        elif filter_obj.label:
+                            label = Category.objects.get(name=filter_obj.label)
+                            email.category.add(label)
+
+                        email.is_filter = True
+                        email.save()
+
         return render(request, self.template_name, {'emails': emails})
 
 
@@ -484,7 +522,7 @@ class Filters(LoginRequiredMixin, View):
     def get(self, request):
         owner = Users.objects.get(id=request.user.id)
         filters = Filter.objects.filter(owner=owner)
-        return render(request, self.template_name, {'filters': filters})
+        return render(request, self.template_name, {'filters': filters, 'Archive': 'Archive'})
 
 
 class FilterDetail(LoginRequiredMixin, DetailView):
@@ -504,17 +542,20 @@ class CreateFilter(LoginRequiredMixin, View):
 
     def post(self, request):
 
+        form = self.form_class(request.POST)
         user = Users.objects.get(id=request.user.id)
+        form.owner = user
         emails = Email.objects.filter(Q(sender=user) | Q(recipients=user) | Q(cc=user) | Q(bcc=user))
 
-        if 'text' in request.POST:
+        if form.is_valid():
 
-            form = self.form_class(request.POST)
-            form.owner = user
+            text = form.cleaned_data['text']
+            from_user = form.cleaned_data['from_user']
 
-            if form.is_valid():
-                cd = form.cleaned_data['text']
-                for email in emails.filter(Q(body__icontains=cd) | Q(subject__icontains=cd)):
+            # text
+            if text:
+                for email in emails.filter(Q(body__icontains=text) | Q(subject__icontains=text)):
+                    email.is_filter = True
 
                     if 'Add to Label' in request.POST:
                         label = Category.objects.get(name=request.POST.get('label'))
@@ -529,19 +570,27 @@ class CreateFilter(LoginRequiredMixin, View):
                         email.is_archived = True
                         email.save()
 
-                messages.success(request, 'filter created successfully', 'success')
-                return redirect('filters')
-            messages.error(request, 'error')
-            return render(request, self.template_name, {'form': form})
+                # create filter object
+                if 'Add to Label' in request.POST:
 
-        if 'from_user' in request.POST:
+                    label = Category.objects.get(name=request.POST.get('label'))
+                    Filter.objects.create(owner=user,
+                                          text=text,
+                                          label=label)
+                elif 'Trash' in request.POST:
 
-            form = self.form_class(request.POST)
+                    Filter.objects.create(owner=user,
+                                          text=text,
+                                          trash_or_archive='Trash')
 
-            if form.is_valid():
-                cd = form.cleaned_data['from_user']
-                user = Users.objects.get(username=cd)
+                elif 'Archive' in request.POST:
+                    Filter.objects.create(owner=user,
+                                          text=text,
+                                          trash_or_archive='Archive')
+            # from_user
+            if from_user:
                 for email in emails.filter(sender=user):
+                    email.is_filter = True
 
                     if 'Add to Label' in request.POST:
                         label = Category.objects.get(name=request.POST.get('label'))
@@ -556,10 +605,29 @@ class CreateFilter(LoginRequiredMixin, View):
                         email.is_archived = True
                         email.save()
 
-                messages.success(request, 'filter created successfully', 'success')
-                return redirect('filters')
-            messages.error(request, 'error!!!!!')
-            return render(request, self.template_name, {'form': form})
+                # create filter object
+                if 'Add to Label' in request.POST:
+
+                    label = Category.objects.get(name=request.POST.get('label'))
+                    Filter.objects.create(owner=form.owner,
+                                          from_user=user,
+                                          label=label)
+
+                elif 'Trash' in request.POST:
+
+                    Filter.objects.create(owner=form.owner,
+                                          from_user=user,
+                                          trash_or_archive='Trash')
+
+                elif 'Archive' in request.POST:
+                    Filter.objects.create(owner=form.owner,
+                                          from_user=user,
+                                          trash_or_archive='Archive')
+
+            messages.success(request, 'filter created successfully', 'success')
+            return redirect('filters')
+        messages.error(request, 'error occurred', 'error')
+        return render(request, self.template_name, {'form': form})
 
 
 @login_required(login_url=settings.LOGIN_URL)

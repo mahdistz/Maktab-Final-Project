@@ -39,11 +39,17 @@ class Signature(models.Model):
 class Filter(models.Model):
     owner = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="owner_filter")
-    from_user = models.ForeignKey(
-        settings.AUTH_USER_MODEL, verbose_name='from', on_delete=models.PROTECT, related_name="from_user", null=True,
-        blank=True)
+    from_user = models.CharField(max_length=100, null=True, blank=True)
     text = models.CharField(max_length=100, verbose_name='text', null=True, blank=True)
     label = models.ForeignKey(Category, on_delete=models.CASCADE, related_name="label", null=True, blank=True)
+    choice_list = [
+        ('Trash', 'Trash'),
+        ('Archive', 'Archive'),
+    ]
+    trash_or_archive = models.CharField(max_length=10, choices=choice_list, null=True, blank=True)
+
+    def __str__(self):
+        return f"text: {self.text} - from_user: {self.from_user}"
 
 
 class Email(models.Model):
@@ -83,7 +89,8 @@ class Email(models.Model):
     ]
     status = models.CharField(max_length=10, choices=status_choices, default='')
     signature = models.ForeignKey(Signature, on_delete=models.CASCADE, null=True, blank=True)
-    reply_to = models.ForeignKey('self', null=True, blank=True, related_name='replies', on_delete=models.CASCADE)
+    reply = models.ForeignKey('self', null=True, blank=True, related_name='replies', on_delete=models.CASCADE)
+    is_filter = models.BooleanField(default=False)
 
     class Meta:
         ordering = ['-created_time']
@@ -109,4 +116,3 @@ class Email(models.Model):
     def file_size(self):
         if self.file and hasattr(self.file, 'size'):
             return self.file.size
-

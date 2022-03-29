@@ -14,7 +14,7 @@ class EmailAdmin(admin.ModelAdmin):
 
     search_fields = ('subject', 'body', 'sender')
     # for foreign key fields
-    raw_id_fields = ('sender', 'signature', 'reply_to')
+    raw_id_fields = ('sender', 'signature', 'reply')
     # for many_to_many fields
     filter_horizontal = ('recipients', 'cc', 'bcc', 'category')
 
@@ -40,4 +40,4 @@ class SignatureAdmin(admin.ModelAdmin):
 @admin.register(Filter)
 class FilterAdmin(admin.ModelAdmin):
     list_display = ('owner', 'from_user', 'text')
-    raw_id_fields = ('owner', 'from_user', 'label')
+    raw_id_fields = ('owner', 'label')

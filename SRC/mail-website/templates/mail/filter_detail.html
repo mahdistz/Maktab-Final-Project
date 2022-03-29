@@ -4,6 +4,8 @@
 
 <p>text : {{ object.text }}</p>
 <p>From : {{ object.from_user }}</p>
+<p>Label : {{ object.label }}</p>
+<p>Trash/Archive : {{ object.trash_or_archive }}</p>
 
 <a href="{% url 'filter_delete' object.id %}"><input class="btn btn-primary" type="submit" value="Delete"></a>
 
