@@ -1,15 +1,9 @@
 {% extends 'home.html' %}
 {% block content %}
-    <h3>Reply</h3>
-<form method="post">
-{% csrf_token %}
-    <table>
-        {{ form.as_table }}
-        </table>
-   <input type="submit" value="save">
-
-</form>
-    <h3>Replying email:</h3>
+    <h3><center>Reply</center></h3>
+    <br>
+ <h3>Replying email:</h3>
+    <br>
 <div style="width: 500px;height: auto" >
     <p>Sender:{{ email.sender }}</p>
     <p>to:{% for recipients in email.recipients.all %}
@@ -26,4 +20,13 @@
         {% endif %}
     <p>Date Time: {{ email.created_time }}</p>
 </div>
+
+<form method="post">
+{% csrf_token %}
+    <table>
+        {{ form.as_table }}
+        </table>
+    <input type="submit" class="btn btn-primary" value="send">
+
+</form>
 {% endblock %}

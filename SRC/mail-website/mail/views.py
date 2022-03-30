@@ -335,7 +335,7 @@ class InboxMail(LoginRequiredMixin, View):
                             email.is_trashed = True
 
                         elif filter_obj.label:
-                            label = Category.objects.get(name=filter_obj.label)
+                            label = Category.objects.get(name=filter_obj.label, owner=request.user)
                             email.category.add(label)
 
                         email.is_filter = True
@@ -352,7 +352,7 @@ class InboxMail(LoginRequiredMixin, View):
                             email.is_trashed = True
 
                         elif filter_obj.label:
-                            label = Category.objects.get(name=filter_obj.label)
+                            label = Category.objects.get(name=filter_obj.label, owner=request.user)
                             email.category.add(label)
 
                         email.is_filter = True
@@ -416,7 +416,7 @@ class ArchiveMail(LoginRequiredMixin, View):
                                         Q(cc=user, is_archived=True) |
                                         Q(bcc=user, is_archived=True) |
                                         Q(sender=user, is_archived=True)).exclude(
-            status='total').order_by('-created_time')
+                                                                            status='total').order_by('-created_time')
 
         return render(request, self.template_name, {'archives': archives})
 
@@ -470,7 +470,7 @@ class Reply(LoginRequiredMixin, View):
             reply_email = form.save(commit=False)
             sender = Users.objects.get(id=request.user.id)
             reply_email.sender = sender
-            reply_email.reply_to = Email.objects.get(pk=pk)
+            reply_email.reply = Email.objects.get(pk=pk)
             receiver = Users.objects.get(id=Email.objects.get(pk=pk).sender_id)
             recipients = Users.objects.get_by_natural_key(username=receiver)
             reply_email.save()
@@ -495,56 +495,65 @@ class Forward(LoginRequiredMixin, View):
         form = self.form_class(request.POST, request.FILES)
         if form.is_valid():
             sender = Users.objects.get(id=request.user.id)
-            signature = Signature.objects.get(owner=sender, text=form.signature)
             cd = form.cleaned_data
             to_cc_bcc_list = to_cc_bcc(cd['recipients'], cd['cc'], cd['bcc'])
             # Clear duplicates receiver
             receivers_list = list(dict.fromkeys(to_cc_bcc_list))
-
+            # create one object of email with all recipients,cc,bc and
+            # status total to save all data in one object
+            total_email = Email.objects.create(sender=sender, subject=cd['subject'],
+                                               body=cd['body'], file=cd['file'],
+                                               is_sent=True, status='total')
             for receiver in receivers_list:
 
                 if receiver in cd['recipients']:
-                    exist_receiver = Users.objects.filter(username=receiver)
-                    if exist_receiver:
-                        cd['recipients'] = receiver
-                        email = Email.objects.create(sender=sender, subject=cd['subject'],
-                                                     body=cd['body'], file=cd['file'],
-                                                     signature=signature,
-                                                     is_sent=True, status='recipients')
+                    recipients = Users.objects.get_by_natural_key(username=receiver)
+                    total_email.recipients.add(recipients)
 
-                        recipients = Users.objects.get_by_natural_key(username=cd['recipients'])
-                        email.recipients.add(recipients)
-                        email.save()
+                elif receiver in cd['cc']:
+                    cc_people = Users.objects.get_by_natural_key(username=receiver)
+                    total_email.cc.add(cc_people)
+
+                elif receiver in cd['bcc']:
+                    bcc_people = Users.objects.get_by_natural_key(username=receiver)
+                    total_email.bcc.add(bcc_people)
+
+            total_email.save()
+
+            # create one object email for each receiver
+            for receiver in receivers_list:
+
+                if receiver in cd['recipients']:
+
+                    email = Email.objects.create(sender=sender, subject=cd['subject'],
+                                                 body=cd['body'], file=cd['file'],
+                                                 is_sent=True, status='recipients')
+
+                    recipients = Users.objects.get_by_natural_key(username=receiver)
+                    email.recipients.add(recipients)
+                    email.save()
 
                 elif receiver in cd['cc']:
 
-                    exist_receiver = Users.objects.filter(username=receiver)
-                    if exist_receiver:
-                        cd['cc'] = receiver
-                        email = Email.objects.create(sender=sender, subject=cd['subject'],
-                                                     body=cd['body'], file=cd['file'],
-                                                     signature=signature,
-                                                     is_sent=True, status='cc')
+                    email = Email.objects.create(sender=sender, subject=cd['subject'],
+                                                 body=cd['body'], file=cd['file'],
+                                                 is_sent=True, status='cc')
 
-                        recipients = Users.objects.get_by_natural_key(username=cd['cc'])
-                        email.recipients.add(recipients)
-                        email.save()
+                    recipients = Users.objects.get_by_natural_key(username=receiver)
+                    email.recipients.add(recipients)
+                    email.save()
 
                 elif receiver in cd['bcc']:
 
-                    exist_receiver = Users.objects.filter(username=receiver)
-                    if exist_receiver:
-                        cd['bcc'] = receiver
-                        email = Email.objects.create(sender=sender, subject=cd['subject'],
-                                                     body=cd['body'], file=cd['file'],
-                                                     signature=signature,
-                                                     is_sent=True, status='bcc')
+                    email = Email.objects.create(sender=sender, subject=cd['subject'],
+                                                 body=cd['body'], file=cd['file'],
+                                                 is_sent=True, status='bcc')
 
-                        recipients = Users.objects.get_by_natural_key(username=cd['bcc'])
-                        email.recipients.add(recipients)
-                        email.save()
+                    recipients = Users.objects.get_by_natural_key(username=receiver)
+                    email.recipients.add(recipients)
+                    email.save()
 
-            messages.success(request, 'mail sent successfully', 'success')
+            messages.success(request, 'mail forwarded successfully', 'success')
             return redirect('home')
         return render(request, self.template_name, {'form': form})
 
@@ -598,7 +607,7 @@ class CreateFilter(LoginRequiredMixin, View):
                     email.is_filter = True
 
                     if 'Add to Label' in request.POST:
-                        label = Category.objects.get(name=request.POST.get('label'))
+                        label = Category.objects.get(name=request.POST.get('label'), owner=request.user)
                         email.category.add(label)
                         email.save()
 
@@ -613,7 +622,7 @@ class CreateFilter(LoginRequiredMixin, View):
                 # create filter object
                 if 'Add to Label' in request.POST:
 
-                    label = Category.objects.get(name=request.POST.get('label'))
+                    label = Category.objects.get(name=request.POST.get('label'), owner=request.user)
                     Filter.objects.create(owner=user,
                                           text=text,
                                           label=label)
@@ -633,7 +642,7 @@ class CreateFilter(LoginRequiredMixin, View):
                     email.is_filter = True
 
                     if 'Add to Label' in request.POST:
-                        label = Category.objects.get(name=request.POST.get('label'))
+                        label = Category.objects.get(name=request.POST.get('label'), owner=request.user)
                         email.category.add(label)
                         email.save()
 
@@ -648,7 +657,7 @@ class CreateFilter(LoginRequiredMixin, View):
                 # create filter object
                 if 'Add to Label' in request.POST:
 
-                    label = Category.objects.get(name=request.POST.get('label'))
+                    label = Category.objects.get(name=request.POST.get('label'), owner=request.user)
                     Filter.objects.create(owner=form.owner,
                                           from_user=from_user,
                                           label=label)
