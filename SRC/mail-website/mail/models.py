@@ -86,6 +86,7 @@ class Email(models.Model):
         ('recipients', 'recipients'),
         ('cc', 'cc'),
         ('bcc', 'bcc'),
+        ('total', 'total'),
     ]
     status = models.CharField(max_length=10, choices=status_choices, default='')
     signature = models.ForeignKey(Signature, on_delete=models.CASCADE, null=True, blank=True)

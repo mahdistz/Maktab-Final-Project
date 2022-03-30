@@ -1,10 +1,12 @@
 from django.contrib import admin
 from mail.models import Email, Category, Signature, Filter
+from user.models import Users
+from django.shortcuts import HttpResponseRedirect
+from django.contrib import messages
 
 
 @admin.register(Email)
 class EmailAdmin(admin.ModelAdmin):
-
     list_display = ('sender', 'get_recipients', 'get_cc', 'get_bcc',
                     'subject', 'body', 'is_sent',)
 
@@ -29,6 +31,21 @@ class EmailAdmin(admin.ModelAdmin):
 class CategoryAdmin(admin.ModelAdmin):
     list_display = ('owner', 'name',)
     raw_id_fields = ('owner',)
+    fields = ['owner', 'name']
+
+    # Define the default label by admin for all users of website
+    def add_view(self, request, form_url='', extra_context=None):
+        if request.method == "POST":
+            try:
+                users = Users.objects.all()
+                for user in users:
+                    Category.objects.create(owner_id=user.pk, name=request.POST.get("name"))
+                return HttpResponseRedirect("/admin/mail/category")
+            except Exception as e:
+                messages.add_message(request, messages.ERROR, message="This label Exist!")
+                return HttpResponseRedirect("/admin/mail/category/add")
+
+        return super(CategoryAdmin, self).add_view(request)
 
 
 @admin.register(Signature)

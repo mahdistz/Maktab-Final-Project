@@ -6,23 +6,23 @@
     <h3>Create Filter</h3>
         <br>
 
- <form action="" method="post">
+<form action="" method="post" id="form">
     {% csrf_token %}
         {{ form.as_p }}
-        <div class="form-group mt-4">
-            <label for="label" class="col-2 col-sm-1 col-form-label"><strong>Labels:</strong></label>
-            <select name="label" >
-                 <option selected="selected" disabled>------</option>
-                 {% for label in labels %}
-                     <option
-                      value="{{ label }}"
-                     >{{ label }}</option>
-                 {% endfor %}
-            </select>
-        </div>
+{#        <div class="form-group mt-4">#}
+{#            <label for="label" class="col-2 col-sm-1 col-form-label"><strong>Labels:</strong></label>#}
+{#            <select name="label" id="label" >#}
+{#                 <option selected="selected" disabled>------</option>#}
+{#                 {% for label in labels %}#}
+{#                     <option#}
+{#                      value="{{ label }}"#}
+{#                     >{{ label }}</option>#}
+{#                 {% endfor %}#}
+{#            </select>#}
+{#        </div>#}
 
     <div class="form-group mt-4">
-            <input type="submit" class="btn btn-primary" name="Add to Label" value="Add to Label">
+            <input type="submit" class="btn btn-primary" name="Add to Label" id="Add_to_Label" value="Add to Label">
             <input type="submit" class="btn btn-primary" name="Trash" value="Trash">
             <input type="submit" class="btn btn-primary" name="Archive" value="Archive">
             </div>

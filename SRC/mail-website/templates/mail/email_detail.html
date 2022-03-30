@@ -18,7 +18,8 @@
     <p>Signature: <strong>{{ object.signature.text }}</strong></p>
     {% endif %}
     <p>{% if object.file %}
-        file: <a href="{{ object.file.url }}" >Download file</a></p>
+        file: <a href="{{ object.file.url }}" >Download file </a>,
+        Size: <span>{{ object.file.size|filesizeformat }}</span></p>
         {% endif %}
     <p>Date Time: {{ object.created_time }}</p>
     <p>Label:{% for category in object.category.all %}

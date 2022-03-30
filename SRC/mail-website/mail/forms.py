@@ -135,12 +135,12 @@ class CreateFilterForm(forms.ModelForm):
 
     class Meta:
         model = Filter
-        fields = ['text', 'from_user']
+        fields = ['text', 'from_user', 'label']
 
     def clean(self):
         cd = self.cleaned_data
-        if not (cd['from_user'] and cd['text']):
+        if not cd['from_user'] and not cd['text']:
             raise forms.ValidationError('You must fill in one of the fields "from user" or "text" ')
-        if cd['from_user'] is not None and not Users.objects.filter(username=cd['from_user']).exists():
+        elif cd['from_user'] and not Users.objects.filter(username=cd['from_user']).exists():
             raise forms.ValidationError(f"there is no user with this email: {cd['from_user']}")
         return cd
