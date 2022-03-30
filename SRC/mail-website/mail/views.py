@@ -23,8 +23,8 @@ from django.views.decorators.csrf import csrf_exempt
 @api_view(["GET"])
 def api_sent_emails_of_user(request):
     user = Users.objects.get(id=request.user.id)
-    emails = Email.objects.filter(sender=user,
-                                  is_sent=True, is_archived=False, is_trashed=False)
+    emails = Email.objects.filter(sender=user, is_sent=True, is_archived=False, is_trashed=False,
+                                  is_filter=False).exclude(status='total')
     serializer = EmailSerializer(emails, many=True)
     return Response(serializer.data)
 
@@ -34,9 +34,9 @@ def api_sent_emails_of_user(request):
 def api_received_emails_of_user(request):
     user = Users.objects.get(id=request.user.id)
     emails = Email.objects.filter(
-        Q(recipients=user, status='recipients', is_archived=False, is_trashed=False) |
-        Q(recipients=user, status='cc', is_archived=False, is_trashed=False) |
-        Q(recipients=user, status='bcc', is_archived=False, is_trashed=False))
+        Q(recipients=user, status='recipients', is_archived=False, is_trashed=False, is_filter=False) |
+        Q(recipients=user, status='cc', is_archived=False, is_trashed=False, is_filter=False) |
+        Q(recipients=user, status='bcc', is_archived=False, is_trashed=False, is_filter=False))
     serializer = EmailSerializer(emails, many=True)
     return Response(serializer.data)
 
@@ -297,7 +297,7 @@ class AddEmailToCategory(LoginRequiredMixin, View):
         form.name = request.POST.get('name')
         if form.is_valid():
             email = Email.objects.get(pk=pk)
-            category_obj = Category.objects.get(name=form.cleaned_data['name'])
+            category_obj = Category.objects.get(name=form.cleaned_data['name'], owner=request.user)
             email.category.add(category_obj)
             email.save()
             messages.success(request, 'email added to the label successfully', 'success')
@@ -324,7 +324,9 @@ class InboxMail(LoginRequiredMixin, View):
         if filters:
             for filter_obj in filters:
                 if filter_obj.from_user:
-                    for email in emails.filter(sender=filter_obj.from_user):
+
+                    from_user = Users.objects.get(username=filter_obj.from_user)
+                    for email in emails.filter(sender=from_user):
 
                         if filter_obj.trash_or_archive == 'Archive':
                             email.is_archived = True
@@ -366,15 +368,6 @@ class InboxMail(LoginRequiredMixin, View):
             time_threshold = email.created_time - timedelta(seconds=1)
 
             queryset = emails.filter(created_time__range=[email.created_time, time_threshold, ])
-            print(queryset)
-
-        #     res_list = [email.recipients.all() for email in queryset if email.status == 'recipients']
-        #     cc_list = [email.recipients.all() for email in queryset if email.status == 'cc']
-        #     bcc_list = [email.recipients.all() for email in queryset if email.status == 'bcc']
-        #
-        #     print(res_list, "11", cc_list, "22", bcc_list)
-        #
-        # context = {'res_list': res_list, 'cc_list': cc_list, 'bcc_list': bcc_list, 'emails': emails}
 
         return render(request, self.template_name, {'emails': emails})
 
@@ -385,7 +378,7 @@ class SentMail(LoginRequiredMixin, View):
     def get(self, request):
         sent = Email.objects.filter(sender__exact=request.user.id,
                                     is_sent=True, is_archived=False, is_trashed=False, status='total')
-        return render(request, self.template_name, {'sent': sent, 'see_bcc': True})
+        return render(request, self.template_name, {'sent': sent})
 
 
 class DraftMail(LoginRequiredMixin, View):
@@ -569,7 +562,7 @@ class Filters(LoginRequiredMixin, View):
     def get(self, request):
         owner = Users.objects.get(id=request.user.id)
         filters = Filter.objects.filter(owner=owner)
-        return render(request, self.template_name, {'filters': filters, 'Archive': 'Archive'})
+        return render(request, self.template_name, {'filters': filters})
 
 
 class FilterDetail(LoginRequiredMixin, DetailView):
@@ -657,18 +650,18 @@ class CreateFilter(LoginRequiredMixin, View):
 
                     label = Category.objects.get(name=request.POST.get('label'))
                     Filter.objects.create(owner=form.owner,
-                                          from_user=user,
+                                          from_user=from_user,
                                           label=label)
 
                 elif 'Trash' in request.POST:
 
                     Filter.objects.create(owner=form.owner,
-                                          from_user=user,
+                                          from_user=from_user,
                                           trash_or_archive='Trash')
 
                 elif 'Archive' in request.POST:
                     Filter.objects.create(owner=form.owner,
-                                          from_user=user,
+                                          from_user=from_user,
                                           trash_or_archive='Archive')
 
             messages.success(request, 'filter created successfully', 'success')

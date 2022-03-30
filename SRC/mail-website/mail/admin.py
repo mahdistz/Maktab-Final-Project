@@ -10,7 +10,7 @@ class EmailAdmin(admin.ModelAdmin):
     list_display = ('sender', 'get_recipients', 'get_cc', 'get_bcc',
                     'subject', 'body', 'is_sent',)
 
-    list_filter = ('sender', 'recipients',)
+    list_filter = ('sender', 'recipients', 'is_sent')
 
     date_hierarchy = 'created_time'
 

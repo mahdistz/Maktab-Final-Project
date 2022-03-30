@@ -2,6 +2,7 @@
 {% block content %}
     <div style="width: 500px;height: auto" >
     <p>Sender:{{ object.sender }}</p>
+
     <p>to:{% for recipients in object.recipients.all %}
             {{ recipients }},
         {% endfor%}</p>
@@ -11,6 +12,7 @@
     <p>bcc:{% for bcc in object.bcc.all %}
             {{ bcc }},
         {% endfor%}</p>
+
     <p>subject:{{ object.subject }}</p>
     <p>body:</p>
     <p>{{ object.body|safe }}</p>

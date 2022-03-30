@@ -63,20 +63,23 @@ class UsersAdmin(admin.ModelAdmin):
     activate_users.short_description = 'Activate Users'
 
     def count_sent_email(self, obj):
-        qs = Email.objects.filter(sender=obj, is_sent=True).count()
+        qs = Email.objects.filter(sender=obj, is_sent=True).exclude(status='total').count()
         return qs
 
     count_sent_email.short_description = 'Sent Mails'
 
     def count_received_email(self, obj):
-        qs = Email.objects.filter(Q(recipients=obj) | Q(cc=obj) | Q(bcc=obj)).count()
+        qs = Email.objects.filter(Q(recipients=obj) | Q(cc=obj) | Q(bcc=obj)).filter(is_filter=False).\
+            exclude(status='total').count()
         return qs
 
     count_received_email.short_description = 'Received Mails'
 
     def get_user_storage(self, obj):
         # to show on list display
-        user_files = Email.objects.filter(sender=obj).exclude(Q(file='') | Q(file__isnull=True))
+        # downloaded or uploaded file by user
+        user_files = Email.objects.filter(Q(sender=obj) | Q(recipients=obj, is_sent=True)) \
+            .exclude(Q(file='') | Q(file__isnull=True)).exclude(status='total')
         total = sum(int(objects.file_size) for objects in user_files if objects.file_size)
         total = size_format(total)
         return total
@@ -94,7 +97,7 @@ class UsersAdmin(admin.ModelAdmin):
 
         file_data = []
         for user in usernames:
-            file_of_user = all_emails_with_file.filter(sender_id=user.id)
+            file_of_user = all_emails_with_file.filter(Q(sender_id=user.id) | Q(recipients=user.id))
             total = sum(int(objects.file_size) for objects in file_of_user if objects.file_size)
             file_data.append({"user": user.username, "user_size": total})
 
