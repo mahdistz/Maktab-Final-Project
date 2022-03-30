@@ -25,10 +25,9 @@ ALTER TABLE ONLY public.user_contact DROP CONSTRAINT user_contact_email_id_d50e2
 ALTER TABLE ONLY public.mail_signature DROP CONSTRAINT mail_signature_owner_id_86bef9ce_fk_user_users_id;
 ALTER TABLE ONLY public.mail_filter DROP CONSTRAINT mail_filter_owner_id_0acd4079_fk_user_users_id;
 ALTER TABLE ONLY public.mail_filter DROP CONSTRAINT mail_filter_label_id_abc2295a_fk_mail_category_id;
-ALTER TABLE ONLY public.mail_filter DROP CONSTRAINT mail_filter_from_user_id_a95c7fb4_fk_user_users_id;
 ALTER TABLE ONLY public.mail_email DROP CONSTRAINT mail_email_signature_id_f0378076_fk_mail_signature_id;
 ALTER TABLE ONLY public.mail_email DROP CONSTRAINT mail_email_sender_id_102f874d_fk_user_users_id;
-ALTER TABLE ONLY public.mail_email DROP CONSTRAINT mail_email_reply_to_id_f55bc634_fk_mail_email_id;
+ALTER TABLE ONLY public.mail_email DROP CONSTRAINT mail_email_reply_id_acdabf78_fk_mail_email_id;
 ALTER TABLE ONLY public.mail_email_recipients DROP CONSTRAINT mail_email_recipients_users_id_16f46083_fk_user_users_id;
 ALTER TABLE ONLY public.mail_email_recipients DROP CONSTRAINT mail_email_recipients_email_id_8554d849_fk_mail_email_id;
 ALTER TABLE ONLY public.mail_email_cc DROP CONSTRAINT mail_email_cc_users_id_cc5c244a_fk_user_users_id;
@@ -40,9 +39,15 @@ ALTER TABLE ONLY public.mail_email_bcc DROP CONSTRAINT mail_email_bcc_email_id_0
 ALTER TABLE ONLY public.mail_category DROP CONSTRAINT mail_category_owner_id_9ce90553_fk_user_users_id;
 ALTER TABLE ONLY public.django_admin_log DROP CONSTRAINT django_admin_log_user_id_c564eba6_fk_user_users_id;
 ALTER TABLE ONLY public.django_admin_log DROP CONSTRAINT django_admin_log_content_type_id_c4bce8eb_fk_django_co;
+ALTER TABLE ONLY public.dashboard_stats DROP CONSTRAINT dashboard_stats_default_multiseries_criteria_id_1c00740c_fk;
+ALTER TABLE ONLY public.authtoken_token DROP CONSTRAINT authtoken_token_user_id_35299eff_fk_user_users_id;
 ALTER TABLE ONLY public.auth_permission DROP CONSTRAINT auth_permission_content_type_id_2f476e4b_fk_django_co;
 ALTER TABLE ONLY public.auth_group_permissions DROP CONSTRAINT auth_group_permissions_group_id_b120cbf9_fk_auth_group_id;
 ALTER TABLE ONLY public.auth_group_permissions DROP CONSTRAINT auth_group_permissio_permission_id_84c5c92e_fk_auth_perm;
+ALTER TABLE ONLY public.admin_tools_stats_criteriatostatsm2m DROP CONSTRAINT admin_tools_stats_criteriatostatsm2m_stats_id_10bd79ea_fk;
+ALTER TABLE ONLY public.admin_tools_stats_criteriatostatsm2m DROP CONSTRAINT admin_tools_stats_criteriatostatsm2m_criteria_id_bfe67f05_fk;
+ALTER TABLE ONLY public.admin_tools_stats_cachedvalue DROP CONSTRAINT admin_tools_stats_cachedvalue_stats_id_952da855_fk;
+ALTER TABLE ONLY public.admin_tools_stats_cachedvalue DROP CONSTRAINT admin_tools_stats_cachedv_multiple_series_choice_id_f68b8312_fk;
 DROP INDEX public.user_users_username_2da30a0a_like;
 DROP INDEX public.user_users_user_permissions_users_id_e1262029;
 DROP INDEX public.user_users_user_permissions_permission_id_8c68afab;
@@ -55,7 +60,6 @@ DROP INDEX public.user_contact_email_id_d50e2efd;
 DROP INDEX public.mail_signature_owner_id_86bef9ce;
 DROP INDEX public.mail_filter_owner_id_0acd4079;
 DROP INDEX public.mail_filter_label_id_abc2295a;
-DROP INDEX public.mail_filter_from_user_id_a95c7fb4;
 DROP INDEX public.mail_email_signature_id_f0378076;
 DROP INDEX public.mail_email_sender_id_102f874d;
 DROP INDEX public.mail_email_reply_to_id_f55bc634;
@@ -72,10 +76,21 @@ DROP INDEX public.django_session_session_key_c0390e0f_like;
 DROP INDEX public.django_session_expire_date_a5c62663;
 DROP INDEX public.django_admin_log_user_id_c564eba6;
 DROP INDEX public.django_admin_log_content_type_id_c4bce8eb;
+DROP INDEX public.dashboard_stats_graph_title_99e6d271_like;
+DROP INDEX public.dashboard_stats_graph_title_99e6d271;
+DROP INDEX public.dashboard_stats_graph_key_4256e63f_like;
+DROP INDEX public.dashboard_stats_default_multiseries_criteria_id_1c00740c;
+DROP INDEX public.dash_stats_criteria_criteria_name_7fe7ae1e_like;
+DROP INDEX public.dash_stats_criteria_criteria_name_7fe7ae1e;
+DROP INDEX public.authtoken_token_key_10f0b77e_like;
 DROP INDEX public.auth_permission_content_type_id_2f476e4b;
 DROP INDEX public.auth_group_permissions_permission_id_84c5c92e;
 DROP INDEX public.auth_group_permissions_group_id_b120cbf9;
 DROP INDEX public.auth_group_name_a6ea08ec_like;
+DROP INDEX public.admin_tools_stats_criteriatostatsm2m_stats_id_10bd79ea;
+DROP INDEX public.admin_tools_stats_criteriatostatsm2m_criteria_id_bfe67f05;
+DROP INDEX public.admin_tools_stats_cachedvalue_stats_id_952da855;
+DROP INDEX public.admin_tools_stats_cachedva_multiple_series_choice_id_f68b8312;
 ALTER TABLE ONLY public.user_users DROP CONSTRAINT user_users_username_key;
 ALTER TABLE ONLY public.user_users_user_permissions DROP CONSTRAINT user_users_user_permissions_pkey;
 ALTER TABLE ONLY public.user_users_user_permissions DROP CONSTRAINT user_users_user_permissi_users_id_permission_id_5fc04ed5_uniq;
@@ -105,12 +120,20 @@ ALTER TABLE ONLY public.django_migrations DROP CONSTRAINT django_migrations_pkey
 ALTER TABLE ONLY public.django_content_type DROP CONSTRAINT django_content_type_pkey;
 ALTER TABLE ONLY public.django_content_type DROP CONSTRAINT django_content_type_app_label_model_76bd3d3b_uniq;
 ALTER TABLE ONLY public.django_admin_log DROP CONSTRAINT django_admin_log_pkey;
+ALTER TABLE ONLY public.dashboard_stats DROP CONSTRAINT dashboard_stats_pkey;
+ALTER TABLE ONLY public.dashboard_stats DROP CONSTRAINT dashboard_stats_graph_key_key;
+ALTER TABLE ONLY public.dash_stats_criteria DROP CONSTRAINT dash_stats_criteria_pkey;
+ALTER TABLE ONLY public.authtoken_token DROP CONSTRAINT authtoken_token_user_id_key;
+ALTER TABLE ONLY public.authtoken_token DROP CONSTRAINT authtoken_token_pkey;
 ALTER TABLE ONLY public.auth_permission DROP CONSTRAINT auth_permission_pkey;
 ALTER TABLE ONLY public.auth_permission DROP CONSTRAINT auth_permission_content_type_id_codename_01ab375a_uniq;
 ALTER TABLE ONLY public.auth_group DROP CONSTRAINT auth_group_pkey;
 ALTER TABLE ONLY public.auth_group_permissions DROP CONSTRAINT auth_group_permissions_pkey;
 ALTER TABLE ONLY public.auth_group_permissions DROP CONSTRAINT auth_group_permissions_group_id_permission_id_0cd325b0_uniq;
 ALTER TABLE ONLY public.auth_group DROP CONSTRAINT auth_group_name_key;
+ALTER TABLE ONLY public.admin_tools_stats_criteriatostatsm2m DROP CONSTRAINT admin_tools_stats_criteriatostatsm2m_pkey;
+ALTER TABLE ONLY public.admin_tools_stats_criteriatostatsm2m DROP CONSTRAINT admin_tools_stats_criteriatostatsm2m_order_key;
+ALTER TABLE ONLY public.admin_tools_stats_cachedvalue DROP CONSTRAINT admin_tools_stats_cachedvalue_pkey;
 ALTER TABLE public.user_users_user_permissions ALTER COLUMN id DROP DEFAULT;
 ALTER TABLE public.user_users_groups ALTER COLUMN id DROP DEFAULT;
 ALTER TABLE public.user_users ALTER COLUMN id DROP DEFAULT;
@@ -127,9 +150,13 @@ ALTER TABLE public.mail_category ALTER COLUMN id DROP DEFAULT;
 ALTER TABLE public.django_migrations ALTER COLUMN id DROP DEFAULT;
 ALTER TABLE public.django_content_type ALTER COLUMN id DROP DEFAULT;
 ALTER TABLE public.django_admin_log ALTER COLUMN id DROP DEFAULT;
+ALTER TABLE public.dashboard_stats ALTER COLUMN id DROP DEFAULT;
+ALTER TABLE public.dash_stats_criteria ALTER COLUMN id DROP DEFAULT;
 ALTER TABLE public.auth_permission ALTER COLUMN id DROP DEFAULT;
 ALTER TABLE public.auth_group_permissions ALTER COLUMN id DROP DEFAULT;
 ALTER TABLE public.auth_group ALTER COLUMN id DROP DEFAULT;
+ALTER TABLE public.admin_tools_stats_criteriatostatsm2m ALTER COLUMN id DROP DEFAULT;
+ALTER TABLE public.admin_tools_stats_cachedvalue ALTER COLUMN id DROP DEFAULT;
 DROP SEQUENCE public.user_users_user_permissions_id_seq;
 DROP TABLE public.user_users_user_permissions;
 DROP SEQUENCE public.user_users_id_seq;
@@ -163,15 +190,109 @@ DROP SEQUENCE public.django_content_type_id_seq;
 DROP TABLE public.django_content_type;
 DROP SEQUENCE public.django_admin_log_id_seq;
 DROP TABLE public.django_admin_log;
+DROP SEQUENCE public.dashboard_stats_id_seq;
+DROP TABLE public.dashboard_stats;
+DROP SEQUENCE public.dash_stats_criteria_id_seq;
+DROP TABLE public.dash_stats_criteria;
+DROP TABLE public.authtoken_token;
 DROP SEQUENCE public.auth_permission_id_seq;
 DROP TABLE public.auth_permission;
 DROP SEQUENCE public.auth_group_permissions_id_seq;
 DROP TABLE public.auth_group_permissions;
 DROP SEQUENCE public.auth_group_id_seq;
 DROP TABLE public.auth_group;
+DROP SEQUENCE public.admin_tools_stats_criteriatostatsm2m_id_seq;
+DROP TABLE public.admin_tools_stats_criteriatostatsm2m;
+DROP SEQUENCE public.admin_tools_stats_cachedvalue_id_seq;
+DROP TABLE public.admin_tools_stats_cachedvalue;
 SET default_tablespace = '';
 
 SET default_table_access_method = heap;
+
+--
+-- Name: admin_tools_stats_cachedvalue; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.admin_tools_stats_cachedvalue (
+    id bigint NOT NULL,
+    date timestamp with time zone NOT NULL,
+    time_scale character varying(90) NOT NULL,
+    operation character varying(90),
+    operation_field_name character varying(90),
+    filtered_value character varying(512),
+    value double precision,
+    dynamic_choices jsonb NOT NULL,
+    multiple_series_choice_id bigint,
+    stats_id bigint NOT NULL,
+    is_final boolean NOT NULL,
+    "order" integer
+);
+
+
+ALTER TABLE public.admin_tools_stats_cachedvalue OWNER TO postgres;
+
+--
+-- Name: admin_tools_stats_cachedvalue_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.admin_tools_stats_cachedvalue_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.admin_tools_stats_cachedvalue_id_seq OWNER TO postgres;
+
+--
+-- Name: admin_tools_stats_cachedvalue_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.admin_tools_stats_cachedvalue_id_seq OWNED BY public.admin_tools_stats_cachedvalue.id;
+
+
+--
+-- Name: admin_tools_stats_criteriatostatsm2m; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.admin_tools_stats_criteriatostatsm2m (
+    id bigint NOT NULL,
+    "order" integer,
+    prefix character varying(255) NOT NULL,
+    use_as character varying(90) NOT NULL,
+    criteria_id bigint NOT NULL,
+    stats_id bigint NOT NULL,
+    default_option character varying(255) NOT NULL,
+    choices_based_on_time_range boolean NOT NULL,
+    count_limit integer,
+    CONSTRAINT admin_tools_stats_criteriatostatsm2m_count_limit_check CHECK ((count_limit >= 0)),
+    CONSTRAINT admin_tools_stats_criteriatostatsm2m_order_check CHECK (("order" >= 0))
+);
+
+
+ALTER TABLE public.admin_tools_stats_criteriatostatsm2m OWNER TO postgres;
+
+--
+-- Name: admin_tools_stats_criteriatostatsm2m_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.admin_tools_stats_criteriatostatsm2m_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.admin_tools_stats_criteriatostatsm2m_id_seq OWNER TO postgres;
+
+--
+-- Name: admin_tools_stats_criteriatostatsm2m_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.admin_tools_stats_criteriatostatsm2m_id_seq OWNED BY public.admin_tools_stats_criteriatostatsm2m.id;
+
 
 --
 -- Name: auth_group; Type: TABLE; Schema: public; Owner: postgres
@@ -275,6 +396,112 @@ ALTER TABLE public.auth_permission_id_seq OWNER TO postgres;
 --
 
 ALTER SEQUENCE public.auth_permission_id_seq OWNED BY public.auth_permission.id;
+
+
+--
+-- Name: authtoken_token; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.authtoken_token (
+    key character varying(40) NOT NULL,
+    created timestamp with time zone NOT NULL,
+    user_id bigint NOT NULL
+);
+
+
+ALTER TABLE public.authtoken_token OWNER TO postgres;
+
+--
+-- Name: dash_stats_criteria; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.dash_stats_criteria (
+    id bigint NOT NULL,
+    criteria_name character varying(90) NOT NULL,
+    criteria_fix_mapping jsonb,
+    dynamic_criteria_field_name character varying(90),
+    criteria_dynamic_mapping jsonb,
+    created_date timestamp with time zone NOT NULL,
+    updated_date timestamp with time zone NOT NULL
+);
+
+
+ALTER TABLE public.dash_stats_criteria OWNER TO postgres;
+
+--
+-- Name: dash_stats_criteria_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.dash_stats_criteria_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.dash_stats_criteria_id_seq OWNER TO postgres;
+
+--
+-- Name: dash_stats_criteria_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.dash_stats_criteria_id_seq OWNED BY public.dash_stats_criteria.id;
+
+
+--
+-- Name: dashboard_stats; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.dashboard_stats (
+    id bigint NOT NULL,
+    graph_key character varying(90) NOT NULL,
+    graph_title character varying(90) NOT NULL,
+    model_app_name character varying(90) NOT NULL,
+    model_name character varying(90) NOT NULL,
+    date_field_name character varying(90) NOT NULL,
+    operation_field_name character varying(90),
+    type_operation_field_name character varying(90),
+    is_visible boolean NOT NULL,
+    created_date timestamp with time zone NOT NULL,
+    updated_date timestamp with time zone NOT NULL,
+    user_field_name character varying(90),
+    default_chart_type character varying(90) NOT NULL,
+    default_time_period integer NOT NULL,
+    default_time_scale character varying(90) NOT NULL,
+    y_axis_format character varying(90),
+    "distinct" boolean NOT NULL,
+    default_multiseries_criteria_id bigint,
+    show_to_users boolean NOT NULL,
+    allowed_chart_types character varying(1000),
+    allowed_time_scales character varying(1000) NOT NULL,
+    allowed_type_operation_field_name character varying(1000),
+    cache_values boolean NOT NULL,
+    CONSTRAINT dashboard_stats_default_time_period_check CHECK ((default_time_period >= 0))
+);
+
+
+ALTER TABLE public.dashboard_stats OWNER TO postgres;
+
+--
+-- Name: dashboard_stats_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.dashboard_stats_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.dashboard_stats_id_seq OWNER TO postgres;
+
+--
+-- Name: dashboard_stats_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.dashboard_stats_id_seq OWNED BY public.dashboard_stats.id;
 
 
 --
@@ -447,12 +674,13 @@ CREATE TABLE public.mail_email (
     file character varying(100),
     is_sent boolean NOT NULL,
     signature_id bigint,
-    reply_to_id bigint,
+    reply_id bigint,
     sender_id bigint NOT NULL,
     is_archived boolean NOT NULL,
     is_read boolean NOT NULL,
     is_trashed boolean NOT NULL,
-    status character varying(10) NOT NULL
+    status character varying(10) NOT NULL,
+    is_filter boolean NOT NULL
 );
 
 
@@ -621,10 +849,11 @@ ALTER SEQUENCE public.mail_email_recipients_id_seq OWNED BY public.mail_email_re
 
 CREATE TABLE public.mail_filter (
     id bigint NOT NULL,
-    text_include character varying(100),
-    from_user_id bigint,
-    label_id bigint NOT NULL,
-    owner_id bigint NOT NULL
+    from_user character varying(100),
+    label_id bigint,
+    owner_id bigint NOT NULL,
+    text character varying(100),
+    trash_or_archive character varying(10)
 );
 
 
@@ -874,6 +1103,20 @@ ALTER SEQUENCE public.user_users_user_permissions_id_seq OWNED BY public.user_us
 
 
 --
+-- Name: admin_tools_stats_cachedvalue id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.admin_tools_stats_cachedvalue ALTER COLUMN id SET DEFAULT nextval('public.admin_tools_stats_cachedvalue_id_seq'::regclass);
+
+
+--
+-- Name: admin_tools_stats_criteriatostatsm2m id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.admin_tools_stats_criteriatostatsm2m ALTER COLUMN id SET DEFAULT nextval('public.admin_tools_stats_criteriatostatsm2m_id_seq'::regclass);
+
+
+--
 -- Name: auth_group id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -892,6 +1135,20 @@ ALTER TABLE ONLY public.auth_group_permissions ALTER COLUMN id SET DEFAULT nextv
 --
 
 ALTER TABLE ONLY public.auth_permission ALTER COLUMN id SET DEFAULT nextval('public.auth_permission_id_seq'::regclass);
+
+
+--
+-- Name: dash_stats_criteria id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.dash_stats_criteria ALTER COLUMN id SET DEFAULT nextval('public.dash_stats_criteria_id_seq'::regclass);
+
+
+--
+-- Name: dashboard_stats id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.dashboard_stats ALTER COLUMN id SET DEFAULT nextval('public.dashboard_stats_id_seq'::regclass);
 
 
 --
@@ -1007,6 +1264,22 @@ ALTER TABLE ONLY public.user_users_user_permissions ALTER COLUMN id SET DEFAULT 
 
 
 --
+-- Data for Name: admin_tools_stats_cachedvalue; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.admin_tools_stats_cachedvalue (id, date, time_scale, operation, operation_field_name, filtered_value, value, dynamic_choices, multiple_series_choice_id, stats_id, is_final, "order") FROM stdin;
+\.
+
+
+--
+-- Data for Name: admin_tools_stats_criteriatostatsm2m; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.admin_tools_stats_criteriatostatsm2m (id, "order", prefix, use_as, criteria_id, stats_id, default_option, choices_based_on_time_range, count_limit) FROM stdin;
+\.
+
+
+--
 -- Data for Name: auth_group; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
@@ -1079,6 +1352,58 @@ COPY public.auth_permission (id, name, content_type_id, codename) FROM stdin;
 50	Can change filter	13	change_filter
 51	Can delete filter	13	delete_filter
 52	Can view filter	13	view_filter
+53	Can add Token	14	add_token
+54	Can change Token	14	change_token
+55	Can delete Token	14	delete_token
+56	Can view Token	14	view_token
+57	Can add token	15	add_tokenproxy
+58	Can change token	15	change_tokenproxy
+59	Can delete token	15	delete_tokenproxy
+60	Can view token	15	view_tokenproxy
+61	Can add dashboard stats	16	add_dashboardstats
+62	Can change dashboard stats	16	change_dashboardstats
+63	Can delete dashboard stats	16	delete_dashboardstats
+64	Can view dashboard stats	16	view_dashboardstats
+65	Can add dashboard stats criteria	17	add_dashboardstatscriteria
+66	Can change dashboard stats criteria	17	change_dashboardstatscriteria
+67	Can delete dashboard stats criteria	17	delete_dashboardstatscriteria
+68	Can view dashboard stats criteria	17	view_dashboardstatscriteria
+69	Can add criteria to stats m2m	18	add_criteriatostatsm2m
+70	Can change criteria to stats m2m	18	change_criteriatostatsm2m
+71	Can delete criteria to stats m2m	18	delete_criteriatostatsm2m
+72	Can view criteria to stats m2m	18	view_criteriatostatsm2m
+73	Can add cached value	19	add_cachedvalue
+74	Can change cached value	19	change_cachedvalue
+75	Can delete cached value	19	delete_cachedvalue
+76	Can view cached value	19	view_cachedvalue
+\.
+
+
+--
+-- Data for Name: authtoken_token; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.authtoken_token (key, created, user_id) FROM stdin;
+e4f55b2aaa8108ba932e64caf5cfe5ebcc8c0bf6	2022-03-25 16:44:59.083142+04:30	2
+50b722ec237a20fc1bc5d7b3b01c5a88952f0823	2022-03-25 17:48:10.54903+04:30	1
+\.
+
+
+--
+-- Data for Name: dash_stats_criteria; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.dash_stats_criteria (id, criteria_name, criteria_fix_mapping, dynamic_criteria_field_name, criteria_dynamic_mapping, created_date, updated_date) FROM stdin;
+\.
+
+
+--
+-- Data for Name: dashboard_stats; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.dashboard_stats (id, graph_key, graph_title, model_app_name, model_name, date_field_name, operation_field_name, type_operation_field_name, is_visible, created_date, updated_date, user_field_name, default_chart_type, default_time_period, default_time_scale, y_axis_format, "distinct", default_multiseries_criteria_id, show_to_users, allowed_chart_types, allowed_time_scales, allowed_type_operation_field_name, cache_values) FROM stdin;
+1	users	users	user	Users	date_joined	\N	Count	t	2022-03-25 23:39:19.642605+04:30	2022-03-25 23:44:35.275398+04:30	Admin	discreteBarChart	31	days	\N	f	\N	f	discreteBarChart,lineChart,multiBarChart,pieChart,stackedAreaChart,multiBarHorizontalChart,linePlusBarChart,scatterChart,cumulativeLineChart,lineWithFocusChart	hours,days,weeks,months,quarters,years	Count,Sum,Avg,AvgCountPerInstance,Max,Min	f
+3	mails	emails	mail	Email	created_time	is_sent,sender,recipients,cc,bcc	\N	t	2022-03-28 12:26:06.41783+04:30	2022-03-28 12:28:44.017002+04:30	sender__username	discreteBarChart	31	days	\N	t	\N	f	discreteBarChart,lineChart,multiBarChart,pieChart,stackedAreaChart,multiBarHorizontalChart,linePlusBarChart,scatterChart,cumulativeLineChart,lineWithFocusChart	hours,days,weeks,months,quarters,years	Count,Sum,Avg,AvgCountPerInstance,Max,Min	f
 \.
 
 
@@ -1087,6 +1412,37 @@ COPY public.auth_permission (id, name, content_type_id, codename) FROM stdin;
 --
 
 COPY public.django_admin_log (id, action_time, object_id, object_repr, action_flag, change_message, content_type_id, user_id) FROM stdin;
+1	2022-03-25 23:39:19.652602+04:30	1	users	1	[{"added": {}}]	16	7
+2	2022-03-25 23:44:35.285403+04:30	1	users	2	[{"changed": {"fields": ["Choose Type operation"]}}]	16	7
+3	2022-03-25 23:46:43.213862+04:30	8	sasan	1	[{"added": {}}, {"added": {"name": "email", "object": "From: sasan, Sub: None"}}]	6	7
+4	2022-03-25 23:53:05.185356+04:30	2	mails	1	[{"added": {}}]	16	7
+5	2022-03-25 23:55:04.902223+04:30	7	Admin	2	[{"changed": {"fields": ["Verification", "Email address", "Phone Number"]}}, {"added": {"name": "email", "object": "From: Admin, Sub: None"}}]	6	7
+6	2022-03-26 15:33:48.090819+04:30	2	mails	2	[{"changed": {"fields": ["Operate field name"]}}]	16	7
+7	2022-03-26 15:36:55.146252+04:30	9	_mahdis_	1	[{"added": {}}]	6	7
+8	2022-03-26 15:59:52.650299+04:30	10	123mah___	1	[{"added": {}}]	6	7
+9	2022-03-26 16:00:48.216376+04:30	11	1111nhnhnhnh6666	1	[{"added": {}}]	6	7
+10	2022-03-26 16:09:21.231695+04:30	12	sara_zahiri__	1	[{"added": {}}]	6	7
+11	2022-03-26 16:11:01.339373+04:30	13	reza_askari	1	[{"added": {}}]	6	7
+12	2022-03-26 16:16:42.753391+04:30	2	mails	2	[{"changed": {"fields": ["Operate field name", "Distinct"]}}]	16	7
+13	2022-03-26 16:37:03.882308+04:30	14	niayesh1_5	1	[{"added": {}}]	6	7
+14	2022-03-26 17:12:06.798319+04:30	15	darya_rahimi	1	[{"added": {}}]	6	7
+15	2022-03-26 17:26:29.384149+04:30	16	shima_babayi@mail.com	1	[{"added": {}}]	6	7
+16	2022-03-26 17:29:38.93591+04:30	17	yahya_golmohammadi@mail.com	1	[{"added": {}}]	6	7
+17	2022-03-26 18:03:48.325194+04:30	12	sara_zahiri__	3		6	7
+18	2022-03-26 18:03:48.342825+04:30	11	1111nhnhnhnh6666	3		6	7
+19	2022-03-26 18:03:48.344841+04:30	10	123mah___	3		6	7
+20	2022-03-28 12:17:18.811801+04:30	2	mails	2	[{"changed": {"fields": ["Operate field name", "Distinct"]}}]	16	7
+21	2022-03-28 12:18:46.497473+04:30	2	mails	2	[{"changed": {"fields": ["Operate field name"]}}]	16	7
+22	2022-03-28 12:19:52.649924+04:30	2	mails	2	[{"changed": {"fields": ["Distinct", "User field name"]}}]	16	7
+23	2022-03-28 12:23:31.39793+04:30	2	mails	2	[{"changed": {"fields": ["Distinct", "Show to ordinary users", "Cache charts values"]}}]	16	7
+24	2022-03-28 12:24:41.790533+04:30	2	mails	2	[{"changed": {"fields": ["Cache charts values"]}}]	16	7
+25	2022-03-28 12:25:33.185101+04:30	2	mails	3		16	7
+26	2022-03-28 12:26:06.426828+04:30	3	mails	1	[{"added": {}}]	16	7
+27	2022-03-28 12:26:32.765217+04:30	3	mails	2	[{"changed": {"fields": ["Operate field name"]}}]	16	7
+28	2022-03-28 12:28:44.024947+04:30	3	mails	2	[{"changed": {"fields": ["Distinct"]}}]	16	7
+29	2022-03-29 19:25:54.498088+04:30	15	darya_rahimi	3		6	7
+30	2022-03-29 19:25:54.505082+04:30	14	niayesh1_5	3		6	7
+31	2022-03-29 19:25:54.50709+04:30	13	reza_askari	3		6	7
 \.
 
 
@@ -1108,6 +1464,12 @@ COPY public.django_content_type (id, app_label, model) FROM stdin;
 11	mail	updateemailofuser
 12	mail	signature
 13	mail	filter
+14	authtoken	token
+15	authtoken	tokenproxy
+16	admin_tools_stats	dashboardstats
+17	admin_tools_stats	dashboardstatscriteria
+18	admin_tools_stats	criteriatostatsm2m
+19	admin_tools_stats	cachedvalue
 \.
 
 
@@ -1144,6 +1506,35 @@ COPY public.django_migrations (id, app, name, applied) FROM stdin;
 26	user	0005_alter_contact_email	2022-03-12 19:45:06.252314+03:30
 27	mail	0004_auto_20220315_0134	2022-03-15 01:35:01.204072+03:30
 28	mail	0005_filter	2022-03-17 00:51:51.262309+03:30
+29	mail	0006_auto_20220323_1615	2022-03-23 16:15:29.796934+04:30
+30	mail	0007_alter_filter_label	2022-03-23 16:53:30.765435+04:30
+31	user	0006_auto_20220324_1920	2022-03-24 19:20:30.619421+04:30
+32	authtoken	0001_initial	2022-03-25 16:43:54.443737+04:30
+33	authtoken	0002_auto_20160226_1747	2022-03-25 16:43:54.520958+04:30
+34	authtoken	0003_tokenproxy	2022-03-25 16:43:54.527279+04:30
+35	admin_tools_stats	0001_initial	2022-03-25 23:35:00.603261+04:30
+36	admin_tools_stats	0002_auto_20190920_1058	2022-03-25 23:35:00.640008+04:30
+37	admin_tools_stats	0003_auto_20191007_0950	2022-03-25 23:35:00.69058+04:30
+38	admin_tools_stats	0004_dashboardstats_y_tick_format	2022-03-25 23:35:00.700579+04:30
+39	admin_tools_stats	0005_auto_20200203_1537	2022-03-25 23:35:00.873276+04:30
+40	admin_tools_stats	0006_auto_20200205_0944	2022-03-25 23:35:00.956863+04:30
+41	admin_tools_stats	0007_auto_20200205_1054	2022-03-25 23:35:01.00989+04:30
+42	admin_tools_stats	0008_auto_20200911_1400	2022-03-25 23:35:01.050891+04:30
+43	admin_tools_stats	0009_auto_20200928_1003	2022-03-25 23:35:01.067855+04:30
+44	admin_tools_stats	0010_dashboardstats_show_to_users	2022-03-25 23:35:01.07986+04:30
+45	admin_tools_stats	0011_auto_20210204_1206	2022-03-25 23:35:01.10207+04:30
+46	admin_tools_stats	0012_auto_20210207_0859	2022-03-25 23:35:01.164858+04:30
+47	admin_tools_stats	0013_auto_20210221_1247	2022-03-25 23:35:01.179736+04:30
+48	admin_tools_stats	0014_auto_20211122_1511	2022-03-25 23:35:01.28121+04:30
+49	admin_tools_stats	0015_auto_20211209_0822	2022-03-25 23:35:01.311326+04:30
+50	admin_tools_stats	0016_dashboardstats_cache_values	2022-03-25 23:35:01.325204+04:30
+51	admin_tools_stats	0017_auto_20220326_1814	2022-03-26 18:14:36.632763+04:30
+52	user	0007_auto_20220326_1814	2022-03-26 18:14:36.736428+04:30
+53	mail	0008_alter_email_body	2022-03-26 23:46:13.431869+04:30
+54	mail	0009_auto_20220329_1548	2022-03-29 15:48:45.470381+04:30
+55	mail	0010_filter_trash_or_archive	2022-03-29 16:33:57.912355+04:30
+56	mail	0011_auto_20220330_0055	2022-03-30 00:55:18.347044+04:30
+57	mail	0012_alter_email_status	2022-03-30 15:57:44.904907+04:30
 \.
 
 
@@ -1152,7 +1543,7 @@ COPY public.django_migrations (id, app, name, applied) FROM stdin;
 --
 
 COPY public.django_session (session_key, session_data, expire_date) FROM stdin;
-gyeaxnsfv2wp85vza3ro9q22va6yfejo	.eJxVjDsOwyAQBe9CHSH-4JTpfQbEsktwEmHJ2FWUu0dILpL2zcx7s5iOvcaj0xYXZFem2OV3g5Sf1AbAR2r3lee17dsCfCj8pJ3PK9Lrdrp_BzX1OmqTlNPZB0uyoMgWnAVpvFKaVMkeKXgUiFMok7QFQGvAgAaEM1lIxT5f75A4LA:1nUFS7:PDPcppMskJ4YxrRXBhNFnPpFaWnHagidLdztfCOxB6A	2022-04-15 02:45:39.653292+04:30
+nrmnit1wqg42jh3ciyugivejmlgwk5a5	.eJxVjDsOwyAQBe9CHSH-4JTpfQbEsktwEmHJ2FWUu0dILpL2zcx7s5iOvcaj0xYXZFem2OV3g5Sf1AbAR2r3lee17dsCfCj8pJ3PK9Lrdrp_BzX1OmqTlNPZB0uyoMgWnAVpvFKaVMkeKXgUiFMok7QFQGvAgAaEM1lIxT5f75A4LA:1nZczY:sf3HLWDv5aba7_4EYmv0P8JUSHT41BTX4S1FUMEY3nU	2022-04-29 22:54:24.8315+04:30
 \.
 
 
@@ -1164,6 +1555,12 @@ COPY public.mail_category (id, name, owner_id) FROM stdin;
 2	mahdis	1
 4	university	2
 5	maktab	2
+7	test category	2
+8	test category	1
+9	test category	7
+10	test category	9
+11	test category	16
+12	test category	17
 \.
 
 
@@ -1171,20 +1568,52 @@ COPY public.mail_category (id, name, owner_id) FROM stdin;
 -- Data for Name: mail_email; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.mail_email (id, subject, body, created_time, file, is_sent, signature_id, reply_to_id, sender_id, is_archived, is_read, is_trashed, status) FROM stdin;
-4	it's good	tery hello .how are you???	2022-03-12 23:38:38.420192+03:30	mahdistz@mail.com/user.contact.csv	f	\N	\N	1	f	f	f	
-1	it's good	hhhhhhhhhhhhh	2022-03-12 19:21:19.552733+03:30	mahdistz@mail.com/ERD.pdf	t	\N	\N	1	f	f	f	recipients
-5	\N	hello my friend\r\nhow are you?\r\nwhen you come back?\r\ni miss you ...	2022-03-13 23:15:57.624189+03:30		t	\N	\N	2	f	f	f	recipients
-6	pdf of exam	hi master\r\nthis is pdf of my exam.\r\ngood luck	2022-03-15 01:49:09.845854+03:30		t	\N	\N	2	f	f	f	recipients
-7	\N	to exercise you should must string\r\nand hopeful.	2022-03-15 01:58:54.3003+03:30		t	1	\N	2	f	f	f	recipients
-8	hi	my friend	2022-03-15 23:16:11.134661+03:30	Admin@mail.com/bs4_compose_email.html	f	1	\N	2	f	f	f	
-10	1	hy friend	2022-03-15 23:17:38.524861+03:30	Admin@mail.com/inbox_compose_message.html	t	2	\N	2	f	f	f	
-11	to my lovely friend	hi, i miss you dear\r\ncome back soon.	2022-03-15 23:33:56.919784+03:30	mahdistz@mail.com/ERD_h80u4zP.pdf	t	1	\N	1	f	f	f	recipients
-12	to my lovely friend	hi, i miss you dear\r\ncome back soon.	2022-03-15 23:33:56.940788+03:30	mahdistz@mail.com/ERD_SIwDN0x.pdf	t	1	\N	1	f	f	f	cc
-13	90	hey everyone i am doing a website for my university athletic, the thing is in my program i created a productbase and then models of this product, for stock control, and i have a problem here in my html of product, i created a select field in html to get the choice the model that someone want to buy, but i need to get the value of the select because is my model pk to put in the cart.	2022-03-16 01:29:26.073614+03:30	mahdistz@mail.com/Simple_email_inbox_page.html	f	\N	\N	1	f	f	f	
-14	\N	jkjkjkjkjkjkjk	2022-03-16 01:34:11.160014+03:30		f	\N	\N	1	f	f	f	
-15	\N	jht	2022-03-16 01:43:05.616155+03:30		t	4	\N	1	f	f	f	recipients
-9	hi	my friend	2022-03-15 23:16:59.168912+03:30	Admin@mail.com/bs4_compose_email_BYDcpGy.html	f	1	\N	2	f	f	t	
+COPY public.mail_email (id, subject, body, created_time, file, is_sent, signature_id, reply_id, sender_id, is_archived, is_read, is_trashed, status, is_filter) FROM stdin;
+14	\N	jkjkjkjkjkjkjk	2022-03-16 01:34:11.160014+03:30		f	\N	\N	1	t	f	f		t
+13	90	hey everyone i am doing a website for my university athletic, the thing is in my program i created a productbase and then models of this product, for stock control, and i have a problem here in my html of product, i created a select field in html to get the choice the model that someone want to buy, but i need to get the value of the select because is my model pk to put in the cart.	2022-03-16 01:29:26.073614+03:30	mahdistz@mail.com/Simple_email_inbox_page.html	f	\N	\N	1	t	f	f		t
+11	to my lovely friend	hi, i miss you dear\r\ncome back soon.	2022-03-15 23:33:56.919784+03:30	mahdistz@mail.com/ERD_h80u4zP.pdf	t	1	\N	1	t	f	f	recipients	t
+34	14569	<p>dsdsdsdsdsdsds</p>	2022-03-30 16:28:10.583875+04:30		t	\N	\N	2	f	f	f	bcc	t
+43	899	<p>bcc check</p>	2022-03-30 17:21:26.312698+04:30		t	\N	\N	2	f	f	f	bcc	t
+42	899	<p>bcc check</p>	2022-03-30 17:21:26.303695+04:30		t	\N	\N	2	f	f	f	recipients	t
+33	14569	<p>dsdsdsdsdsdsds</p>	2022-03-30 16:28:10.574855+04:30		t	\N	\N	2	f	f	f	recipients	t
+27	\N	<p>jjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjj</p>	2022-03-30 15:37:34.104294+04:30		t	\N	\N	2	f	f	f	recipients	t
+4	it's good	tery hello .how are you???	2022-03-12 23:38:38.420192+03:30	mahdistz@mail.com/user.contact.csv	f	\N	\N	1	t	f	t		t
+1	it's good	hhhhhhhhhhhhh	2022-03-12 19:21:19.552733+03:30	mahdistz@mail.com/ERD.pdf	t	\N	\N	1	t	f	f	recipients	t
+32	14569	<p>dsdsdsdsdsdsds</p>	2022-03-30 16:28:10.553855+04:30		t	\N	\N	2	f	f	f	total	t
+31	hi	<p>rgrgrgrgrgr</p>\r\n\r\n<p>tkf;lvkdfke[pfketkfed&#39;</p>\r\n\r\n<p>fktke[fdetfd&#39;d</p>	2022-03-30 16:10:28.071195+04:30		t	\N	\N	2	t	f	f	cc	t
+30	hi	<p>rgrgrgrgrgr</p>\r\n\r\n<p>tkf;lvkdfke[pfketkfed&#39;</p>\r\n\r\n<p>fktke[fdetfd&#39;d</p>	2022-03-30 16:10:28.060151+04:30		t	\N	\N	2	f	f	f	recipients	t
+29	hi	<p>rgrgrgrgrgr</p>\r\n\r\n<p>tkf;lvkdfke[pfketkfed&#39;</p>\r\n\r\n<p>fktke[fdetfd&#39;d</p>	2022-03-30 16:10:28.03969+04:30		t	\N	\N	2	f	f	f	total	t
+26	\N	<p>dfdfdfdfdddddddddddddddddddddddddd</p>	2022-03-30 15:19:13.40628+04:30		t	\N	\N	2	f	f	f	recipients	t
+25	\N	<p>what you want baby?</p>\r\n\r\n<p><em><strong>i miss you...</strong></em><img alt="heart" src="http://127.0.0.1:8080/static/ckeditor/ckeditor/plugins/smiley/images/heart.png" style="height:23px; width:23px" title="heart" /></p>	2022-03-30 15:17:54.073336+04:30	Admin@mail.com/Simple_email_inbox_page.html	t	\N	\N	2	f	f	f	recipients	t
+21	\N	<p>salam</p>	2022-03-29 17:04:49.794709+04:30		t	1	\N	2	t	f	t	recipients	t
+24	\N	<p>hi mahdis</p>\r\n\r\n<p>i&#39;m admin<img alt="heart" src="http://127.0.0.1:8080/static/ckeditor/ckeditor/plugins/smiley/images/heart.png" style="height:23px; width:23px" title="heart" /></p>	2022-03-30 15:11:54.929746+04:30		t	\N	\N	2	t	f	f	recipients	t
+41	899	<p>bcc check</p>	2022-03-30 17:21:26.286028+04:30		t	\N	\N	2	f	f	f	total	t
+40	\N	<p>87hjbnihy</p>	2022-03-30 17:21:00.947618+04:30		t	\N	\N	2	f	f	f	cc	t
+39	\N	<p>87hjbnihy</p>	2022-03-30 17:21:00.937587+04:30		t	\N	\N	2	f	f	f	recipients	t
+12	to my lovely friend	hi, i miss you dear\r\ncome back soon.	2022-03-15 23:33:56.940788+03:30	mahdistz@mail.com/ERD_SIwDN0x.pdf	t	1	\N	1	t	f	f	cc	t
+38	\N	<p>87hjbnihy</p>	2022-03-30 17:21:00.70252+04:30		t	\N	\N	2	f	f	f	total	t
+44	\N	<p>ddddddddddddddddddddddddd</p>	2022-03-30 22:34:31.432998+04:30		t	\N	\N	1	f	f	f	total	f
+22	\N	<p>hi mahdis</p>	2022-03-29 19:53:03.965723+04:30		t	4	\N	1	t	f	f	recipients	t
+37	666	<p>derya sal qwe</p>	2022-03-30 16:34:58.137137+04:30	Admin@mail.com/tex_template_96-02-15_eH02ufO.zip	t	1	\N	2	f	f	f	bcc	t
+19	\N	<p><strong>hello</strong> <span data-darkreader-inline-color="" style="--darkreader-inline-color:#f2ae43; color:#f39c12"><em>my</em></span> <span style="font-size:16px"><span data-darkreader-inline-bgcolor="" style="--darkreader-inline-bgcolor:#3980ae; background-color:#3498db">friend</span></span></p>	2022-03-27 01:30:46.151365+04:30		t	6	\N	7	t	f	f	recipients	t
+15	\N	jht	2022-03-16 01:43:05.616155+03:30		t	4	\N	1	t	f	t	recipients	t
+47	343434343	<p>bcc check ggggggggggggggggggggg</p>	2022-03-30 23:01:28.140957+04:30		t	\N	\N	2	f	f	f	total	f
+23	\N	<p>hi hi hi hi&nbsp;</p>\r\n\r\n<p>chetoryyyyyy????</p>	2022-03-30 00:57:45.28544+04:30		t	1	\N	2	f	f	t	recipients	t
+20	\N	<p>salam</p>\r\n\r\n<p>chetory?</p>	2022-03-29 16:49:09.270184+04:30		t	5	\N	2	t	f	t	recipients	t
+16	\N	hello mahdid	2022-03-18 09:35:04.579284+03:30		t	1	\N	2	t	f	t	recipients	t
+9	hi	my friend	2022-03-15 23:16:59.168912+03:30	Admin@mail.com/bs4_compose_email_BYDcpGy.html	f	1	\N	2	t	f	t		t
+45	\N	<p>ddddddddddddddddddddddddd</p>	2022-03-30 22:34:31.449964+04:30		t	\N	\N	1	f	f	f	recipients	t
+35	666	<p>derya sal qwe</p>	2022-03-30 16:34:58.042954+04:30	Admin@mail.com/tex_template_96-02-15.zip	t	1	\N	2	f	f	f	total	t
+28	\N	<p>jjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjj</p>	2022-03-30 15:37:34.120911+04:30		t	\N	\N	2	f	f	f	recipients	t
+8	hi	my friend	2022-03-15 23:16:11.134661+03:30	Admin@mail.com/bs4_compose_email.html	f	1	\N	2	t	f	t		t
+7	\N	to exercise you should must string\r\nand hopeful.	2022-03-15 01:58:54.3003+03:30		t	1	\N	2	t	f	t	recipients	t
+6	pdf of exam	hi master\r\nthis is pdf of my exam.\r\ngood luck	2022-03-15 01:49:09.845854+03:30		t	\N	\N	2	t	f	t	recipients	t
+5	\N	hello my friend\r\nhow are you?\r\nwhen you come back?\r\ni miss you ...	2022-03-13 23:15:57.624189+03:30		t	\N	\N	2	t	f	t	recipients	t
+46	899	<p>bcc check heeeeeeeeeeeeee</p>	2022-03-30 22:52:03.988497+04:30		t	\N	\N	2	f	f	f	recipients	f
+36	666	<p>derya sal qwe</p>	2022-03-30 16:34:58.074989+04:30	Admin@mail.com/tex_template_96-02-15_rMrk2ZH.zip	t	1	\N	2	f	f	f	recipients	t
+48	343434343	<p>bcc check ggggggggggggggggggggg</p>	2022-03-30 23:01:28.160958+04:30		t	\N	\N	2	f	f	f	recipients	f
+49	343434343	<p>bcc check ggggggggggggggggggggg</p>	2022-03-30 23:01:28.170959+04:30		t	\N	\N	2	f	f	f	bcc	f
+50	\N	<p><span data-darkreader-inline-color="" style="--darkreader-inline-color:#e9a842; color:#f39c12">feryal godew </span><em>bina shod </em>ya <strong>versa</strong></p>	2022-03-30 23:05:39.659961+04:30		t	\N	47	2	f	f	f		f
 \.
 
 
@@ -1193,6 +1622,9 @@ COPY public.mail_email (id, subject, body, created_time, file, is_sent, signatur
 --
 
 COPY public.mail_email_bcc (id, email_id, users_id) FROM stdin;
+1	35	1
+2	41	1
+3	47	2
 \.
 
 
@@ -1202,6 +1634,53 @@ COPY public.mail_email_bcc (id, email_id, users_id) FROM stdin;
 
 COPY public.mail_email_category (id, email_id, category_id) FROM stdin;
 1	5	5
+3	16	5
+4	15	5
+5	14	5
+6	13	5
+7	11	5
+8	9	5
+9	8	5
+10	7	5
+11	6	5
+13	4	5
+14	1	5
+45	16	4
+47	5	4
+48	4	4
+49	19	4
+53	20	4
+54	23	4
+55	21	4
+58	9	4
+59	8	4
+60	7	4
+61	6	4
+63	43	5
+64	42	5
+65	41	5
+66	40	5
+67	39	5
+68	38	5
+69	37	5
+70	36	5
+71	35	5
+72	34	5
+73	33	5
+74	32	5
+76	31	5
+77	30	5
+78	29	5
+79	28	5
+80	27	5
+81	26	5
+82	25	5
+83	24	5
+84	23	5
+85	21	5
+86	20	5
+153	45	5
+154	35	7
 \.
 
 
@@ -1212,6 +1691,8 @@ COPY public.mail_email_category (id, email_id, category_id) FROM stdin;
 COPY public.mail_email_cc (id, email_id, users_id) FROM stdin;
 1	4	1
 2	13	1
+3	29	1
+4	38	1
 \.
 
 
@@ -1230,6 +1711,40 @@ COPY public.mail_email_recipients (id, email_id, users_id) FROM stdin;
 10	13	2
 11	14	2
 12	15	2
+13	16	1
+16	19	2
+17	20	2
+18	21	2
+19	22	1
+20	23	2
+21	24	1
+22	25	1
+23	26	2
+24	27	1
+25	28	2
+26	29	2
+27	30	2
+28	31	1
+29	32	2
+30	32	1
+31	33	2
+32	34	1
+33	35	2
+34	36	2
+35	37	1
+36	38	2
+37	39	2
+38	40	1
+39	41	2
+40	42	2
+41	43	1
+42	44	2
+43	45	2
+44	46	1
+45	47	1
+46	48	1
+47	49	2
+48	50	2
 \.
 
 
@@ -1237,8 +1752,11 @@ COPY public.mail_email_recipients (id, email_id, users_id) FROM stdin;
 -- Data for Name: mail_filter; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.mail_filter (id, text_include, from_user_id, label_id, owner_id) FROM stdin;
-1	\N	1	2	2
+COPY public.mail_filter (id, from_user, label_id, owner_id, text, trash_or_archive) FROM stdin;
+4	\N	\N	1	hello	Trash
+5	\N	\N	1	hi	Archive
+10	\N	4	2	bug	\N
+13	mahdistz@mail.com	5	2	\N	\N
 \.
 
 
@@ -1248,8 +1766,9 @@ COPY public.mail_filter (id, text_include, from_user_id, label_id, owner_id) FRO
 
 COPY public.mail_signature (id, text, owner_id) FROM stdin;
 1	Mahdis Taghizadeh	2
-2	Goodbye	2
 4	god plz help me	1
+5	food	2
+6	bye	7
 \.
 
 
@@ -1277,8 +1796,12 @@ COPY public.user_contact (id, name, birth_date, other_email, phone_number, email
 --
 
 COPY public.user_users (id, password, last_login, is_superuser, first_name, last_name, is_staff, date_joined, username, verification, phone, email, birth_date, nationality, gender, is_active) FROM stdin;
-1	pbkdf2_sha256$260000$ytF1R1kGVatQMMrNlLLU1a$DkDgR48XON7DFSyGT2Yn5WsHQYLd3880bxc4c395fuY=	2022-03-15 23:21:13.330153+03:30	f			f	2022-03-11 12:36:14.393803+03:30	mahdistz@mail.com	Phone	09392841705	test@gmail.com	\N	\N	\N	t
-2	pbkdf2_sha256$260000$JCQDzzCDEUDhNW4nuyyP8B$iFXAdoslmzhO5uASCVlKCRGkJXxKuaXCcTzG+m8muZQ=	2022-03-16 01:45:39.650295+03:30	f			f	2022-03-12 01:30:23.011119+03:30	Admin@mail.com	Email	09392841708	mahdis.taghizadeh1376@gmail.com	\N	\N	\N	t
+7	pbkdf2_sha256$260000$laI8KDle5VoTwvLMTLYZn1$t4TpmAK6YKoVvERAcVLO8+77aDeNQojRflne4e7No+c=	2022-03-30 19:13:42.201014+04:30	t			t	2022-03-24 19:21:00+04:30	Admin	Phone	09392841709	mahdistz@gmail.com	\N	\N	\N	t
+1	pbkdf2_sha256$260000$ytF1R1kGVatQMMrNlLLU1a$DkDgR48XON7DFSyGT2Yn5WsHQYLd3880bxc4c395fuY=	2022-03-30 22:34:10.27155+04:30	f			f	2022-03-11 12:36:14.393803+03:30	mahdistz@mail.com	Phone	09392841705	test@gmail.com	\N	\N	\N	t
+2	pbkdf2_sha256$260000$JCQDzzCDEUDhNW4nuyyP8B$iFXAdoslmzhO5uASCVlKCRGkJXxKuaXCcTzG+m8muZQ=	2022-03-30 22:54:24.427497+04:30	f			f	2022-03-12 01:30:23.011119+03:30	Admin@mail.com	Email	09392841708	mahdis.taghizadeh1376@gmail.com	\N	\N	\N	t
+9	123mah123	\N	f	مهدیس	تقی زاده	f	2022-03-26 15:35:55+04:30	_mahdis_	Phone	09392841744	test8@gmail.com	\N	iran	F	t
+16	pbkdf2_sha256$260000$BIl27PdAtmd2y1Lnx6f7Zp$lROkCvxor3mXolht6CoadhXskhAJnAW+xiKhORfvdgs=	\N	f			f	2022-03-26 17:26:28.80639+04:30	shima_babayi@mail.com	Phone	09332341343	test3331111@gmail.com	\N	\N	\N	f
+17	pbkdf2_sha256$260000$NbkREyvJiYIelAfuWOxgJU$wFqpTmlhnmcwKiKJjJswOIsxeOMroL9qrJZStF4PxiQ=	\N	f			f	2022-03-26 17:29:38.656931+04:30	yahya_golmohammadi@mail.com	Email	09362641014	test1267@gmail.com	\N	\N	\N	t
 \.
 
 
@@ -1299,6 +1822,20 @@ COPY public.user_users_user_permissions (id, users_id, permission_id) FROM stdin
 
 
 --
+-- Name: admin_tools_stats_cachedvalue_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.admin_tools_stats_cachedvalue_id_seq', 164, true);
+
+
+--
+-- Name: admin_tools_stats_criteriatostatsm2m_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.admin_tools_stats_criteriatostatsm2m_id_seq', 1, false);
+
+
+--
 -- Name: auth_group_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
@@ -1316,84 +1853,98 @@ SELECT pg_catalog.setval('public.auth_group_permissions_id_seq', 1, false);
 -- Name: auth_permission_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.auth_permission_id_seq', 52, true);
+SELECT pg_catalog.setval('public.auth_permission_id_seq', 76, true);
+
+
+--
+-- Name: dash_stats_criteria_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.dash_stats_criteria_id_seq', 1, false);
+
+
+--
+-- Name: dashboard_stats_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.dashboard_stats_id_seq', 3, true);
 
 
 --
 -- Name: django_admin_log_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.django_admin_log_id_seq', 1, false);
+SELECT pg_catalog.setval('public.django_admin_log_id_seq', 31, true);
 
 
 --
 -- Name: django_content_type_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.django_content_type_id_seq', 13, true);
+SELECT pg_catalog.setval('public.django_content_type_id_seq', 19, true);
 
 
 --
 -- Name: django_migrations_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.django_migrations_id_seq', 28, true);
+SELECT pg_catalog.setval('public.django_migrations_id_seq', 57, true);
 
 
 --
 -- Name: mail_category_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.mail_category_id_seq', 6, true);
+SELECT pg_catalog.setval('public.mail_category_id_seq', 12, true);
 
 
 --
 -- Name: mail_email_bcc_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.mail_email_bcc_id_seq', 1, false);
+SELECT pg_catalog.setval('public.mail_email_bcc_id_seq', 3, true);
 
 
 --
 -- Name: mail_email_category_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.mail_email_category_id_seq', 2, true);
+SELECT pg_catalog.setval('public.mail_email_category_id_seq', 154, true);
 
 
 --
 -- Name: mail_email_cc_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.mail_email_cc_id_seq', 2, true);
+SELECT pg_catalog.setval('public.mail_email_cc_id_seq', 4, true);
 
 
 --
 -- Name: mail_email_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.mail_email_id_seq', 15, true);
+SELECT pg_catalog.setval('public.mail_email_id_seq', 50, true);
 
 
 --
 -- Name: mail_email_recipients_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.mail_email_recipients_id_seq', 12, true);
+SELECT pg_catalog.setval('public.mail_email_recipients_id_seq', 48, true);
 
 
 --
 -- Name: mail_filter_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.mail_filter_id_seq', 1, true);
+SELECT pg_catalog.setval('public.mail_filter_id_seq', 13, true);
 
 
 --
 -- Name: mail_signature_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.mail_signature_id_seq', 4, true);
+SELECT pg_catalog.setval('public.mail_signature_id_seq', 6, true);
 
 
 --
@@ -1421,7 +1972,7 @@ SELECT pg_catalog.setval('public.user_users_groups_id_seq', 1, false);
 -- Name: user_users_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.user_users_id_seq', 2, true);
+SELECT pg_catalog.setval('public.user_users_id_seq', 17, true);
 
 
 --
@@ -1429,6 +1980,30 @@ SELECT pg_catalog.setval('public.user_users_id_seq', 2, true);
 --
 
 SELECT pg_catalog.setval('public.user_users_user_permissions_id_seq', 1, false);
+
+
+--
+-- Name: admin_tools_stats_cachedvalue admin_tools_stats_cachedvalue_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.admin_tools_stats_cachedvalue
+    ADD CONSTRAINT admin_tools_stats_cachedvalue_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: admin_tools_stats_criteriatostatsm2m admin_tools_stats_criteriatostatsm2m_order_key; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.admin_tools_stats_criteriatostatsm2m
+    ADD CONSTRAINT admin_tools_stats_criteriatostatsm2m_order_key UNIQUE ("order");
+
+
+--
+-- Name: admin_tools_stats_criteriatostatsm2m admin_tools_stats_criteriatostatsm2m_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.admin_tools_stats_criteriatostatsm2m
+    ADD CONSTRAINT admin_tools_stats_criteriatostatsm2m_pkey PRIMARY KEY (id);
 
 
 --
@@ -1477,6 +2052,46 @@ ALTER TABLE ONLY public.auth_permission
 
 ALTER TABLE ONLY public.auth_permission
     ADD CONSTRAINT auth_permission_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: authtoken_token authtoken_token_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.authtoken_token
+    ADD CONSTRAINT authtoken_token_pkey PRIMARY KEY (key);
+
+
+--
+-- Name: authtoken_token authtoken_token_user_id_key; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.authtoken_token
+    ADD CONSTRAINT authtoken_token_user_id_key UNIQUE (user_id);
+
+
+--
+-- Name: dash_stats_criteria dash_stats_criteria_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.dash_stats_criteria
+    ADD CONSTRAINT dash_stats_criteria_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: dashboard_stats dashboard_stats_graph_key_key; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.dashboard_stats
+    ADD CONSTRAINT dashboard_stats_graph_key_key UNIQUE (graph_key);
+
+
+--
+-- Name: dashboard_stats dashboard_stats_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.dashboard_stats
+    ADD CONSTRAINT dashboard_stats_pkey PRIMARY KEY (id);
 
 
 --
@@ -1712,6 +2327,34 @@ ALTER TABLE ONLY public.user_users
 
 
 --
+-- Name: admin_tools_stats_cachedva_multiple_series_choice_id_f68b8312; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX admin_tools_stats_cachedva_multiple_series_choice_id_f68b8312 ON public.admin_tools_stats_cachedvalue USING btree (multiple_series_choice_id);
+
+
+--
+-- Name: admin_tools_stats_cachedvalue_stats_id_952da855; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX admin_tools_stats_cachedvalue_stats_id_952da855 ON public.admin_tools_stats_cachedvalue USING btree (stats_id);
+
+
+--
+-- Name: admin_tools_stats_criteriatostatsm2m_criteria_id_bfe67f05; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX admin_tools_stats_criteriatostatsm2m_criteria_id_bfe67f05 ON public.admin_tools_stats_criteriatostatsm2m USING btree (criteria_id);
+
+
+--
+-- Name: admin_tools_stats_criteriatostatsm2m_stats_id_10bd79ea; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX admin_tools_stats_criteriatostatsm2m_stats_id_10bd79ea ON public.admin_tools_stats_criteriatostatsm2m USING btree (stats_id);
+
+
+--
 -- Name: auth_group_name_a6ea08ec_like; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -1737,6 +2380,55 @@ CREATE INDEX auth_group_permissions_permission_id_84c5c92e ON public.auth_group_
 --
 
 CREATE INDEX auth_permission_content_type_id_2f476e4b ON public.auth_permission USING btree (content_type_id);
+
+
+--
+-- Name: authtoken_token_key_10f0b77e_like; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX authtoken_token_key_10f0b77e_like ON public.authtoken_token USING btree (key varchar_pattern_ops);
+
+
+--
+-- Name: dash_stats_criteria_criteria_name_7fe7ae1e; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX dash_stats_criteria_criteria_name_7fe7ae1e ON public.dash_stats_criteria USING btree (criteria_name);
+
+
+--
+-- Name: dash_stats_criteria_criteria_name_7fe7ae1e_like; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX dash_stats_criteria_criteria_name_7fe7ae1e_like ON public.dash_stats_criteria USING btree (criteria_name varchar_pattern_ops);
+
+
+--
+-- Name: dashboard_stats_default_multiseries_criteria_id_1c00740c; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX dashboard_stats_default_multiseries_criteria_id_1c00740c ON public.dashboard_stats USING btree (default_multiseries_criteria_id);
+
+
+--
+-- Name: dashboard_stats_graph_key_4256e63f_like; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX dashboard_stats_graph_key_4256e63f_like ON public.dashboard_stats USING btree (graph_key varchar_pattern_ops);
+
+
+--
+-- Name: dashboard_stats_graph_title_99e6d271; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX dashboard_stats_graph_title_99e6d271 ON public.dashboard_stats USING btree (graph_title);
+
+
+--
+-- Name: dashboard_stats_graph_title_99e6d271_like; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX dashboard_stats_graph_title_99e6d271_like ON public.dashboard_stats USING btree (graph_title varchar_pattern_ops);
 
 
 --
@@ -1834,7 +2526,7 @@ CREATE INDEX mail_email_recipients_users_id_16f46083 ON public.mail_email_recipi
 -- Name: mail_email_reply_to_id_f55bc634; Type: INDEX; Schema: public; Owner: postgres
 --
 
-CREATE INDEX mail_email_reply_to_id_f55bc634 ON public.mail_email USING btree (reply_to_id);
+CREATE INDEX mail_email_reply_to_id_f55bc634 ON public.mail_email USING btree (reply_id);
 
 
 --
@@ -1849,13 +2541,6 @@ CREATE INDEX mail_email_sender_id_102f874d ON public.mail_email USING btree (sen
 --
 
 CREATE INDEX mail_email_signature_id_f0378076 ON public.mail_email USING btree (signature_id);
-
-
---
--- Name: mail_filter_from_user_id_a95c7fb4; Type: INDEX; Schema: public; Owner: postgres
---
-
-CREATE INDEX mail_filter_from_user_id_a95c7fb4 ON public.mail_filter USING btree (from_user_id);
 
 
 --
@@ -1943,6 +2628,38 @@ CREATE INDEX user_users_username_2da30a0a_like ON public.user_users USING btree 
 
 
 --
+-- Name: admin_tools_stats_cachedvalue admin_tools_stats_cachedv_multiple_series_choice_id_f68b8312_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.admin_tools_stats_cachedvalue
+    ADD CONSTRAINT admin_tools_stats_cachedv_multiple_series_choice_id_f68b8312_fk FOREIGN KEY (multiple_series_choice_id) REFERENCES public.dash_stats_criteria(id) DEFERRABLE INITIALLY DEFERRED;
+
+
+--
+-- Name: admin_tools_stats_cachedvalue admin_tools_stats_cachedvalue_stats_id_952da855_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.admin_tools_stats_cachedvalue
+    ADD CONSTRAINT admin_tools_stats_cachedvalue_stats_id_952da855_fk FOREIGN KEY (stats_id) REFERENCES public.dashboard_stats(id) DEFERRABLE INITIALLY DEFERRED;
+
+
+--
+-- Name: admin_tools_stats_criteriatostatsm2m admin_tools_stats_criteriatostatsm2m_criteria_id_bfe67f05_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.admin_tools_stats_criteriatostatsm2m
+    ADD CONSTRAINT admin_tools_stats_criteriatostatsm2m_criteria_id_bfe67f05_fk FOREIGN KEY (criteria_id) REFERENCES public.dash_stats_criteria(id) DEFERRABLE INITIALLY DEFERRED;
+
+
+--
+-- Name: admin_tools_stats_criteriatostatsm2m admin_tools_stats_criteriatostatsm2m_stats_id_10bd79ea_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.admin_tools_stats_criteriatostatsm2m
+    ADD CONSTRAINT admin_tools_stats_criteriatostatsm2m_stats_id_10bd79ea_fk FOREIGN KEY (stats_id) REFERENCES public.dashboard_stats(id) DEFERRABLE INITIALLY DEFERRED;
+
+
+--
 -- Name: auth_group_permissions auth_group_permissio_permission_id_84c5c92e_fk_auth_perm; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1964,6 +2681,22 @@ ALTER TABLE ONLY public.auth_group_permissions
 
 ALTER TABLE ONLY public.auth_permission
     ADD CONSTRAINT auth_permission_content_type_id_2f476e4b_fk_django_co FOREIGN KEY (content_type_id) REFERENCES public.django_content_type(id) DEFERRABLE INITIALLY DEFERRED;
+
+
+--
+-- Name: authtoken_token authtoken_token_user_id_35299eff_fk_user_users_id; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.authtoken_token
+    ADD CONSTRAINT authtoken_token_user_id_35299eff_fk_user_users_id FOREIGN KEY (user_id) REFERENCES public.user_users(id) DEFERRABLE INITIALLY DEFERRED;
+
+
+--
+-- Name: dashboard_stats dashboard_stats_default_multiseries_criteria_id_1c00740c_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.dashboard_stats
+    ADD CONSTRAINT dashboard_stats_default_multiseries_criteria_id_1c00740c_fk FOREIGN KEY (default_multiseries_criteria_id) REFERENCES public.admin_tools_stats_criteriatostatsm2m(id) DEFERRABLE INITIALLY DEFERRED;
 
 
 --
@@ -2055,11 +2788,11 @@ ALTER TABLE ONLY public.mail_email_recipients
 
 
 --
--- Name: mail_email mail_email_reply_to_id_f55bc634_fk_mail_email_id; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: mail_email mail_email_reply_id_acdabf78_fk_mail_email_id; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.mail_email
-    ADD CONSTRAINT mail_email_reply_to_id_f55bc634_fk_mail_email_id FOREIGN KEY (reply_to_id) REFERENCES public.mail_email(id) DEFERRABLE INITIALLY DEFERRED;
+    ADD CONSTRAINT mail_email_reply_id_acdabf78_fk_mail_email_id FOREIGN KEY (reply_id) REFERENCES public.mail_email(id) DEFERRABLE INITIALLY DEFERRED;
 
 
 --
@@ -2076,14 +2809,6 @@ ALTER TABLE ONLY public.mail_email
 
 ALTER TABLE ONLY public.mail_email
     ADD CONSTRAINT mail_email_signature_id_f0378076_fk_mail_signature_id FOREIGN KEY (signature_id) REFERENCES public.mail_signature(id) DEFERRABLE INITIALLY DEFERRED;
-
-
---
--- Name: mail_filter mail_filter_from_user_id_a95c7fb4_fk_user_users_id; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.mail_filter
-    ADD CONSTRAINT mail_filter_from_user_id_a95c7fb4_fk_user_users_id FOREIGN KEY (from_user_id) REFERENCES public.user_users(id) DEFERRABLE INITIALLY DEFERRED;
 
 
 --
