@@ -6,6 +6,7 @@
     <h3>You Have {{ filters|length }}  Filter{{ filters|length|pluralize }}</h3>
     <a href="{% url 'create_filter' %}" ><input type="submit" class="btn btn-primary" value="Create  Filter"></a>
     <br>
+    <br>
 
     <div class="table-responsive" style="height: auto;width: 1000px">
     <table class="table">
@@ -13,12 +14,23 @@
 
             <td class="filter">Filter</td>
             <td class="label">Label</td>
+            <td class="archive or trash">Archive/Trash</td>
     {% for filter in filters %}
 
           <tr>
-                <td class="filter"><a href="/mail/filter_detail/{{ filter.id }}">text: {{ filter.text_include }} -
-                    from user: {{ filter.from_user.username }} </a></td>
-                <td class="label">{{ filter.label.name }}</td>
+                <td class="filter"><a href="/mail/filter_detail/{{ filter.id }}">text: {{ filter.text|default:None }} -
+                    from user: {{ filter.from_user|default:None }} </a></td>
+                {% if filter.label %}
+                    <td class="label">{{ filter.label.name }}</td>
+                {% else %}
+                    <td class="label">---</td>
+                {% endif %}
+                {% if filter.trash_or_archive %}
+                    <td class="archive or trash">{{ filter.trash_or_archive }}</td>
+                {% else %}
+                     <td class="archive or trash">---</td>
+                {% endif %}
+
                 </tr>
     {% endfor %}
     </tbody></table>

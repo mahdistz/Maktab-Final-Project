@@ -40,6 +40,7 @@ urlpatterns = [
                   path('verify/', VerifyCodeView.as_view(), name='verify'),
                   path('api-auth/', include('rest_framework.urls')),
                   path('admin_tools_stats/', include('admin_tools_stats.urls')),
+                  path('ckeditor/', include('ckeditor_uploader.urls')),
 
               ] + static(settings.STATIC_URL)
 

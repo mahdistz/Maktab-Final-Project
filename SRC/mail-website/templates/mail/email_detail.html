@@ -2,6 +2,7 @@
 {% block content %}
     <div style="width: 500px;height: auto" >
     <p>Sender:{{ object.sender }}</p>
+
     <p>to:{% for recipients in object.recipients.all %}
             {{ recipients }},
         {% endfor%}</p>
@@ -11,14 +12,16 @@
     <p>bcc:{% for bcc in object.bcc.all %}
             {{ bcc }},
         {% endfor%}</p>
+
     <p>subject:{{ object.subject }}</p>
     <p>body:</p>
-    <p>{{ object.body }}</p>
+    <p>{{ object.body|safe }}</p>
     <p>{% if object.signature %}
     <p>Signature: <strong>{{ object.signature.text }}</strong></p>
     {% endif %}
     <p>{% if object.file %}
-        file: <a href="{{ object.file.url }}" >Download file</a></p>
+        file: <a href="{{ object.file.url }}" >Download file </a>,
+        Size: <span>{{ object.file.size|filesizeformat }}</span></p>
         {% endif %}
     <p>Date Time: {{ object.created_time }}</p>
     <p>Label:{% for category in object.category.all %}

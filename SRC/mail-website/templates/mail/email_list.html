@@ -3,7 +3,7 @@
     <center>
     <h3>you have {{ object_list|length }} Email{{ object_list|length|pluralize }}</h3>
     {% for email in object_list %}
-        <li><a href="/mail/email_detail/{{ email.id }}"> {{ email.title }}-{{ email.body|truncatewords:5 }}
+        <li><a href="/mail/email_detail/{{ email.id }}"> {{ email.title }}-{{ email.body|safe|truncatewords:5 }}
          {{ email.created_time|date:"D d M Y" }}-{{ email.created_time|time:"H:i" }}</a> </li>
     {% endfor %}
     </center>

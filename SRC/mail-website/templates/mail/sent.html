@@ -13,7 +13,7 @@
     {% for email in sent %}
         <tr>
                 <td class="subject">{{ email.subject }}</td>
-                <td class="text-body"><a href="/mail/email_detail/{{ email.id }}">{{ email.body|truncatewords:7 }}</a></td>
+                <td class="text-body"><a href="/mail/email_detail/{{ email.id }}">{{ email.body|safe|truncatewords:7 }}</a></td>
                 <td class="time">{{ email.created_time|date:" d M Y" }}-{{ email.created_time|time:"H:i" }}</td>
                 </tr>
     {% endfor %}
