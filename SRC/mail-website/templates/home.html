@@ -249,13 +249,21 @@ document.addEventListener("DOMContentLoaded", function(event) {
     document.getElementById("sidebarCollapse").onclick = function () {
         document.getElementById("sidebar").classList.toggle("active");
         document.getElementById("content").classList.toggle("active");
-        document.getElementById("Mo dal").classList.toggle("active");
         }
     });
 
 </script>
        <script type="text/javascript" src="{% static "ckeditor/ckeditor-init.js" %}"></script>
     <script type="text/javascript" src="{% static "ckeditor/ckeditor/ckeditor.js" %}"></script>
+<script>
+  // suppose the `id` attribute of element is `message_container`.
+    var message_ele = document.getElementById("message_container");
+
+        setTimeout(function(){
+           message_ele.style.display = "none";
+        }, 5000);
+        // Timeout is 5 sec, you can change it
+</script>
 {% endblock %}
 </body>
 </html>

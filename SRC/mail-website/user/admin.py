@@ -23,6 +23,23 @@ def size_format(value):
     return '%s %s' % (str(round(value, 2)), ext)
 
 
+def size(value):
+    """
+    Simple kb/mb/gb size
+    """
+    value = int(value)
+    if value < 512000:
+        value = value / 1024.0
+
+    elif value < 4194304000:
+        value = value / 1048576.0
+
+    else:
+        value = value / 1073741824.0
+
+    return '%s' % (round(value, 2))
+
+
 @admin.register(Users)
 class UsersAdmin(admin.ModelAdmin):
     list_display = ('username',
@@ -69,7 +86,7 @@ class UsersAdmin(admin.ModelAdmin):
     count_sent_email.short_description = 'Sent Mails'
 
     def count_received_email(self, obj):
-        qs = Email.objects.filter(Q(recipients=obj) | Q(cc=obj) | Q(bcc=obj)).filter(is_filter=False).\
+        qs = Email.objects.filter(Q(recipients=obj) | Q(cc=obj) | Q(bcc=obj)).filter(is_sent=True, is_filter=False). \
             exclude(status='total').count()
         return qs
 
@@ -99,7 +116,7 @@ class UsersAdmin(admin.ModelAdmin):
         for user in usernames:
             file_of_user = all_emails_with_file.filter(Q(sender_id=user.id) | Q(recipients=user.id))
             total = sum(int(objects.file_size) for objects in file_of_user if objects.file_size)
-            file_data.append({"user": user.username, "user_size": total})
+            file_data.append({"user": user.username, "user_size": size(total)})
 
         # attach the file data to the template context
         extra_context = extra_context or {"file_data": file_data}

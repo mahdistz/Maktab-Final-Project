@@ -313,6 +313,7 @@ class InboxMail(LoginRequiredMixin, View):
     template_name = 'mail/inbox.html'
 
     def get(self, request):
+
         # Get all emails sent to the user from the database
         emails = Email.objects.filter(
             Q(recipients=request.user.id, status='recipients', is_archived=False, is_trashed=False, is_filter=False) |
@@ -357,6 +358,11 @@ class InboxMail(LoginRequiredMixin, View):
 
                         email.is_filter = True
                         email.save()
+        # notification to user when user is login and received new mail
+        user = request.user
+        for email in emails:
+            if email.created_time >= user.last_login:
+                messages.info(request, 'you have one new email')
         # get recipients, cc and bcc people from email to show on detail of email
 
         total_emails = Email.objects.filter(status='total').filter(Q(recipients=request.user.id) |
@@ -416,7 +422,7 @@ class ArchiveMail(LoginRequiredMixin, View):
                                         Q(cc=user, is_archived=True) |
                                         Q(bcc=user, is_archived=True) |
                                         Q(sender=user, is_archived=True)).exclude(
-                                                                            status='total').order_by('-created_time')
+            status='total').order_by('-created_time')
 
         return render(request, self.template_name, {'archives': archives})
 
@@ -584,9 +590,7 @@ class CreateFilter(LoginRequiredMixin, View):
 
     def get(self, request):
         form = self.form_class
-        user = Users.objects.get(id=request.user.id)
-        labels = Category.objects.filter(owner=user)
-
+        labels = Category.objects.filter(owner=request.user)
         return render(request, self.template_name, {'form': form, 'labels': labels})
 
     def post(self, request):
