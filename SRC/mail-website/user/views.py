@@ -41,6 +41,8 @@ from rest_framework.status import (
 )
 from rest_framework.response import Response
 from django.http import HttpResponse, JsonResponse
+from mail.models import Email, Signature
+from .forms import SendEmailToContactForm
 
 
 @csrf_exempt
@@ -338,3 +340,48 @@ def export_to_csv(request):
         row = writer.writerow([getattr(obj, field) for field in field_names])
 
     return response
+
+
+class SendEmailToContact(LoginRequiredMixin, View):
+    form_class = SendEmailToContactForm
+    template_name = 'user/send_email_to_contact.html'
+
+    def get(self, request, pk):
+        form = self.form_class
+        signatures = Signature.objects.filter(owner=request.user)
+        return render(request, self.template_name, {'form': form, 'signatures': signatures})
+
+    def post(self, request, pk):
+        form = self.form_class(request.POST, request.FILES)
+        form.subject = request.POST.get('subject')
+        form.file = request.POST.get('file')
+        form.body = request.POST.get('body')
+        if request.POST.get('text'):
+            form.signature = request.POST.get('text')
+        form.sender = request.user
+        contact = Contact.objects.get(id=pk)
+        if form.is_valid():
+            cd = form.cleaned_data
+            if request.POST.get('text'):
+                signature = Signature.objects.get(owner=request.user, text=form.signature)
+            if 'save' in request.POST:
+                email = Email.objects.create(sender=request.user, subject=cd['subject'],
+                                             body=cd['body'], file=cd['file'],
+                                             is_sent=True, status='recipients')
+
+                email_total = Email.objects.create(sender=request.user, subject=cd['subject'],
+                                                   body=cd['body'], file=cd['file'],
+                                                   is_sent=True, status='total')
+                if request.POST.get('text'):
+                    email.signature = signature
+                    email_total.signature = signature
+
+                recipients = Users.objects.get_by_natural_key(username=contact.email.username)
+                email.recipients.add(recipients)
+                email_total.recipients.add(recipients)
+                email.save()
+                email_total.save()
+                messages.success(request, 'email sent successfully')
+                return redirect('sent')
+        messages.error(request, 'error occurred')
+        return redirect('contacts')

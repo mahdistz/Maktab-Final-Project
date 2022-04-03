@@ -689,3 +689,83 @@ def filter_delete(request, pk):
     filter_obj.delete()
     messages.success(request, 'filter deleted successfully', 'success')
     return redirect('filters')
+
+
+class SendEmailFromDraft(LoginRequiredMixin, View):
+
+    def get(self, request, pk):
+        email_draft = Email.objects.get(pk=pk)
+        owner = Users.objects.get(id=request.user.id)
+        if email_draft.signature:
+            signature = Signature.objects.get(owner=owner, text=email_draft.signature)
+
+        to_cc_bcc_list = to_cc_bcc(email_draft.recipients.all(), email_draft.cc.all(), email_draft.bcc.all())
+        # Clear duplicates receiver
+        receiver_list = list(dict.fromkeys(to_cc_bcc_list))
+        sender = Users.objects.get(id=request.user.id)
+        # create one object of email with all recipients,cc,bc and
+        # status total to save all data in one object
+        total_email = Email.objects.create(sender=sender, subject=email_draft.subject,
+                                           body=email_draft.body, file=email_draft.file,
+                                           is_sent=True, status='total')
+        if email_draft.signature:
+            total_email.signature = signature
+
+        for receiver in receiver_list:
+            if receiver in email_draft.recipients.all():
+                recipients = Users.objects.get_by_natural_key(username=receiver)
+                total_email.recipients.add(recipients)
+
+            elif receiver in email_draft.cc.all():
+                cc_people = Users.objects.get_by_natural_key(username=receiver)
+                total_email.cc.add(cc_people)
+
+            elif receiver in email_draft.bcc.all():
+                bcc_people = Users.objects.get_by_natural_key(username=receiver)
+                total_email.bcc.add(bcc_people)
+
+        total_email.save()
+
+        # create one object email for each receiver
+        for receiver in receiver_list:
+            if receiver in email_draft.recipients.all():
+
+                email = Email.objects.create(sender=sender, subject=email_draft.subject,
+                                             body=email_draft.body, file=email_draft.file,
+                                             is_sent=True, status='recipients')
+                if email_draft.signature:
+                    email.signature = signature
+
+                recipients = Users.objects.get_by_natural_key(username=receiver)
+                email.recipients.add(recipients)
+                email.save()
+
+            elif receiver in email_draft.cc.all():
+
+                email = Email.objects.create(sender=sender, subject=email_draft.subject,
+                                             body=email_draft.body, file=email_draft.file,
+                                             is_sent=True, status='cc')
+                if email_draft.signature:
+                    email.signature = signature
+
+                recipients = Users.objects.get_by_natural_key(username=receiver)
+                email.recipients.add(recipients)
+                email.save()
+
+            elif receiver in email_draft.bcc.all():
+
+                email = Email.objects.create(sender=sender, subject=email_draft.subject,
+                                             body=email_draft.body, file=email_draft.file,
+                                             is_sent=True, status='bcc')
+                if email_draft.signature:
+                    email.signature = signature
+
+                recipients = Users.objects.get_by_natural_key(username=receiver)
+                email.recipients.add(recipients)
+                email.save()
+
+        # delete draft email
+        email_draft.delete()
+
+        messages.success(request, 'mail sent successfully', 'success')
+        return render(request, 'mail/draft.html', {})

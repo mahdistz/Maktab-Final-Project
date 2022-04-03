@@ -11,12 +11,14 @@
             <td class="subject">Subject</td>
             <td class="text-body">Email</td>
             <td class="time">Time</td>
+            <td class="sent">send email</td>
     {% for email in drafts %}
        <tr>
                 <td class="name">{{ email.sender }}</td>
                 <td class="subject">{{ email.subject }}</td>
                 <td class="text-body"><a href="/mail/email_detail/{{ email.id }}">{{ email.body|truncatewords:7 }}</a></td>
                 <td class="time">{{ email.created_time|date:" d M Y" }}-{{ email.created_time|time:"H:i" }}</td>
+                <td class="sent"><a href="{% url 'send_email_from_draft' email.id %}"><button class="btn btn-success">Send</button></a></td>
                 </tr>
     {% endfor %}
     </tbody></table>

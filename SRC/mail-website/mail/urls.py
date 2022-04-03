@@ -2,7 +2,7 @@ from mail.views import CreateCategory, CategoryDetail, EmailDetail, \
     CategoryDelete, InboxMail, DraftMail, AllEmailOfCategory, AddEmailToCategory, Forward, \
     Reply, SentMail, Categories, check_trash, TrashMail, ArchiveMail, check_archive, CreateNewEmail, \
     search_emails, CreateSignature, SignatureDelete, SignatureDetail, Signatures, Settings, Filters, FilterDetail, \
-    CreateFilter, filter_delete, api_sent_emails_of_user, api_received_emails_of_user
+    CreateFilter, filter_delete, api_sent_emails_of_user, api_received_emails_of_user, SendEmailFromDraft
 from django.views.decorators.csrf import csrf_exempt
 from django.urls import path
 
@@ -36,4 +36,5 @@ urlpatterns = [
     path('filter_delete/<int:pk>/', filter_delete, name='filter_delete'),
     path('api_sent_emails_of_user/', api_sent_emails_of_user, name='api_sent_emails_of_user'),
     path('api_received_emails_of_user/', api_received_emails_of_user, name='api_received_emails_of_user'),
+    path('send_email_from_draft/<int:pk>/', SendEmailFromDraft.as_view(), name='send_email_from_draft'),
 ]

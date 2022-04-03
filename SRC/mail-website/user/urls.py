@@ -1,6 +1,6 @@
 from django.urls import path
 from .views import index, home, ResetPasswordEmailView, CreateContact, ContactDetail, ContactUpdate, \
-    contact_delete, ContactsOfUser, export_to_csv, sample_api, api_contacts_of_user
+    contact_delete, ContactsOfUser, export_to_csv, sample_api, api_contacts_of_user, SendEmailToContact
 from rest_framework.authtoken.views import obtain_auth_token
 
 urlpatterns = [
@@ -16,5 +16,6 @@ urlpatterns = [
     path('api-token-auth/', obtain_auth_token, name='api_token_auth'),
     path('api_sample/', sample_api, name='sample_api'),
     path('api_contacts_of_user/', api_contacts_of_user, name='api_contacts_of_user'),
+    path('send_email_to_contact/<int:pk>/', SendEmailToContact.as_view(), name='send_email_to_contact'),
 
 ]

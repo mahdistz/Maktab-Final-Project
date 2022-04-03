@@ -12,4 +12,6 @@
 
 <a href="{% url 'contact_update' object.id %}"><input class="btn btn-primary" type="submit" value="Edit"></a>
 
+<a href="{% url 'send_email_to_contact' object.id %}"><input class="btn btn-primary" type="submit" value="Send Email"></a>
+
 {% endblock %}

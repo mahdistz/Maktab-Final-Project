@@ -10,6 +10,7 @@ from django.urls import reverse
 from django.conf import settings
 import kavenegar
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm, UserChangeForm
+from mail.models import Email
 
 
 class DateInput(forms.DateInput):
@@ -143,3 +144,9 @@ class ContactUpdateForm(forms.ModelForm):
 
 class SearchContactForm(forms.Form):
     search = forms.CharField()
+
+
+class SendEmailToContactForm(forms.ModelForm):
+    class Meta:
+        model = Email
+        fields = ['subject', 'body', 'file', 'signature', ]
