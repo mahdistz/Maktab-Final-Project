@@ -6,12 +6,11 @@ from django.contrib.sites.shortcuts import get_current_site
 from django.views import View
 from utils import send_otp_code
 from .forms import UserRegisterForm, VerifyCodeForm, CreateContactForm, ContactUpdateForm, SearchContactForm
-from django.contrib.auth import login, authenticate
+from django.contrib.auth import login
 from django.utils.encoding import force_bytes, force_text
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.template.loader import render_to_string
-from .models import Users, CodeRegister, Contact
-from .serializers import ContactSerializer
+from .models import Users, CodeRegister
 from .tokens import account_activation_token
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.auth import get_user_model
@@ -30,17 +29,13 @@ from django.contrib.messages.views import SuccessMessageMixin
 from django.views.generic import DetailView
 from user.models import Contact
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.shortcuts import render, redirect, HttpResponse, HttpResponseRedirect, Http404
+from django.shortcuts import render, redirect
 from django.db.models import Q
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.decorators import api_view
-from rest_framework.status import (
-    HTTP_400_BAD_REQUEST,
-    HTTP_404_NOT_FOUND,
-    HTTP_200_OK
-)
+from rest_framework.status import HTTP_200_OK
 from rest_framework.response import Response
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse
 from mail.models import Email, Signature
 from .forms import SendEmailToContactForm
 import logging
@@ -176,7 +171,6 @@ class VerifyCodeView(View):
                 logger.error('this code is wrong')
                 return redirect('verify')
         else:
-            messages.warning('')
             return redirect('index')
 
 
@@ -264,7 +258,7 @@ class ContactUpdate(LoginRequiredMixin, View):
             contact.other_email = update_contact['other_email']
             contact.birth_date = update_contact['birth_date']
             contact.save()
-            messages.success(request, 'contact updated successfully', 'success')
+            messages.success(request, f'dear {request.user}, contact updated successfully', 'success')
             return redirect('contacts')
         messages.warning(request, 'contact not updated ')
         logger.warning('contact not updated ')
@@ -327,8 +321,8 @@ class CreateContact(LoginRequiredMixin, View):
                 messages.success(request, 'contact created successfully', 'success')
                 return redirect('contacts')
 
-        messages.warning(request, 'contact not created  ')
-        logger.warning('contact not created ')
+        messages.warning(request, 'contact not created ')
+        logger.warning(f'contact of {request.user} not created')
         return render(request, self.template_name, {'form': form})
 
 
@@ -389,8 +383,8 @@ class SendEmailToContact(LoginRequiredMixin, View):
                 email_total.recipients.add(recipients)
                 email.save()
                 email_total.save()
-                messages.success(request, 'Email sent successfully')
+                messages.success(request, f'dear {request.user}, Email sent successfully')
                 return redirect('sent')
-        messages.error(request, ' Email could not be sent')
-        logger.error(' Email could not be sent')
+        messages.error(request, f'dear {request.user}, Email could not be sent')
+        logger.error(f' Email of {request.user} could not be sent')
         return redirect('contacts')
