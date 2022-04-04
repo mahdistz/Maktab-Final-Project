@@ -187,3 +187,39 @@ CKEDITOR_CONFIGS = {
         'toolbar': 'full',
     },
 }
+
+# logging
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {funcName} {process:d} {thread:d} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'user_file': {
+            'level': 'WARNING',
+            'class': 'logging.FileHandler',
+            'filename': 'user.log',
+            'formatter': 'verbose',
+        },
+        'mail_file': {
+            'level': 'WARNING',
+            'class': 'logging.FileHandler',
+            'filename': 'mail.log',
+            'formatter': 'verbose',
+        },
+    },
+    'loggers': {
+        'user': {
+            'handlers': ['user_file', ],
+            'level': 'WARNING',
+        },
+        'mail': {
+            'handlers': ['mail_file'],
+            'level': 'WARNING',
+        },
+    }
+}

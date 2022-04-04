@@ -17,6 +17,9 @@ from rest_framework.decorators import api_view  # GET PUT POST , ..... نوع د
 from rest_framework.response import Response  # ارسال پاسخ ها
 from .serializers import EmailSerializer
 from django.views.decorators.csrf import csrf_exempt
+import logging
+
+logger = logging.getLogger('mail')
 
 
 @csrf_exempt
@@ -73,7 +76,8 @@ class CreateSignature(LoginRequiredMixin, View):
             signature.save()
             messages.success(request, 'signature saved successfully', 'success')
             return redirect('signatures')
-        messages.error(request, 'error occurred', 'error')
+        messages.error(request, 'signature does not create', 'error')
+        logger.error('signature does not create')
         return render(request, self.template_name, {'form': form})
 
 
@@ -236,7 +240,8 @@ class CreateNewEmail(LoginRequiredMixin, View):
                 return redirect('draft')
 
         else:
-            messages.error(request, "Email doesn't sent,Error occurred", 'error')
+            messages.error(request, "Email could not be sent", 'error')
+            logger.error("Email could not be sent")
             return render(request, 'mail/create_new_email.html', {'form': form})
 
 
@@ -277,8 +282,10 @@ class CreateCategory(LoginRequiredMixin, View):
             category = form.save(commit=False)
             category.owner = Users.objects.get(id=request.user.id)
             category.save()
-            messages.success(request, 'category created successfully', 'success')
+            messages.success(request, 'label created successfully', 'success')
             return redirect('categories')
+        messages.error(request, 'label not created ', 'error')
+        logger.error('label not created ')
         return render(request, self.template_name, {'form': form})
 
 
@@ -300,8 +307,10 @@ class AddEmailToCategory(LoginRequiredMixin, View):
             category_obj = Category.objects.get(name=form.cleaned_data['name'], owner=request.user)
             email.category.add(category_obj)
             email.save()
-            messages.success(request, 'email added to the label successfully', 'success')
+            messages.success(request, 'Email added to the label successfully', 'success')
             return redirect('categories')
+        messages.error(request, ' Email not added to the label', 'error')
+        logger.error('Email not added to the label')
         return render(request, self.template_name, {'form': form})
 
 
@@ -363,17 +372,6 @@ class InboxMail(LoginRequiredMixin, View):
         for email in emails:
             if email.created_time >= user.last_login:
                 messages.info(request, 'you have one new email')
-        # get recipients, cc and bcc people from email to show on detail of email
-
-        total_emails = Email.objects.filter(status='total').filter(Q(recipients=request.user.id) |
-                                                                   Q(cc=request.user.id) | Q(bcc=request.user.id))
-        for email in total_emails:
-            print(email.created_time.date(), email.created_time.time())
-            from datetime import timedelta
-
-            time_threshold = email.created_time - timedelta(seconds=1)
-
-            queryset = emails.filter(created_time__range=[email.created_time, time_threshold, ])
 
         return render(request, self.template_name, {'emails': emails})
 
@@ -483,8 +481,10 @@ class Reply(LoginRequiredMixin, View):
             reply_email.recipients.add(recipients)
             reply_email.is_sent = True
             reply_email.save()
-            messages.success(request, 'mail sent successfully', 'success')
-            return redirect('home')
+            messages.success(request, 'Email replayed successfully', 'success')
+            return redirect('sent')
+        messages.error(request, ' Email could not be replayed', 'error')
+        logger.error('Email could not be replayed')
         return render(request, self.template_name, {'form': form})
 
 
@@ -559,8 +559,10 @@ class Forward(LoginRequiredMixin, View):
                     email.recipients.add(recipients)
                     email.save()
 
-            messages.success(request, 'mail forwarded successfully', 'success')
+            messages.success(request, 'Email forwarded successfully', 'success')
             return redirect('home')
+        messages.error(request, ' Email could not be forwarded', 'error')
+        logger.error(' Email could not be forwarded')
         return render(request, self.template_name, {'form': form})
 
 
@@ -677,9 +679,10 @@ class CreateFilter(LoginRequiredMixin, View):
                                           from_user=from_user,
                                           trash_or_archive='Archive')
 
-            messages.success(request, 'filter created successfully', 'success')
+            messages.success(request, 'Filter created successfully', 'success')
             return redirect('filters')
-        messages.error(request, 'error occurred', 'error')
+        messages.error(request, 'Filter not created ', 'error')
+        logger.error('Filter not created ')
         return render(request, self.template_name, {'form': form})
 
 
@@ -687,7 +690,7 @@ class CreateFilter(LoginRequiredMixin, View):
 def filter_delete(request, pk):
     filter_obj = Filter.objects.filter(id=pk)
     filter_obj.delete()
-    messages.success(request, 'filter deleted successfully', 'success')
+    messages.success(request, 'Filter deleted successfully', 'success')
     return redirect('filters')
 
 
@@ -767,5 +770,5 @@ class SendEmailFromDraft(LoginRequiredMixin, View):
         # delete draft email
         email_draft.delete()
 
-        messages.success(request, 'mail sent successfully', 'success')
+        messages.success(request, 'Email sent successfully', 'success')
         return render(request, 'mail/draft.html', {})

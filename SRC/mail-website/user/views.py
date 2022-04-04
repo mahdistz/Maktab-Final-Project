@@ -43,13 +43,9 @@ from rest_framework.response import Response
 from django.http import HttpResponse, JsonResponse
 from mail.models import Email, Signature
 from .forms import SendEmailToContactForm
+import logging
 
-
-@csrf_exempt
-@api_view(["GET"])
-def sample_api(request):
-    data = {'sample_data': 123}
-    return Response(data, status=HTTP_200_OK)
+logger = logging.getLogger('user')
 
 
 @csrf_exempt
@@ -149,7 +145,8 @@ class SignUpView(View):
                 }
                 messages.success(request, 'we sent you a code', 'success')
                 return redirect('verify')
-
+        messages.error(request, 'You did not enter the form information correctly', 'error')
+        logger.error('You did not enter the form information correctly')
         return render(request, self.template_name, {'form': form})
 
 
@@ -170,15 +167,16 @@ class VerifyCodeView(View):
         if form.is_valid():
             if str(form.cleaned_data['code']) == str(code_instance):
                 user.is_active = True
-                user.username += "@mail.com"
                 user.save()
                 code_instance.delete()
                 messages.success(request, 'you registered!')
                 return redirect('login')
             else:
                 messages.error(request, 'this code is wrong')
+                logger.error('this code is wrong')
                 return redirect('verify')
         else:
+            messages.warning('')
             return redirect('index')
 
 
@@ -194,7 +192,6 @@ class ActivateAccount(View):
 
         if user is not None and account_activation_token.check_token(user, token):
             user.is_active = True
-            user.username += '@mail.com'
             user.save()
             login(request, user)
             messages.success(request, 'Your account have been confirmed.')
@@ -269,6 +266,8 @@ class ContactUpdate(LoginRequiredMixin, View):
             contact.save()
             messages.success(request, 'contact updated successfully', 'success')
             return redirect('contacts')
+        messages.warning(request,'contact not updated ')
+        logger.warning('contact not updated ')
         return render(request, self.template_name, {'form': form})
 
 
@@ -321,6 +320,8 @@ class CreateContact(LoginRequiredMixin, View):
             contact.save()
             messages.success(request, 'contact created successfully', 'success')
             return redirect('contacts')
+        messages.warning(request, 'contact not created  ')
+        logger.warning('contact not created ')
         return render(request, self.template_name, {'form': form})
 
 
@@ -381,7 +382,8 @@ class SendEmailToContact(LoginRequiredMixin, View):
                 email_total.recipients.add(recipients)
                 email.save()
                 email_total.save()
-                messages.success(request, 'email sent successfully')
+                messages.success(request, 'Email sent successfully')
                 return redirect('sent')
-        messages.error(request, 'error occurred')
+        messages.error(request, ' Email could not be sent')
+        logger.error(' Email could not be sent')
         return redirect('contacts')
