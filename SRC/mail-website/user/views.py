@@ -266,7 +266,7 @@ class ContactUpdate(LoginRequiredMixin, View):
             contact.save()
             messages.success(request, 'contact updated successfully', 'success')
             return redirect('contacts')
-        messages.warning(request,'contact not updated ')
+        messages.warning(request, 'contact not updated ')
         logger.warning('contact not updated ')
         return render(request, self.template_name, {'form': form})
 
@@ -317,9 +317,16 @@ class CreateContact(LoginRequiredMixin, View):
             contact = form.save(commit=False)
             contact.owner = Users.objects.get(id=request.user.id)
             contact.email = Users.objects.get(username=form.cleaned_data['email'])
-            contact.save()
-            messages.success(request, 'contact created successfully', 'success')
-            return redirect('contacts')
+            # checking unique_together for email and owner
+            if Contact.objects.filter(owner=contact.owner, email=contact.email).exists():
+                messages.error(request, f'dear {request.user}, you can not create two contact with same email', 'error')
+                logger.error(f'{request.user}, can not create two contact with same email ')
+                return redirect('create_contact')
+            else:
+                contact.save()
+                messages.success(request, 'contact created successfully', 'success')
+                return redirect('contacts')
+
         messages.warning(request, 'contact not created  ')
         logger.warning('contact not created ')
         return render(request, self.template_name, {'form': form})

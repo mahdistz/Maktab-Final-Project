@@ -281,9 +281,15 @@ class CreateCategory(LoginRequiredMixin, View):
         if form.is_valid():
             category = form.save(commit=False)
             category.owner = Users.objects.get(id=request.user.id)
-            category.save()
-            messages.success(request, 'label created successfully', 'success')
-            return redirect('categories')
+            # checking unique_together for name and owner
+            if Category.objects.filter(owner=request.user, name=category.name).exists():
+                messages.error(request, f'dear {request.user},you can not create two label with same name ', 'error')
+                logger.error(f'{request.user} can not create two label with same name ')
+                return redirect('create_category')
+            else:
+                category.save()
+                messages.success(request, 'label created successfully', 'success')
+                return redirect('categories')
         messages.error(request, 'label not created ', 'error')
         logger.error('label not created ')
         return render(request, self.template_name, {'form': form})
