@@ -1,9 +1,8 @@
 from django.test import Client
 from django.test import TestCase
-from django.urls import reverse
-from user.models import Users
 from mail.forms import CreateMailForm
 from mail.models import Email
+from user.models import Users
 
 
 class ViewTest(TestCase):
@@ -44,13 +43,6 @@ class ViewTest(TestCase):
 
         self.assertEqual(response.status_code, 200)
 
-        # self.assertIn(b'Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.', response.content)
-
-        # self.assertIn(b"Your password can’t be too similar to your other personal information."
-        #               b"Your password must contain at least 8 characters."
-        #               b"Your password can’t be a commonly used password."
-        #               b"Your password can’t be entirely numeric.", response.content)
-
     def test_login_username_or_password_not_correct(self):
         print('******************test_login_username_or_password_not_correct()**********************')
 
@@ -80,11 +72,9 @@ class ViewTest(TestCase):
         self.assertTemplateUsed('home.html')
 
     def test_create_email(self):
-        # create update and delete a blog
         # log user in and user
         self.client.login(username='foofoo@mail.com', password='password')
-
-        # create new blog
+        # create new email
         # expected date from the user, you can put invalid data to test from validation
         form_data = {
             'sender': self.user,
@@ -112,4 +102,3 @@ class ViewTest(TestCase):
         self.assertEqual(self.email.sender, self.user)
         # one email created, test if this is true
         self.assertEqual(num_of_emails, 1)
-

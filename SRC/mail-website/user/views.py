@@ -5,7 +5,8 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.sites.shortcuts import get_current_site
 from django.views import View
 from utils import send_otp_code
-from .forms import UserRegisterForm, VerifyCodeForm, CreateContactForm, ContactUpdateForm, SearchContactForm
+from .forms import UserRegisterForm, VerifyCodeForm, CreateContactForm, ContactUpdateForm, SearchContactForm, \
+    UserEditProfileForm
 from django.contrib.auth import login
 from django.utils.encoding import force_bytes, force_text
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
@@ -55,7 +56,7 @@ def api_contacts_of_user(request):
 
 
 def index(request):
-    return render(request, 'user/index.html', {'title': 'index'})
+    return render(request, 'user/base.html', {})
 
 
 @login_required(login_url=settings.LOGIN_URL)
@@ -81,7 +82,6 @@ class CustomLoginView(LoginView):
 
 class SignUpView(View):
     form_class = UserRegisterForm
-    # template_name = 'register/index.html'
     template_name = 'user/register.html'
 
     def dispatch(self, request, *args, **kwargs):
@@ -97,12 +97,22 @@ class SignUpView(View):
 
     def post(self, request, *args, **kwargs):
         form = self.form_class(request.POST)
+        form.first_name = request.POST.get('first_name')
+        form.last_name = request.POST.get('last_name')
+        form.username = request.POST.get('username')
+        form.password1 = request.POST.get('password1')
+        form.password2 = request.POST.get('password2')
+        form.verification = request.POST.get('verification')
+        form.email = request.POST.get('email')
+        form.phone = request.POST.get('phone')
+        form.birth_date = request.POST.get('birth_date')
+        form.nationality = request.POST.get('nationality')
+        form.gender = request.POST.get('gender')
         if form.is_valid():
             user = form.save(commit=False)
             user.is_active = False  # Deactivate account till it is confirmed
             user.save()
             if str(form.cleaned_data['verification']) == 'Email':
-
                 # EMAIL
                 current_site = get_current_site(request)
                 subject = 'Activate Your Account'
@@ -135,7 +145,7 @@ class SignUpView(View):
                     'first_name': form.cleaned_data['first_name'],
                     'last_name': form.cleaned_data['last_name'],
                     'nationality': form.cleaned_data['nationality'],
-                    'birth_date': form.cleaned_data['birth_date'].isoformat(),
+                    'birth_date': form.cleaned_data['birth_date'],
                     'gender': form.cleaned_data['gender'],
                 }
                 messages.success(request, 'we sent you a code', 'success')

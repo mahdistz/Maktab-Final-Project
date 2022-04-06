@@ -8,30 +8,69 @@
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
 
-    <title>{% block title %} {% endblock %} </title>
+    <title>{% block title %} Mail website {% endblock %} </title>
+        {% block link %}{% endblock %}
 </head>
-<body>
+<body style="background-color: #91c6f8">
   <div class="container p-3 my-3">
     <div class="row">
       <div class="col-md-12">
         <nav class="navbar navbar-expand-md navbar-light " style="background-color: #f0f5f5">
-          <a href="{% url 'home' %}" class="navbar-brand">Home</a>
+          <a href="{% url 'index' %}" class="navbar-brand">Mail Website</a>
             <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbarCollapse">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarCollapse">
                 <div class="navbar-nav ml-auto">
                   {% if user.is_authenticated %}
-                    <a href="#" class="nav-item nav-link">Profile</a>
+                    <a href="{% url 'home' %}" class="nav-item nav-link">Home</a>
                     <a href="{% url 'logout' %}" class="nav-item nav-link">Logout</a>
                   {% else %}
                     <a href="{% url 'login' %}" class="nav-item nav-link">Sign in</a>
+                    <a href="{% url 'register' %}" class="nav-item nav-link">Sign up</a>
                   {% endif %}
 
                 </div>
             </div>
         </nav>
-        {% block content %}{% endblock %}
+      {% block message %}
+          <div class="card-header">
+       {% if messages %}
+        <ul class="messages">
+            {% for message in messages %}
+                <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+          </div>
+        {% endblock %}
+        {% block content %}
+           <div class="form-content my-3 p-3">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-5">
+                    <div class="card shadow-lg border-0 rounded-lg mt-0 mb-3">
+                        <div class="card-header justify-content-center">
+                          <h3 class="font-weight-light my-1 text-center">Welcome To Mail Website</h3>
+                        </div>
+                        <div class="card-body">
+                          <center>
+                              {% if not user.is_authenticated %}
+                            <a href="{% url "login" %}"><input class="btn btn-primary" value="Login"></a> <br>
+                                        or   <br>
+                             <a href="{% url "register" %}"><input class="btn btn-primary" value="Register"></a> <br>
+                                  {% else %}
+                              <a href="{% url "home" %}"><input class="btn btn-primary" value="Home"></a> <br>
+                              {% endif %}
+                              </center>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+     </div>
+        {% endblock %}
       </div>
     </div>
   </div>
@@ -40,6 +79,27 @@
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
-
+    <script type="text/javascript">
+    $(function () {
+        $("#verification_choice").change(function () {
+            if ($(this).val() === 'Email') {
+                $("#Email").removeAttr("disabled");
+                $("#Email").attr('required','required')
+                $("#Phone").attr("disabled", "disabled")
+                $('#Email').focus()
+            }
+        });
+    });
+    $(function () {
+        $("#verification_choice").change(function () {
+            if ($(this).val() === 'Phone') {
+                $("#Phone").removeAttr("disabled");
+                $("#Phone").attr('required','required')
+                $("#Email").attr("disabled", "disabled")
+                $('#Phone').focus()
+            }
+        });
+    });
+</script>
 </body>
 </html>

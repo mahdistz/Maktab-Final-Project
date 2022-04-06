@@ -148,3 +148,9 @@ class SendEmailToContactForm(forms.ModelForm):
     class Meta:
         model = Email
         fields = ['subject', 'body', 'file', 'signature', ]
+
+
+class UserEditProfileForm(forms.ModelForm):
+    class Meta:
+        model = Users
+        fields = ['first_name', 'last_name', 'gender', 'birth_date', 'nationality']

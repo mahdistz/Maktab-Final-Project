@@ -1,19 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
-<center>
-<div style="background-color: #0b2e13;width: 500px;height: 500px;">
-     {% if messages %}
-<ul class="messages">
-    {% for message in messages %}
-    <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
-    {% endfor %}
-</ul>
-{% endif %}
+{% extends "user/base.html" %}
+{% block title %} Login Page {% endblock title%}
+{% block content %}
+    <center>
+    <div class="card-body align-items-center">
 <form method="post">
     {% csrf_token %}
     <br>
@@ -21,9 +10,8 @@
         {{ form.as_table }}
     </table>
     <br>
-    <input style="background-color: #0c5460;" type="submit" value="Enter" >
+    <input class="btn-success" type="submit" value="Enter" >
 </form>
     </div>
     </center>
-</body>
-</html>
+   {% endblock %}
