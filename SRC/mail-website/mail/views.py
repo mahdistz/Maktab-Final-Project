@@ -18,6 +18,8 @@ from rest_framework.response import Response  # ارسال پاسخ ها
 from .serializers import EmailSerializer
 from django.views.decorators.csrf import csrf_exempt
 import logging
+from django.utils import timezone
+from datetime import datetime, timedelta
 
 logger = logging.getLogger('mail')
 
@@ -324,61 +326,76 @@ class EmailDetail(LoginRequiredMixin, DetailView):
     model = Email
 
 
+def received_emails(request):
+    emails = Email.objects.filter(
+        Q(recipients=request.user.id, status='recipients', is_archived=False, is_trashed=False, is_filter=False) |
+        Q(recipients=request.user.id, status='cc', is_archived=False, is_trashed=False, is_filter=False) |
+        Q(recipients=request.user.id, status='bcc', is_archived=False, is_trashed=False, is_filter=False)).order_by(
+        '-created_time')
+    return emails
+
+
+def notification_to_login_user_when_received_new_email(request):
+    # notification to user that received new mail, when user is login and refresh the inbox
+    emails = received_emails(request)
+    new_emails = emails.filter(created_time__gt=request.user.last_login)
+    if new_emails:
+        for new_email in new_emails:
+            if timezone.now == new_email.created_time + timedelta(minutes=2):
+                messages.info(request, 'you have one new email')
+
+
+def filtered_emails_on_inbox(request, emails):
+
+    filters = Filter.objects.filter(owner_id=request.user.id)
+    if filters:
+        for filter_obj in filters:
+            if filter_obj.from_user and not filter_obj.text:
+
+                from_user = Users.objects.get(username=filter_obj.from_user)
+                for email in emails.filter(sender=from_user):
+
+                    if filter_obj.trash_or_archive == 'Archive':
+                        email.is_archived = True
+
+                    elif filter_obj.trash_or_archive == 'Trash':
+                        email.is_trashed = True
+
+                    elif filter_obj.label:
+                        label = Category.objects.get(name=filter_obj.label, owner=request.user)
+                        email.category.add(label)
+
+                    email.is_filter = True
+                    email.save()
+
+            if filter_obj.text and not filter_obj.from_user:
+
+                for email in emails.filter(Q(body__icontains=filter_obj.text) |
+                                           Q(subject__icontains=filter_obj.text)):
+
+                    if filter_obj.trash_or_archive == 'Archive':
+                        email.is_archived = True
+
+                    elif filter_obj.trash_or_archive == 'Trash':
+                        email.is_trashed = True
+
+                    elif filter_obj.label:
+                        label = Category.objects.get(name=filter_obj.label, owner=request.user)
+                        email.category.add(label)
+
+                    email.is_filter = True
+                    email.save()
+    return emails
+
+
 class InboxMail(LoginRequiredMixin, View):
     template_name = 'mail/inbox.html'
 
     def get(self, request):
-
         # Get all emails sent to the user from the database
-        emails = Email.objects.filter(
-            Q(recipients=request.user.id, status='recipients', is_archived=False, is_trashed=False, is_filter=False) |
-            Q(recipients=request.user.id, status='cc', is_archived=False, is_trashed=False, is_filter=False) |
-            Q(recipients=request.user.id, status='bcc', is_archived=False, is_trashed=False, is_filter=False)).order_by(
-            '-created_time')
+        emails = received_emails(request)
         # Check emails with user-defined filters. Changes apply if filter exists
-        filters = Filter.objects.filter(owner_id=request.user.id)
-        if filters:
-            for filter_obj in filters:
-                if filter_obj.from_user:
-
-                    from_user = Users.objects.get(username=filter_obj.from_user)
-                    for email in emails.filter(sender=from_user):
-
-                        if filter_obj.trash_or_archive == 'Archive':
-                            email.is_archived = True
-
-                        elif filter_obj.trash_or_archive == 'Trash':
-                            email.is_trashed = True
-
-                        elif filter_obj.label:
-                            label = Category.objects.get(name=filter_obj.label, owner=request.user)
-                            email.category.add(label)
-
-                        email.is_filter = True
-                        email.save()
-
-                if filter_obj.text:
-                    for email in emails.filter(Q(body__icontains=filter_obj.text) |
-                                               Q(subject__icontains=filter_obj.text)):
-
-                        if filter_obj.trash_or_archive == 'Archive':
-                            email.is_archived = True
-
-                        elif filter_obj.trash_or_archive == 'Trash':
-                            email.is_trashed = True
-
-                        elif filter_obj.label:
-                            label = Category.objects.get(name=filter_obj.label, owner=request.user)
-                            email.category.add(label)
-
-                        email.is_filter = True
-                        email.save()
-        # notification to user when user is login and received new mail
-        user = request.user
-        for email in emails:
-            if email.created_time >= user.last_login:
-                messages.info(request, 'you have one new email')
-
+        emails = filtered_emails_on_inbox(request, emails)
         return render(request, self.template_name, {'emails': emails})
 
 

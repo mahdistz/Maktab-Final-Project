@@ -1,43 +1,77 @@
 {% extends 'home.html' %}
 {% block content %}
-    <div style="width: 500px;height: auto" >
-    <p>Sender:{{ object.sender }}</p>
+    <center>
+    <div class="card" style="background-color: #c2ddf3;border-bottom-style:outset;width: 100vh;height:auto;">
+            <div class="row justify-content-center">
 
-    <p>to:{% for recipients in object.recipients.all %}
-            {{ recipients }},
-        {% endfor%}</p>
-    <p>cc:{% for cc in object.cc.all %}
-            {{ cc }},
-        {% endfor%}</p>
-    <p>bcc:{% for bcc in object.bcc.all %}
-            {{ bcc }},
-        {% endfor%}</p>
+                <div class="row-md-8">
+                    <div class="card-body" >
+                        <p><strong>Sender:</strong>{{ object.sender }}</p>
+                        <hr>
+                        {% if user.username == object.recipients.get.username %}
+                            <p> <strong>to : me </strong></p>
+                        {% else %}
+                        <p><strong>to:</strong>{% for recipients in object.recipients.all %}
+                                {{ recipients }},{% endfor%}</p>
+                        {% endif %}
+                        <hr>
+                        {% if object.cc.all %}
+                            {% if user.username == object.cc.get.username %}
+                                 <p><strong>cc : me </strong></p>
+                            {% else %}
+                            <p><strong>cc: </strong>{% for cc in object.cc.all %}
+                                        {{ cc }},{% endfor%}</p>
+                            {% endif %}
+                             <hr>
+                        {% endif %}
 
-    <p>subject:{{ object.subject }}</p>
-    <p>body:</p>
-    <p>{{ object.body|safe }}</p>
-    <p>{% if object.signature %}
-    <p>Signature: <strong>{{ object.signature.text }}</strong></p>
-    {% endif %}
-    <p>{% if object.file %}
-        file: <a href="{{ object.file.url }}" >Download file </a>,
-        Size: <span>{{ object.file.size|filesizeformat }}</span></p>
-        {% endif %}
-    <p>Date Time: {{ object.created_time }}</p>
-    <p>Label:{% for category in object.category.all %}
-            {{ category }},
-        {% endfor%}</p>
+                        {% if object.bcc.all %}
+                              {% if user.username == object.bcc.get.username %}
+                                        <p><strong>bcc: me </strong></p>
+                              {% else %}
+                                <p><strong>bcc: </strong>{% for bcc in object.bcc.all %}
+                                        {{ bcc }},
+                                  {% endfor%}</p>
+                              {% endif %}
+                            <hr>
+                        {% endif %}
 
-<a href="{% url 'forward' object.id %}"><input class="btn btn-primary" type="submit" value="Forward"></a>
+                        <p><strong>subject: </strong> {{ object.subject }}</p>
+                        <hr>
+                        <p><strong>body:</strong></p>
+                        <p> {{ object.body |safe }}</p>
+                        {% if object.signature %}
+                        <p> <strong> {{ object.signature.text }}</strong></p>
+                        {% endif %}
+                        <hr>
+                        <p>{% if object.file %}
+                            <strong>file:</strong> <a href="{{ object.file.url }}" > Download file </a>,
+                           <strong> Size:</strong> <span>{{ object.file.size|filesizeformat }}</span></p>
+                            <hr>
+                        {% endif %}
 
-<a href="{% url 'reply' object.id %}"><input class="btn btn-primary" type="submit" value="Reply"></a>
+                        <p><strong>Date Time:</strong> {{ object.created_time }}</p>
+                        <hr>
+                        {% if object.category.all %}
+                        <p><strong>Labels:</strong>{% for category in object.category.all %}
+                                {{ category }},
+                            {% endfor%}</p>
+                              <hr>
+                        {% endif %}
 
-<a href="{% url 'add_email_to_category' object.id %}"><input class="btn btn-primary" type="submit"
-                                                             value="Add to Label"></a>
+                    <a href="{% url 'forward' object.id %}"><input class="btn btn-primary" type="submit" value="Forward"></a>
 
-<a href="{% url 'archive' object.id %}"><input class="btn btn-primary" type="submit" value="Archive"></a>
+                    <a href="{% url 'reply' object.id %}"><input class="btn btn-primary" type="submit" value="Reply"></a>
 
-<a href="{% url 'trash' object.id %}"><input class="btn btn-primary" type="submit" value="Delete"></a>
+                    <a href="{% url 'add_email_to_category' object.id %}"><input class="btn btn-primary" type="submit"
+                                                                                 value="Add to Label"></a>
 
+                    <a href="{% url 'archive' object.id %}"><input class="btn btn-primary" type="submit" value="Archive"></a>
+
+                    <a href="{% url 'trash' object.id %}"><input class="btn btn-primary" type="submit" value="Trash"></a>
+                    </div>
+                </div>
+           </div>
     </div>
+ </center>
 {% endblock %}
