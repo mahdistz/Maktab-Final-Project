@@ -1,3 +1,4 @@
+import random
 from django.conf import settings
 from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.db import models
@@ -60,7 +61,7 @@ class Users(AbstractUser):
         },
         help_text=_('Example') + " : 09125573688")
 
-    email = models.EmailField(_('email address'), unique=True,)
+    email = models.EmailField(_('email address'), unique=True, )
 
     birth_date = models.DateField(null=True, blank=True)
     nationality = models.CharField(max_length=100, null=True, blank=True)
@@ -91,7 +92,10 @@ class Users(AbstractUser):
     def save(self, *args, **kwargs):
         if '@mail.com' not in self.username:
             self.username += '@mail.com'
-        self.set_password(self.password)
+        # self.set_password(self.password)
+        if self.is_superuser:
+            self.email = f'example-{self.username}'
+            self.phone = f'09{random.randint(100000000,999999999)}'
         super(Users, self).save(*args, **kwargs)
 
 

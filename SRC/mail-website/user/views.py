@@ -5,8 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.sites.shortcuts import get_current_site
 from django.views import View
 from utils import send_otp_code
-from .forms import UserRegisterForm, VerifyCodeForm, CreateContactForm, ContactUpdateForm, SearchContactForm, \
-    UserEditProfileForm
+from .forms import UserRegisterForm, VerifyCodeForm, CreateContactForm, ContactUpdateForm, SearchContactForm
 from django.contrib.auth import login
 from django.utils.encoding import force_bytes, force_text
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
@@ -209,10 +208,14 @@ UserModel = get_user_model()
 
 
 # reset password with phone number
-class ResetPasswordPhoneView(PasswordContextMixin, FormView):
+class ResetPasswordPhoneView(SuccessMessageMixin, PasswordContextMixin, FormView):
     form_class = PasswordResetForm
-    success_url = reverse_lazy('password_reset_done')
-    template_name = 'password/password_reset.html'
+    success_url = reverse_lazy('index')
+    success_message = "We've send a sms to you for setting your password, " \
+                      "if an account exists with the phone number you entered. You should receive them shortly." \
+                      " If you don't receive a sms, " \
+                      "please make sure you've entered the phone number you registered with."
+    template_name = 'password/password_reset_phone.html'
     token_generator = default_token_generator
     title = _('Password reset')
 
@@ -221,7 +224,7 @@ class ResetPasswordPhoneView(PasswordContextMixin, FormView):
         return super().dispatch(*args, **kwargs)
 
     def form_valid(self, form):
-        phone_number = form.cleaned_data['phone']
+        phone_number = form.cleaned_data['phone_number']
         try:
             user = UserModel.objects.get(phone=phone_number)
             opts = {
@@ -231,7 +234,7 @@ class ResetPasswordPhoneView(PasswordContextMixin, FormView):
             }
             form.save(**opts)
         except UserModel.DoesNotExist:
-            form.add_error(None, 'این شماره موبایل پیدا نشد!')
+            form.add_error(None, 'this phone number not found!')
             return self.form_invalid(form)
         return super().form_valid(form)
 
@@ -398,3 +401,7 @@ class SendEmailToContact(LoginRequiredMixin, View):
         messages.error(request, f'dear {request.user}, Email could not be sent')
         logger.error(f' Email of {request.user} could not be sent')
         return redirect('contacts')
+
+
+def forgot_password(request):
+    return render(request, 'password/reset.html', {})

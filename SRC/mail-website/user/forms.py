@@ -44,7 +44,7 @@ UserModel = get_user_model()
 
 
 class PasswordResetForm(forms.Form):
-    phone_number = forms.CharField(label='شماره موبایل', max_length=11,
+    phone_number = forms.CharField(label='phone number', max_length=11,
                                    validators=[RegexValidator(regex=r'09(\d{9})$')])
 
     def send_sms(self, phone_number, reset_link):
@@ -64,7 +64,7 @@ class PasswordResetForm(forms.Form):
             print(e)
 
     def get_users(self, phone_number):
-        return UserModel.objects.get(phone_number=phone_number)
+        return UserModel.objects.get(phone=phone_number)
 
     def save(self, domain_override=None,
              use_https=False, token_generator=default_token_generator,
@@ -81,7 +81,7 @@ class PasswordResetForm(forms.Form):
         else:
             site_name = domain = domain_override
         user = self.get_users(phone_number)
-        user_phone_number = user.phone_number
+        user_phone_number = user.phone
         protocol = 'https' if use_https else 'http'
         uid = urlsafe_base64_encode(force_bytes(user.pk))
         token = token_generator.make_token(user)
@@ -148,9 +148,3 @@ class SendEmailToContactForm(forms.ModelForm):
     class Meta:
         model = Email
         fields = ['subject', 'body', 'file', 'signature', ]
-
-
-class UserEditProfileForm(forms.ModelForm):
-    class Meta:
-        model = Users
-        fields = ['first_name', 'last_name', 'gender', 'birth_date', 'nationality']

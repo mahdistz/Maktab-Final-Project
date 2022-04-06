@@ -22,27 +22,17 @@
                             </div>
                         {% endif %}
                         <div class="card-body">
-                            <form method="POST">
-                                {% csrf_token %}
+                            <center>
                                 <div class="form-row">
                                     <div class="col-md-10 offset-md-1">
                                     <div class="form-group">
-                                      <label class="small mb-1" for="id_email">Email</label>
-                                        <input type="email" name="email"  class="form-control"
-                                               autocomplete="email" maxlength="254" required id="id_email"
-                                               placeholder="Enter email">
+                                     <a href="{% url "password_reset_phone" %}"><input class="btn btn-primary" value="Phone"></a> <br>
+                                        or   <br>
+                                        <a href="{% url "password_reset" %}"><input class="btn btn-primary" value="Email"></a> <br>
                                     </div>
                                 </div>
                             </div>
-                                <div class="form-row">
-                                  <div class="col-md-10 offset-md-1">
-                                    <div class="form-group mt-0 mb-1">
-                                        <button type="submit" class="col-md-12 btn btn-dark">Submit
-                                        </button>
-                                    </div>
-                                 </div>
-                               </div>
-                            </form>
+                                </center>
                         </div>
                         <div class="card-footer text-center">
                             <div class="small">
