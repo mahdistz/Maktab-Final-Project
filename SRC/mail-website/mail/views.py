@@ -335,18 +335,7 @@ def received_emails(request):
     return emails
 
 
-def notification_to_login_user_when_received_new_email(request):
-    # notification to user that received new mail, when user is login and refresh the inbox
-    emails = received_emails(request)
-    new_emails = emails.filter(created_time__gt=request.user.last_login)
-    if new_emails:
-        for new_email in new_emails:
-            if timezone.now == new_email.created_time + timedelta(minutes=2):
-                messages.info(request, 'you have one new email')
-
-
-def filtered_emails_on_inbox(request, emails):
-
+def filtered_emails(request, emails):
     filters = Filter.objects.filter(owner_id=request.user.id)
     if filters:
         for filter_obj in filters:
@@ -394,8 +383,15 @@ class InboxMail(LoginRequiredMixin, View):
     def get(self, request):
         # Get all emails sent to the user from the database
         emails = received_emails(request)
+        # notification to user that received new mail, when user is login and refresh the inbox
+        new_emails = emails.filter(created_time__gt=request.user.last_login)
+        if new_emails:
+            for new_email in new_emails:
+                if timezone.now() <= new_email.created_time + timedelta(minutes=1):
+                    messages.info(request, 'you have one new email')
         # Check emails with user-defined filters. Changes apply if filter exists
-        emails = filtered_emails_on_inbox(request, emails)
+        emails = filtered_emails(request, emails)
+
         return render(request, self.template_name, {'emails': emails})
 
 
@@ -511,6 +507,14 @@ class Reply(LoginRequiredMixin, View):
         return render(request, self.template_name, {'form': form})
 
 
+def forwarding_message(email):
+
+    new_body = '--forwarded message--' + '\n' + f'From:{email.sender}' + '\n'
+    new_body += f'Date:{email.created_time}' + '\n' f'Subject:{email.subject}' + '\n' + f'to:{email.recipients}'
+    new_body += '\n' + email.body
+    return new_body
+
+
 class Forward(LoginRequiredMixin, View):
     template_name = 'mail/forward.html'
     form_class = ForwardForm
@@ -518,6 +522,8 @@ class Forward(LoginRequiredMixin, View):
     def get(self, request, pk):
         email = Email.objects.get(pk=pk)
         form = self.form_class(instance=email)
+        form.body = forwarding_message(email)
+        print(form.body)
         return render(request, self.template_name, {'form': form})
 
     def post(self, request, pk):

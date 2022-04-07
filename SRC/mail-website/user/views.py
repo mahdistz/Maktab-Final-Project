@@ -39,6 +39,7 @@ from django.http import HttpResponse
 from mail.models import Email, Signature
 from .forms import SendEmailToContactForm
 import logging
+from mail.views import received_emails
 
 logger = logging.getLogger('user')
 
@@ -60,7 +61,8 @@ def index(request):
 
 @login_required(login_url=settings.LOGIN_URL)
 def home(request):
-    return render(request, 'home.html', {})
+    emails = received_emails(request)
+    return render(request, 'mail/inbox.html', {'emails': emails})
 
 
 # Class based view that extends from the built-in login view to add remember me functionality

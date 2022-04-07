@@ -1,13 +1,12 @@
 {% extends 'home.html' %}
 {% block content %}
-    <h3>Forward</h3>
+    <h3>Forwarded Email</h3>
 <form method="post">
 {% csrf_token %}
     <table>
         {{ form.as_table }}
         </table>
    <input type="submit" class="btn btn-primary" value="forward">
-
 </form>
     <br>
 {% endblock %}

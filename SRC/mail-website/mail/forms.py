@@ -1,8 +1,7 @@
 from django import forms
+from django.core import validators
 from mail.models import Email, Category, Signature, Filter
 from user.models import Users
-from django.core import validators
-from django.utils.translation import ugettext_lazy as _
 
 
 class MinLengthValidator(validators.MinLengthValidator):
@@ -92,6 +91,13 @@ class ReplyForm(forms.ModelForm):
         model = Email
         fields = ['subject', 'body', 'file']
 
+    def clean_file(self):
+        if self.cleaned_data['file']:
+            file = self.cleaned_data['file']
+            if file.size > 25 * 1024 * 1024:
+                raise forms.ValidationError('file size should not exceed 25 MB')
+            return file
+
 
 class ForwardForm(forms.ModelForm):
     class Meta:
@@ -122,6 +128,13 @@ class ForwardForm(forms.ModelForm):
             if not Users.objects.filter(username=receiver).exists():
                 raise forms.ValidationError(f'there is no user with this email: {receiver}')
         return bcc
+
+    def clean_file(self):
+        if self.cleaned_data['file']:
+            file = self.cleaned_data['file']
+            if file.size > 25 * 1024 * 1024:
+                raise forms.ValidationError('file size should not exceed 25 MB')
+            return file
 
 
 class SignatureForm(forms.ModelForm):

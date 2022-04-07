@@ -1,26 +1,63 @@
 {% extends 'home.html' %}
 {% block content %}
-    <h3><center>Reply</center></h3>
+    <h3><center>Replayed Email</center></h3>
     <br>
- <h3>Replying email:</h3>
-    <br>
-<div style="width: 500px;height: auto" >
-    <p>Sender:{{ email.sender }}</p>
-    <p>to:{% for recipients in email.recipients.all %}
-            {{ recipients }},
-        {% endfor%}</p>
-    <p>cc:{% for cc in email.cc.all %}
-            {{ cc }},
-        {% endfor%}</p>
-    <p>subject:{{ email.subject }}</p>
-    <p>body:</p>
-    <p>{{ email.body|safe }}</p>
-    <p>{% if email.file %}
-        file: <a href="{{ email.file.url }}" >Download file</a></p>
-        {% endif %}
-    <p>Date Time: {{ email.created_time }}</p>
-</div>
+ <center>
+    <div class="card" style="background-color: #c2ddf3;border-bottom-style:outset;width: 100vh;height:auto;">
+            <div class="row justify-content-center">
+                <div class="row-md-8">
+                    <div class="card-body" >
+                        <p><strong>Sender:</strong>{{ email.sender }}</p>
+                        <hr>
+                        {% if user.username == email.recipients.get.username %}
+                            <p> <strong>to : me </strong></p>
+                        {% else %}
+                        <p><strong>to:</strong>{% for recipients in email.recipients.all %}
+                                {{ recipients }},{% endfor%}</p>
+                        {% endif %}
+                        <hr>
+                        {% if email.cc.all %}
+                            {% if user.username == email.cc.get.username %}
+                                 <p><strong>cc : me </strong></p>
+                            {% else %}
+                            <p><strong>cc: </strong>{% for cc in email.cc.all %}
+                                        {{ cc }},{% endfor%}</p>
+                            {% endif %}
+                             <hr>
+                        {% endif %}
 
+                        {% if email.bcc.all %}
+                              {% if user.username == email.bcc.get.username %}
+                                        <p><strong>bcc: me </strong></p>
+                              {% else %}
+                                <p><strong>bcc: </strong>{% for bcc in email.bcc.all %}
+                                        {{ bcc }},
+                                  {% endfor%}</p>
+                              {% endif %}
+                            <hr>
+                        {% endif %}
+
+                        <p><strong>subject: </strong> {{ email.subject }}</p>
+                        <hr>
+                        <p><strong>body:</strong></p>
+                        <p> {{ email.body |safe }}</p>
+                        {% if email.signature %}
+                        <p> <strong> {{ email.signature.text }}</strong></p>
+                        {% endif %}
+                        <hr>
+                        <p>{% if email.file %}
+                            <strong>file:</strong> <a href="{{ email.file.url }}" > Download file </a>,
+                           <strong> Size:</strong> <span>{{ email.file.size|filesizeformat }}</span></p>
+                            <hr>
+                        {% endif %}
+                        <p><strong>Date Time:</strong> {{ email.created_time }}</p>
+                        <hr>
+                    </div>
+                </div>
+           </div>
+    </div>
+<br>
+<br>
 <form method="post">
 {% csrf_token %}
     <table>
@@ -29,4 +66,5 @@
     <input type="submit" class="btn btn-primary" value="send">
 
 </form>
+     </center>
 {% endblock %}
