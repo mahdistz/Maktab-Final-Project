@@ -69,6 +69,63 @@
                     <a href="{% url 'archive' object.id %}"><input class="btn btn-primary" type="submit" value="Archive"></a>
 
                     <a href="{% url 'trash' object.id %}"><input class="btn btn-primary" type="submit" value="Trash"></a>
+                    <hr>
+                    {% if object.reply %}
+                    <h4>Replayed Emails: </h4>
+
+                                <p><strong>Sender:</strong>{{ object.reply.sender }}</p>
+                                <hr>
+                                {% if user.username == object.reply.recipients.get.username %}
+                                    <p> <strong>to : me </strong></p>
+                                {% else %}
+                                <p><strong>to:</strong>{% for recipients in object.reply.recipients.all %}
+                                        {{ recipients }},{% endfor%}</p>
+                                {% endif %}
+                                <hr>
+                                {% if object.reply.cc.all %}
+                                    {% if user.username == object.reply.cc.get.username %}
+                                         <p><strong>cc : me </strong></p>
+                                    {% else %}
+                                    <p><strong>cc: </strong>{% for cc in object.reply.cc.all %}
+                                                {{ cc }},{% endfor%}</p>
+                                    {% endif %}
+                                     <hr>
+                                {% endif %}
+
+                                {% if object.reply.bcc.all %}
+                                      {% if user.username == object.reply.bcc.get.username %}
+                                                <p><strong>bcc: me </strong></p>
+                                      {% else %}
+                                        <p><strong>bcc: </strong>{% for bcc in object.reply.bcc.all %}
+                                                {{ bcc }},
+                                          {% endfor%}</p>
+                                      {% endif %}
+                                    <hr>
+                                {% endif %}
+
+                                <p><strong>subject: </strong> {{ object.reply.subject }}</p>
+                                <hr>
+                                <p><strong>body:</strong></p>
+                                <p> {{ object.reply.body |safe }}</p>
+                                {% if object.reply.signature %}
+                                <p> <strong> {{ object.reply.signature.text }}</strong></p>
+                                {% endif %}
+                                <hr>
+                                <p>{% if object.reply.file %}
+                                    <strong>file:</strong> <a href="{{ object.reply.file.url }}" > Download file </a>,
+                                   <strong> Size:</strong> <span>{{ object.reply.file.size|filesizeformat }}</span></p>
+                                    <hr>
+                                {% endif %}
+
+                                <p><strong>Date Time:</strong> {{ object.reply.created_time }}</p>
+                                <hr>
+                                {% if object.reply.category.all %}
+                                <p><strong>Labels:</strong>{% for category in object.reply.category.all %}
+                                        {{ category }},
+                                    {% endfor%}</p>
+                                      <hr>
+                            {% endif %}
+                    {% endif %}
                     </div>
                 </div>
            </div>

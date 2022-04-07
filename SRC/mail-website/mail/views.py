@@ -478,6 +478,12 @@ class CategoryDelete(LoginRequiredMixin, DeleteView):
     success_url = reverse_lazy('categories')
 
 
+def replaying_message(cd):
+    new_body = '--replayed message--' + '\n' + f'From:{cd.sender}' + '\n'
+    new_body += f'Subject:{cd.subject}' + '\n' + cd.body
+    return new_body
+
+
 class Reply(LoginRequiredMixin, View):
     template_name = 'mail/reply.html'
     form_class = ReplyForm
@@ -490,16 +496,29 @@ class Reply(LoginRequiredMixin, View):
     def post(self, request, pk):
         form = self.form_class(request.POST, request.FILES)
         if form.is_valid():
+            email = Email.objects.get(pk=pk)
             reply_email = form.save(commit=False)
-            sender = Users.objects.get(id=request.user.id)
-            reply_email.sender = sender
-            reply_email.reply = Email.objects.get(pk=pk)
+            reply_email.body = replaying_message(email)
+            total_email = form.save(commit=False)
+            total_email.body = replaying_message(email)
+            reply_email.sender = request.user
+            total_email.sender = request.user
+            email = Email.objects.get(pk=pk)
+            reply_email.status = 'recipients'
+            total_email.status = 'total'
             receiver = Users.objects.get(id=Email.objects.get(pk=pk).sender_id)
             recipients = Users.objects.get_by_natural_key(username=receiver)
             reply_email.save()
+            total_email.save()
             reply_email.recipients.add(recipients)
+            total_email.recipients.add(recipients)
             reply_email.is_sent = True
+            total_email.is_sent = True
+            email.reply = reply_email
+            email.save()
             reply_email.save()
+            total_email.save()
+
             messages.success(request, 'Email replayed successfully', 'success')
             return redirect('sent')
         messages.error(request, ' Email could not be replayed', 'error')
@@ -507,11 +526,9 @@ class Reply(LoginRequiredMixin, View):
         return render(request, self.template_name, {'form': form})
 
 
-def forwarding_message(email):
-
-    new_body = '--forwarded message--' + '\n' + f'From:{email.sender}' + '\n'
-    new_body += f'Date:{email.created_time}' + '\n' f'Subject:{email.subject}' + '\n' + f'to:{email.recipients}'
-    new_body += '\n' + email.body
+def forwarding_message(cd):
+    new_body = '--forwarded message--' + '\n' + f'From:{cd["sender"]}' + '\n'
+    new_body += f'Subject:{cd["subject"]}' + '\n' + cd["body"]
     return new_body
 
 
@@ -522,22 +539,22 @@ class Forward(LoginRequiredMixin, View):
     def get(self, request, pk):
         email = Email.objects.get(pk=pk)
         form = self.form_class(instance=email)
-        form.body = forwarding_message(email)
-        print(form.body)
         return render(request, self.template_name, {'form': form})
 
     def post(self, request, pk):
+        email = Email.objects.get(pk=pk)
         form = self.form_class(request.POST, request.FILES)
         if form.is_valid():
             sender = Users.objects.get(id=request.user.id)
             cd = form.cleaned_data
+            cd["sender"] = sender
             to_cc_bcc_list = to_cc_bcc(cd['recipients'], cd['cc'], cd['bcc'])
             # Clear duplicates receiver
             receivers_list = list(dict.fromkeys(to_cc_bcc_list))
             # create one object of email with all recipients,cc,bc and
             # status total to save all data in one object
             total_email = Email.objects.create(sender=sender, subject=cd['subject'],
-                                               body=cd['body'], file=cd['file'],
+                                               body=forwarding_message(cd), file=cd['file'],
                                                is_sent=True, status='total')
             for receiver in receivers_list:
 
@@ -561,7 +578,7 @@ class Forward(LoginRequiredMixin, View):
                 if receiver in cd['recipients']:
 
                     email = Email.objects.create(sender=sender, subject=cd['subject'],
-                                                 body=cd['body'], file=cd['file'],
+                                                 body=forwarding_message(cd), file=cd['file'],
                                                  is_sent=True, status='recipients')
 
                     recipients = Users.objects.get_by_natural_key(username=receiver)
@@ -571,7 +588,7 @@ class Forward(LoginRequiredMixin, View):
                 elif receiver in cd['cc']:
 
                     email = Email.objects.create(sender=sender, subject=cd['subject'],
-                                                 body=cd['body'], file=cd['file'],
+                                                 body=forwarding_message(cd), file=cd['file'],
                                                  is_sent=True, status='cc')
 
                     recipients = Users.objects.get_by_natural_key(username=receiver)
@@ -581,7 +598,7 @@ class Forward(LoginRequiredMixin, View):
                 elif receiver in cd['bcc']:
 
                     email = Email.objects.create(sender=sender, subject=cd['subject'],
-                                                 body=cd['body'], file=cd['file'],
+                                                 body=forwarding_message(cd), file=cd['file'],
                                                  is_sent=True, status='bcc')
 
                     recipients = Users.objects.get_by_natural_key(username=receiver)
