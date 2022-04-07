@@ -1,9 +1,9 @@
 from django.test import Client
 from django.test import TestCase
+from django.urls import reverse
 from mail.forms import CreateMailForm
 from mail.models import Email, Signature, Filter, Category
 from user.models import Users
-from django.urls import reverse
 
 
 class ViewTest(TestCase):
@@ -14,11 +14,11 @@ class ViewTest(TestCase):
 
         self.user = Users.objects.create_superuser(
             username='foofoo@mail.com',
-            password='password',
+            password='1X<ISRUkw+tuK',
         )
-        self.user2 = Users.objects.create(
+        self.user2 = Users.objects.create_user(
             username='aaaaaa@mail.com',
-            password='password',
+            password='1X<ISRUkw+tuK',
             email='example@gmail.com',
             phone='09121212345',
             verification='Email',
@@ -31,42 +31,9 @@ class ViewTest(TestCase):
         self.email.recipients.add(self.user2)
         self.email.save()
 
-    def test_home_page(self):
-        # send GET request.
-        # request to the specified url with GET request method.
-        response = self.client.get(path='http://127.0.0.1:8000/home/')
-        self.assertEqual(response.status_code, 302)
-
-    def test_login_use_empty_username_password(self):
-        login_account_test_data = {'username': '', 'password': '', 'remember_me': True}
-        # send POST request.
-        response = self.client.post(path='/login/', data=login_account_test_data)
-
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'user/login.html')
-
-    def test_login_username_or_password_not_correct(self):
-        login_account_test_data = {'username': 'Admin', 'password': 'qqqqqq'}
-
-        response = self.client.post(path='/login/', data=login_account_test_data)
-
-        self.assertEqual(response.status_code, 200)
-
-        self.assertIn(b'Please enter a correct username and password.'
-                      b' Note that both fields may be case-sensitive.',
-                      response.content)
-
-    def test_login_success(self):
-        login_account_test_data = {'username': 'Admin@mail.com', 'password': 'salam1234'}
-
-        response = self.client.post(path='/login/', data=login_account_test_data)
-
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed('home.html')
-
     def test_create_email(self):
         # log user in and user
-        self.client.login(username='foofoo@mail.com', password='password')
+        login = self.client.login(username=self.user.username, password='1X<ISRUkw+tuK')
         # create new email
         # expected date from the user, you can put invalid data to test from validation
         form_data = {
@@ -97,13 +64,13 @@ class ViewTest(TestCase):
 
     def test_inbox_emails(self):
         # log user in and user
-        self.client.login(username='aaaaaa@mail.com', password='password')
-
+        login = self.client.login(username=self.user.username, password='1X<ISRUkw+tuK')
         response = self.client.get(path='/mail/inbox/')
 
-        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.status_code, 200)
 
     def test_redirect_to_login_page_when_user_not_login(self):
+
         response1 = self.client.get(path='/mail/inbox/')
         response2 = self.client.get(path='/mail/sent/')
         response3 = self.client.get(path='/mail/draft/')
@@ -123,51 +90,63 @@ class ViewTest(TestCase):
         self.assertRedirects(response8, '/login/?next=/mail/signatures/', 302)
 
     def test_view_url_exists_at_desired_location(self):
-        self.client.login(username='aaaaaa@mail.com', password='password')
+
+        login = self.client.login(username=self.user.username, password='1X<ISRUkw+tuK')
         response = self.client.get('/mail/inbox/')
-        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.status_code, 200)
 
     def test_view_url_accessible_by_name(self):
-        self.client.login(username='aaaaaa@mail.com', password='password')
+
+        login = self.client.login(username=self.user.username, password='1X<ISRUkw+tuK')
         response = self.client.get(reverse('inbox'))
-        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response,'mail/inbox.html')
+
+    def test_view_uses_correct_template(self):
+
+        login = self.client.login(username=self.user.username, password='1X<ISRUkw+tuK')
+        response = self.client.get(reverse('inbox'))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'mail/inbox.html')
 
     def test_signatures(self):
-        signature = Signature.objects.create(owner=self.user)
+
+        login = self.client.login(username=self.user.username, password='1X<ISRUkw+tuK')
+        signature = Signature.objects.create(owner=self.user, text='hi')
         self.email.signature = signature
-
+        self.assertEqual(signature.text, 'hi')
+        response1 = self.client.get(reverse('signatures'))
+        self.assertTemplateUsed(response1,'mail/signatures.html')
         num_signatures = Signature.objects.all().count()
         self.assertEqual(num_signatures, 1)
 
-        self.client.delete('/mail/signature_delete/<int:pk>/', data={'pk': 1})
-
-        num_signatures = Signature.objects.all().count()
-        self.assertEqual(num_signatures, 1)
+        get_signature = Signature.objects.get(pk=signature.pk)
+        del_signature = get_signature.delete()
+        self.assertFalse(Signature.objects.filter(pk=signature.pk).exists())
 
     def test_categories(self):
+
         category = Category.objects.create(owner=self.user, name='test_category')
         num_categories = Category.objects.all().count()
+
         self.assertEqual(num_categories, 1)
+        self.assertEqual(category.name, 'test_category')
+
+        get_category = Category.objects.get(pk=category.pk)
+        del_category = get_category.delete()
+        self.assertFalse(Category.objects.filter(pk=category.pk).exists())
 
     def test_email_detail(self):
-        self.client.login(username='aaaaaa@mail.com', password='password')
-        email = Email.objects.create(sender=self.user, subject='hi',
-                                     body='email body', is_sent=True)
-        self.email.recipients.add(self.user2)
-        self.email.save()
-        response = self.client.get('/mail/email_detail/<int:pk>/', data={'pk': 1})
+
+        login = self.client.login(username=self.user.username, password='1X<ISRUkw+tuK')
+        response = self.client.get(reverse('email_detail', args=[self.email.pk]))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'mail/email_detail.html')
 
     def test_filter(self):
+
         category = Category.objects.create(owner=self.user, name='test_category')
         filter_obj = Filter.objects.create(owner=self.user2, from_user='foofoo@mail.com', label=category)
         filters_num = Filter.objects.all().count()
         self.assertEqual(filters_num, 1)
         self.assertEqual(filter_obj.label.name, 'test_category')
-
-    def test_reply(self):
-        pass
-
-    def test_forward(self):
-        pass
