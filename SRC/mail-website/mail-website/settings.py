@@ -12,6 +12,12 @@ https://docs.djangoproject.com/en/4.0/ref/settings/
 import os.path
 from pathlib import Path
 from django.contrib.messages import constants as messages
+import environ
+
+
+# Initialise environment variables
+env = environ.Env()
+environ.Env.read_env()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -20,7 +26,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-slx-z0eijl8+f-&-2j6)+eb4v29#5ff2u1)y-223c*j@ex_*q0'
+SECRET_KEY = env('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -93,9 +99,9 @@ WSGI_APPLICATION = 'mail-website.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'finalprojectdjango',
-        'USER': 'postgres',
-        'PASSWORD': 'mahdis378',
+        'NAME': env('DATABASE_NAME'),
+        'USER': env('DATABASE_USER'),
+        'PASSWORD': env('DATABASE_PASS'),
         'HOST': 'localhost',
         'PORT': '5432',
     }
@@ -147,12 +153,12 @@ AUTH_USER_MODEL = 'user.Users'
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_USE_TLS = True
 EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_HOST_USER = 'mahdis.taghizadeh1376@gmail.com'
-EMAIL_HOST_PASSWORD = 'ychbvkunvjeqoldv'
+EMAIL_HOST_USER = env('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
 EMAIL_PORT = 587
 
 # SMS
-KAVENEGAR_APIKEY = '537436632F69455067616771704939662B6F4A4D4A5753784A655775682B3249474646455571346C584A343D'
+KAVENEGAR_APIKEY = env('KAVENEGAR_APIKEY')
 
 # Media files
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
@@ -196,19 +202,19 @@ LOGGING = {
     'disable_existing_loggers': False,
     'formatters': {
         'verbose': {
-            'format': '{levelname} {asctime} {module} {funcName} {process:d} {thread:d} {message}',
+            'format': '{levelname} {asctime} {message}',
             'style': '{',
         },
     },
     'handlers': {
         'user_file': {
-            'level': 'WARNING',
+            'level': 'INFO',
             'class': 'logging.FileHandler',
             'filename': 'user.log',
             'formatter': 'verbose',
         },
         'mail_file': {
-            'level': 'WARNING',
+            'level': 'INFO',
             'class': 'logging.FileHandler',
             'filename': 'mail.log',
             'formatter': 'verbose',
@@ -216,12 +222,12 @@ LOGGING = {
     },
     'loggers': {
         'user': {
-            'handlers': ['user_file', ],
-            'level': 'WARNING',
+            'handlers': ['user_file'],
+            'level': 'INFO',
         },
         'mail': {
             'handlers': ['mail_file'],
-            'level': 'WARNING',
+            'level': 'INFO',
         },
     }
 }
