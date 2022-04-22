@@ -90,11 +90,11 @@ class Users(AbstractUser):
     get_full_name.short_description = 'Name'
 
     def save(self, *args, **kwargs):
-        if '@mail.com' not in self.username:
-            self.username += '@mail.com'
-        # self.set_password(self.password)
-        if self.is_superuser:
-            self.email = f'example-{self.username}'
+        if not self.is_superuser:
+            if '@mail.com' not in self.username:
+                self.username += '@mail.com'
+        else:
+            self.email = f'{self.username}@mail.com'
             self.phone = f'09{random.randint(100000000,999999999)}'
         super(Users, self).save(*args, **kwargs)
 
