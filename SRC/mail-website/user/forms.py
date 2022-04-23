@@ -27,15 +27,6 @@ class UserRegisterForm(UserCreationForm):
         }
 
 
-class CustomUserChangeForm(UserChangeForm):
-    class Meta:
-        model = Users
-        fields = ('first_name', 'last_name', 'birth_date', 'nationality', 'gender')
-        widgets = {
-            'birth_date': DateInput()
-        }
-
-
 class VerifyCodeForm(forms.Form):
     code = forms.IntegerField()
 

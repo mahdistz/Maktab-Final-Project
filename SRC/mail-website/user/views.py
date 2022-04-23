@@ -47,12 +47,12 @@ logger = logging.getLogger('user')
 @csrf_exempt
 @api_view(["GET"])
 def api_contacts_of_user(request):
-    user_id = request.user.id
-    user = Users.objects.get(id=user_id)
-    contacts = user.contacts.values('name', 'email', 'phone_number', 'other_email',
-                                    'birth_date')
-    data = {'contacts': contacts}
-    return Response(data, status=HTTP_200_OK)
+    if request.method == 'GET':
+        user = Users.objects.get(id=request.user.id)
+        contacts = user.contacts.values('name', 'email', 'phone_number', 'other_email',
+                                        'birth_date')
+        data = {'contacts': contacts}
+        return Response(data, status=HTTP_200_OK)
 
 
 def index(request):

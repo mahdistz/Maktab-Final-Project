@@ -27,23 +27,25 @@ logger = logging.getLogger('mail')
 @csrf_exempt
 @api_view(["GET"])
 def api_sent_emails_of_user(request):
-    user = Users.objects.get(id=request.user.id)
-    emails = Email.objects.filter(sender=user, is_sent=True, is_archived=False, is_trashed=False,
-                                  is_filter=False).exclude(status='total')
-    serializer = EmailSerializer(emails, many=True)
-    return Response(serializer.data)
+    if request.method == 'GET':
+        user = Users.objects.get(id=request.user.id)
+        emails = Email.objects.filter(sender=user, is_sent=True, is_archived=False, is_trashed=False,
+                                      is_filter=False).exclude(status='total')
+        serializer = EmailSerializer(emails, many=True)
+        return Response(serializer.data)
 
 
 @csrf_exempt
 @api_view(["GET"])
 def api_received_emails_of_user(request):
-    user = Users.objects.get(id=request.user.id)
-    emails = Email.objects.filter(
-        Q(recipients=user, status='recipients', is_archived=False, is_trashed=False, is_filter=False) |
-        Q(recipients=user, status='cc', is_archived=False, is_trashed=False, is_filter=False) |
-        Q(recipients=user, status='bcc', is_archived=False, is_trashed=False, is_filter=False))
-    serializer = EmailSerializer(emails, many=True)
-    return Response(serializer.data)
+    if request.method == 'GET':
+        user = Users.objects.get(id=request.user.id)
+        emails = Email.objects.filter(
+            Q(recipients=user, status='recipients', is_archived=False, is_trashed=False, is_filter=False) |
+            Q(recipients=user, status='cc', is_archived=False, is_trashed=False, is_filter=False) |
+            Q(recipients=user, status='bcc', is_archived=False, is_trashed=False, is_filter=False))
+        serializer = EmailSerializer(emails, many=True)
+        return Response(serializer.data)
 
 
 @login_required(login_url=settings.LOGIN_URL)
