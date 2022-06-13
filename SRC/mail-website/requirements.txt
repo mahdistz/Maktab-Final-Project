@@ -10,7 +10,7 @@ click-plugins==1.1.1
 click-repl==0.2.0
 colorama==0.4.4
 datetime-truncate==1.1.1
-Django==3.2
+Django==3.2.13
 django-admin-charts==1.0.0
 django-bootstrap-form==3.4
 django-bootstrap-sidebar==1.0.0
