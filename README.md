@@ -23,6 +23,13 @@
 
 ![](SRC/mail-website/images/image-2.png)
 
+
+**Activate Account with Sending Email :**
+
+
+![](SRC/mail-website/images/image-10.png)
+
+
 **Home Page:**
 
 ![](SRC/mail-website/images/image-3.png)
@@ -50,3 +57,14 @@
 **Admin Dashboard :**
 
 ![](SRC/mail-website/images/image-9.png)
+
+**Users Page in Admin Panel With Chart of Storaged Used Space By Each User:**
+
+![](SRC/mail-website/images/image-11.png)
+
+**Charts of Number of Users and Emails in Admin Panel:**
+
+![](SRC/mail-website/images/image-12.png)
+
+![](SRC/mail-website/images/image-13.png)
+
