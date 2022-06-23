@@ -20,6 +20,7 @@ from django.contrib.auth import views as auth
 from django.urls import path, include
 from user.forms import LoginForm
 from user.views import SignUpView, ActivateAccount, VerifyCodeView, CustomLoginView
+from rest_framework_simplejwt import views as jwt_views
 
 urlpatterns = [
                   path('admin/', admin.site.urls),
@@ -41,6 +42,8 @@ urlpatterns = [
                   path('api-auth/', include('rest_framework.urls')),
                   path('admin_tools_stats/', include('admin_tools_stats.urls')),
                   path('ckeditor/', include('ckeditor_uploader.urls')),
+                  path('api/token/', jwt_views.TokenObtainPairView.as_view(), name='token_obtain_pair'),
+                  path('api/token/refresh/', jwt_views.TokenRefreshView.as_view(), name='token_refresh'),
 
               ] + static(settings.STATIC_URL)
 

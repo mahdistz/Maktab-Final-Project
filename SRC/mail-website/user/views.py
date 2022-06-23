@@ -1,5 +1,6 @@
 import random
 import csv
+import logging
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.sites.shortcuts import get_current_site
@@ -11,6 +12,7 @@ from django.utils.encoding import force_bytes, force_text
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.template.loader import render_to_string
 from .models import Users, CodeRegister
+from .serializers import ContactSerializer
 from .tokens import account_activation_token
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.auth import get_user_model
@@ -31,28 +33,22 @@ from user.models import Contact
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render, redirect
 from django.db.models import Q
-from django.views.decorators.csrf import csrf_exempt
-from rest_framework.decorators import api_view
-from rest_framework.status import HTTP_200_OK
-from rest_framework.response import Response
+from rest_framework import viewsets
 from django.http import HttpResponse
 from mail.models import Email, Signature
 from .forms import SendEmailToContactForm
-import logging
 from mail.views import received_emails
 
 logger = logging.getLogger('user')
 
 
-@csrf_exempt
-@api_view(["GET"])
-def api_contacts_of_user(request):
-    if request.method == 'GET':
-        user = Users.objects.get(id=request.user.id)
-        contacts = user.contacts.values('name', 'email', 'phone_number', 'other_email',
-                                        'birth_date')
-        data = {'contacts': contacts}
-        return Response(data, status=HTTP_200_OK)
+class ContactsOfUserAPI(viewsets.ModelViewSet):
+    serializer_class = ContactSerializer
+
+    def get_queryset(self):
+        user = Users.objects.get(username=self.request.user)
+        query = Contact.objects.filter(owner=user)
+        return query
 
 
 def index(request):

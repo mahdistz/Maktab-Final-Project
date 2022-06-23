@@ -11,7 +11,7 @@ class CategorySerializer(serializers.ModelSerializer):
 
 class EmailSerializer(serializers.ModelSerializer):
     # for foreign_key fields
-    sender = serializers.StringRelatedField(read_only=True, required=False)
+    sender = UserSerializer(read_only=True)
     signature = serializers.StringRelatedField(read_only=True, required=False)
 
     class Meta:

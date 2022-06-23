@@ -1,6 +1,9 @@
+import logging
+import json
 from django.shortcuts import render, redirect
 from django.views import View
 from django.contrib import messages
+from rest_framework import viewsets
 from .models import Email, Category, Signature, Filter
 from user.models import Users
 from mail.forms import CreateMailForm, CreateCategoryForm, \
@@ -11,41 +14,34 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Q
 from django.contrib.auth.decorators import login_required
 from django.conf import settings
-import json
 from django.http import JsonResponse
-from rest_framework.decorators import api_view  # GET PUT POST , ..... نوع درخواست
-from rest_framework.response import Response  # ارسال پاسخ ها
 from .serializers import EmailSerializer
-from django.views.decorators.csrf import csrf_exempt
-import logging
 from django.utils import timezone
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 logger = logging.getLogger('mail')
 
 
-@csrf_exempt
-@api_view(["GET"])
-def api_sent_emails_of_user(request):
-    if request.method == 'GET':
-        user = Users.objects.get(id=request.user.id)
-        emails = Email.objects.filter(sender=user, is_sent=True, is_archived=False, is_trashed=False,
-                                      is_filter=False).exclude(status='total')
-        serializer = EmailSerializer(emails, many=True)
-        return Response(serializer.data)
+class SentEmailOfUserAPI(viewsets.ModelViewSet):
+    serializer_class = EmailSerializer
+
+    def get_queryset(self):
+        user = Users.objects.get(username=self.request.user)
+        query = Email.objects.filter(sender_id=user, is_sent=True, is_archived=False, is_trashed=False,
+                                     is_filter=False).exclude(status='total')
+        return query
 
 
-@csrf_exempt
-@api_view(["GET"])
-def api_received_emails_of_user(request):
-    if request.method == 'GET':
-        user = Users.objects.get(id=request.user.id)
-        emails = Email.objects.filter(
+class ReceivedEmailOfUserAPI(viewsets.ModelViewSet):
+    serializer_class = EmailSerializer
+
+    def get_queryset(self):
+        user = Users.objects.get(username=self.request.user)
+        query = Email.objects.filter(
             Q(recipients=user, status='recipients', is_archived=False, is_trashed=False, is_filter=False) |
             Q(recipients=user, status='cc', is_archived=False, is_trashed=False, is_filter=False) |
             Q(recipients=user, status='bcc', is_archived=False, is_trashed=False, is_filter=False))
-        serializer = EmailSerializer(emails, many=True)
-        return Response(serializer.data)
+        return query
 
 
 @login_required(login_url=settings.LOGIN_URL)
