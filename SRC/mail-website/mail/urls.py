@@ -1,15 +1,11 @@
-from rest_framework import routers
 from mail.views import *
 from django.views.decorators.csrf import csrf_exempt
-from django.urls import path, include
-
-router = routers.DefaultRouter()
-router.register('sent_emails_of_user/', SentEmailOfUserAPI, basename='sent_emails_of_user')
-router.register('received_emails_of_user/', ReceivedEmailOfUserAPI, basename='received_emails_of_user')
+from django.urls import path
 
 urlpatterns = [
     # urls for api
-    path('api/', include(router.urls)),
+    path('api/sent_emails_of_user/', SentEmailOfUserAPIView.as_view(), name='sent_emails_of_user'),
+    path('api/received_emails_of_user/', ReceivedEmailOfUserAPIView.as_view(), name='received_emails_of_user'),
 
     path('create_new_email/', CreateNewEmail.as_view(), name='create_new_email'),
 

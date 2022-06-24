@@ -33,7 +33,8 @@ from user.models import Contact
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render, redirect
 from django.db.models import Q
-from rest_framework import viewsets
+from rest_framework.generics import ListAPIView
+from rest_framework.permissions import IsAuthenticated
 from django.http import HttpResponse
 from mail.models import Email, Signature
 from .forms import SendEmailToContactForm
@@ -42,8 +43,10 @@ from mail.views import received_emails
 logger = logging.getLogger('user')
 
 
-class ContactsOfUserAPI(viewsets.ModelViewSet):
+class ContactsOfUserApiView(ListAPIView):
+    """ http://127.0.0.1:8000/api/contacts_of_user/ """
     serializer_class = ContactSerializer
+    permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
         user = Users.objects.get(username=self.request.user)

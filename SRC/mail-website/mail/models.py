@@ -79,7 +79,6 @@ class Email(models.Model):
                             )
 
     is_sent = models.BooleanField(default=False)
-    is_read = models.BooleanField(default=False)
     is_archived = models.BooleanField(default=False)
     is_trashed = models.BooleanField(default=False)
     status_choices = [

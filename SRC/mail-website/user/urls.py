@@ -1,18 +1,13 @@
-from django.urls import path, include
-from rest_framework import routers
+from django.urls import path
 from .views import index, home, ResetPasswordEmailView, CreateContact, ContactDetail, ContactUpdate, \
-    contact_delete, ContactsOfUser, export_to_csv, ContactsOfUserAPI, SendEmailToContact, forgot_password, \
+    contact_delete, ContactsOfUser, export_to_csv, ContactsOfUserApiView, SendEmailToContact, forgot_password, \
     ResetPasswordPhoneView
 from rest_framework.authtoken.views import obtain_auth_token
-
-
-router = routers.DefaultRouter()
-router.register('contacts_of_user/', ContactsOfUserAPI, basename='contacts_of_user')
 
 urlpatterns = [
 
     # urls for api
-    path('api/', include(router.urls)),
+    path('api/contacts_of_user/', ContactsOfUserApiView.as_view(), name='contacts_of_user'),
     path('api-token-auth/', obtain_auth_token, name='api_token_auth'),
 
     # urls for user

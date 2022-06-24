@@ -3,7 +3,8 @@ import json
 from django.shortcuts import render, redirect
 from django.views import View
 from django.contrib import messages
-from rest_framework import viewsets
+from rest_framework.generics import ListAPIView
+from rest_framework.permissions import IsAuthenticated
 from .models import Email, Category, Signature, Filter
 from user.models import Users
 from mail.forms import CreateMailForm, CreateCategoryForm, \
@@ -22,8 +23,10 @@ from datetime import timedelta
 logger = logging.getLogger('mail')
 
 
-class SentEmailOfUserAPI(viewsets.ModelViewSet):
+class SentEmailOfUserAPIView(ListAPIView):
+    """ http://127.0.0.1:8000/mail/api/sent_emails_of_user/ """
     serializer_class = EmailSerializer
+    permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
         user = Users.objects.get(username=self.request.user)
@@ -32,8 +35,10 @@ class SentEmailOfUserAPI(viewsets.ModelViewSet):
         return query
 
 
-class ReceivedEmailOfUserAPI(viewsets.ModelViewSet):
+class ReceivedEmailOfUserAPIView(ListAPIView):
+    """ http://127.0.0.1:8000/mail/api/received_emails_of_user/ """
     serializer_class = EmailSerializer
+    permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
         user = Users.objects.get(username=self.request.user)
